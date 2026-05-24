@@ -1,0 +1,10701 @@
+<!doctype html>
+<html lang="id">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>EA Monster Cloud Service {{ strtoupper((string) ($dashboardPatch ?? 'v209')) }}</title>
+    <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
+    <link rel="shortcut icon" href="{{ asset('favicon.svg') }}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --monster-ink: #0f172a;
+            --monster-night: #111827;
+            --monster-surface: rgba(255, 255, 255, 0.88);
+            --monster-border: rgba(15, 23, 42, 0.09);
+            --monster-gold: #d4a017;
+            --monster-mint: #1f9d7a;
+            --monster-danger: #c2410c;
+            --monster-sky: #2563eb;
+            --monster-bg-top: #f8fafc;
+            --monster-bg-bottom: #eef2f7;
+            --monster-text-muted: rgba(15, 23, 42, 0.75);
+            --monster-text-secondary: #64748b;
+            --monster-chip-bg: rgba(15, 23, 42, 0.05);
+            --monster-control-bg: #ffffff;
+            --monster-control-border: rgba(15, 23, 42, 0.12);
+        }
+
+        html {
+            min-height: 100%;
+            background-color: #eef2f7;
+        }
+
+        html,
+        body {
+            overflow-x: clip;
+        }
+
+        body {
+            min-height: 100dvh;
+            color: var(--monster-ink);
+            background:
+                radial-gradient(circle at top left, rgba(212, 160, 23, 0.16), transparent 28%),
+                radial-gradient(circle at top right, rgba(37, 99, 235, 0.12), transparent 24%),
+                linear-gradient(180deg, var(--monster-bg-top) 0%, var(--monster-bg-bottom) 100%);
+            transition: background-color 0.25s ease, color 0.25s ease;
+            overscroll-behavior-y: none;
+        }
+
+        body[data-theme='dark'] {
+            --monster-ink: #e6edf8;
+            --monster-night: #ecf4ff;
+            --monster-surface: rgba(11, 19, 34, 0.9);
+            --monster-border: rgba(130, 163, 214, 0.22);
+            --monster-bg-top: #0a1322;
+            --monster-bg-bottom: #0e1a2f;
+            --monster-text-muted: rgba(223, 236, 255, 0.85);
+            --monster-text-secondary: #cbd5e1;
+            --monster-chip-bg: rgba(170, 201, 246, 0.15);
+            --monster-control-bg: #091327;
+            --monster-control-border: rgba(145, 182, 240, 0.38);
+        }
+
+        /* Light Mode Typography & Colors */
+        body:not([data-theme='dark']) .section-title,
+        body:not([data-theme='dark']) .sub-group-title,
+        body:not([data-theme='dark']) .switch-title,
+        body:not([data-theme='dark']) .form-label {
+            color: #1e293b;
+            font-weight: 700;
+        }
+
+        body:not([data-theme='dark']) .section-copy,
+        body:not([data-theme='dark']) .switch-copy {
+            color: var(--monster-text-secondary);
+        }
+
+        body:not([data-theme='dark']) .eyebrow {
+            color: #7c8fa3;
+        }
+
+        body:not([data-theme='dark']) .text-secondary {
+            color: var(--monster-text-secondary) !important;
+        }
+
+        body:not([data-theme='dark']) .text-white-50 {
+            color: #7c8fa3 !important;
+        }
+
+        /* Light Mode Cards & Containers */
+        body:not([data-theme='dark']) .settings-card,
+        body:not([data-theme='dark']) .section-card {
+            background: #ffffff;
+            border-color: #e2e8f0;
+        }
+
+        body:not([data-theme='dark']) .meta-card,
+        body:not([data-theme='dark']) .switch-tile {
+            background: #f8fafc;
+            border-color: #e2e8f0;
+        }
+
+        body:not([data-theme='dark']) #workspace-pane-logic .settings-card {
+            background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+            border-color: #cbd5e1;
+        }
+
+        body:not([data-theme='dark']) #workspace-pane-logic .switch-tile {
+            background: linear-gradient(180deg, #ffffff 0%, #f1f5f9 100%);
+            border-color: #cbd5e1;
+        }
+
+        /* Light Mode Form Controls */
+        body:not([data-theme='dark']) .form-control,
+        body:not([data-theme='dark']) .form-select {
+            background: #ffffff;
+            border-color: #cbd5e1;
+            color: #1e293b;
+        }
+
+        body:not([data-theme='dark']) .form-control:focus,
+        body:not([data-theme='dark']) .form-select:focus {
+            background: #ffffff;
+            border-color: #3b82f6;
+            color: #1e293b;
+        }
+
+        body:not([data-theme='dark']) .form-control::placeholder {
+            color: #cbd5e1;
+        }
+
+        /* Light Mode News Items */
+        body:not([data-theme='dark']) .news-item {
+            background: #ffffff;
+            border-color: #e2e8f0;
+        }
+
+        body:not([data-theme='dark']) .news-item-next {
+            background: linear-gradient(135deg, rgba(226, 232, 240, 0.5), rgba(255, 255, 255, 1));
+            border-left-color: rgba(59, 130, 246, 0.4);
+        }
+
+        body:not([data-theme='dark']) .news-item:hover {
+            background: #ffffff;
+            border-color: #cbd5e1;
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+        }
+
+        body:not([data-theme='dark']) .news-item-next:hover {
+            background: linear-gradient(135deg, rgba(219, 234, 254, 0.8), rgba(255, 255, 255, 1));
+            border-left-color: rgba(59, 130, 246, 0.6);
+        }
+
+        body:not([data-theme='dark']) .news-data-item {
+            background: #f1f5f9;
+            border-color: #cbd5e1;
+        }
+
+        body:not([data-theme='dark']) .news-metric-value {
+            color: #0f172a;
+        }
+
+        body:not([data-theme='dark']) .news-history-card {
+            border-left-color: rgba(59, 130, 246, 0.35);
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.95), rgba(241, 245, 249, 0.85));
+        }
+
+        body:not([data-theme='dark']) .news-impact-badge {
+            border-color: rgba(148, 163, 184, 0.45);
+            background: rgba(226, 232, 240, 0.55);
+            color: #334155;
+        }
+
+        body:not([data-theme='dark']) .news-history-note {
+            color: #64748b;
+        }
+
+        /* Light Mode Text Colors in News */
+        body:not([data-theme='dark']) .fw-semibold,
+        body:not([data-theme='dark']) .fw-bold {
+            color: #0f172a;
+        }
+
+        /* Light Mode Verdict Box */
+        body:not([data-theme='dark']) .verdict-box {
+            background: linear-gradient(135deg, rgba(226, 232, 240, 0.4), rgba(255, 255, 255, 0.9));
+            border-color: #cbd5e1;
+        }
+
+        body:not([data-theme='dark']) .verdict-box:hover {
+            background: linear-gradient(135deg, rgba(219, 234, 254, 0.5), rgba(255, 255, 255, 1));
+            border-color: #bfdbfe;
+            box-shadow: 0 8px 24px rgba(59, 130, 246, 0.1);
+        }
+
+        body:not([data-theme='dark']) .verdict-label {
+            color: #3b82f6;
+        }
+
+        body:not([data-theme='dark']) .verdict-value {
+            background: linear-gradient(135deg, #3b82f6, #f97316);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        body:not([data-theme='dark']) .verdict-description {
+            color: #475569;
+        }
+
+        body:not([data-theme='dark']) .verdict-data-line {
+            color: #1e293b;
+            font-weight: 700;
+        }
+
+        /* Light Mode Buttons */
+        body:not([data-theme='dark']) .btn-dark {
+            background: #1e293b;
+            border-color: #1e293b;
+            color: #ffffff;
+        }
+
+        body:not([data-theme='dark']) .btn-dark:hover {
+            background: #0f172a;
+            border-color: #0f172a;
+        }
+
+        body:not([data-theme='dark']) .btn-success {
+            background: #10b981;
+            border-color: #10b981;
+            color: #ffffff;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+        }
+
+        body:not([data-theme='dark']) .btn-success:hover {
+            background: #059669;
+            border-color: #059669;
+            box-shadow: 0 4px 12px rgba(5, 150, 105, 0.4);
+            transform: translateY(-2px);
+        }
+
+        body:not([data-theme='dark']) .btn-danger {
+            background: #dc2626;
+            border-color: #dc2626;
+            color: #ffffff;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 8px rgba(220, 38, 38, 0.3);
+        }
+
+        body:not([data-theme='dark']) .btn-danger:hover {
+            background: #b91c1c;
+            border-color: #b91c1c;
+            box-shadow: 0 4px 12px rgba(185, 28, 28, 0.4);
+            transform: translateY(-2px);
+        }
+        
+        .bot-toggle-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.38rem;
+            font-weight: 700;
+            line-height: 1;
+            color: rgba(208, 226, 255, 0.7) !important;
+        }
+
+        .bot-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 1rem;
+            min-width: 1rem;
+            font-weight: 800;
+            line-height: 1;
+        }
+
+        body[data-theme='dark'] .text-danger {
+            color: #ff6b6b !important;
+        }
+
+        body[data-theme='dark'] .text-warning {
+            color: #ffd93d !important;
+        }
+
+        body[data-theme='dark'] .text-success {
+            color: #51cf66 !important;
+        }
+
+        body[data-theme='dark'] .text-info {
+            color: #74c0fc !important;
+        }
+
+        body[data-theme='dark'] .text-dark {
+            color: rgba(226, 232, 240, 0.95) !important;
+        }
+
+        body[data-theme='dark'] .text-muted {
+            color: rgba(148, 163, 184, 0.8) !important;
+        }
+
+        body[data-theme='dark'] .fw-semibold,
+        body[data-theme='dark'] .fw-bold {
+            color: rgba(226, 232, 240, 0.95);
+        }
+
+        /* Light Mode Text Colors */
+        body:not([data-theme='dark']) .text-white,
+        body:not([data-theme='dark']) .text-light {
+            color: #1e293b !important;
+        }
+
+        body:not([data-theme='dark']) .text-dark {
+            color: #0f172a !important;
+        }
+
+        body:not([data-theme='dark']) .text-white-50 {
+            color: #64748b !important;
+        }
+
+        body:not([data-theme='dark']) .text-danger {
+            color: #dc2626 !important;
+        }
+        /* Keep Bootstrap modal above custom sticky topbar and dropdown layers. */
+        .modal {
+            z-index: 6200;
+        }
+
+        .modal-backdrop {
+            z-index: 6190;
+        }
+
+        #newsHistoryModal .modal-dialog {
+            z-index: 6201;
+        }
+
+        body:not([data-theme='dark']) .text-warning {
+            color: #ea580c !important;
+        }
+
+        body:not([data-theme='dark']) .text-success {
+            color: #15803d !important;
+        }
+
+        body:not([data-theme='dark']) .text-info {
+            color: #0369a1 !important;
+        }
+
+        body:not([data-theme='dark']) .text-muted {
+            color: #6b7280 !important;
+        }
+
+        body:not([data-theme='dark']) .fw-bold {
+            color: inherit;
+        }
+
+        .hero-shell,
+        .settings-card,
+        .radar-card {
+            border: 1px solid var(--monster-border);
+            border-radius: 24px;
+            background: var(--monster-surface);
+            box-shadow: 0 20px 50px rgba(15, 23, 42, 0.08);
+            backdrop-filter: blur(14px);
+        }
+
+        .hero-shell {
+            overflow: visible;
+            position: relative;
+        }
+
+        .topbar-shell {
+            padding: 0.72rem 0.9rem !important;
+            position: relative;
+            z-index: 5000;
+            isolation: isolate;
+        }
+
+        .dashboard-topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.85rem;
+            flex-wrap: wrap;
+            position: relative;
+            z-index: 2;
+        }
+
+        .topbar-main {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 0.5rem;
+            flex: 0 0 auto;
+        }
+
+        .topbar-brand {
+            display: grid;
+            gap: 0.12rem;
+            min-width: 220px;
+        }
+
+        .topbar-meta {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            flex-wrap: nowrap;
+            align-self: center;
+        }
+
+        .topbar-license-card {
+            min-height: 56px;
+            min-width: 185px;
+            padding: 0.55rem 0.85rem;
+            border-radius: 18px;
+            border: 1px solid rgba(59, 130, 246, 0.18);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.84), rgba(241, 245, 249, 0.72));
+            box-shadow: 0 12px 20px rgba(15, 23, 42, 0.08);
+            display: grid;
+            gap: 0.15rem;
+        }
+
+        .topbar-license-label {
+            font-size: 0.63rem;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--monster-text-secondary);
+            line-height: 1;
+        }
+
+        .topbar-license-main {
+            font-size: 0.92rem;
+            font-weight: 800;
+            color: var(--monster-night);
+            line-height: 1.15;
+        }
+
+        .topbar-license-sub {
+            font-size: 0.76rem;
+            font-weight: 700;
+            color: var(--monster-text-secondary);
+            line-height: 1.15;
+        }
+
+        .topbar-license-card[data-license-state='expired'] {
+            border-color: rgba(248, 113, 113, 0.26);
+            background: linear-gradient(135deg, rgba(254, 242, 242, 0.94), rgba(255, 237, 213, 0.88));
+        }
+
+        .topbar-license-card[data-license-state='expired'] .topbar-license-main {
+            color: #b91c1c;
+        }
+
+        .topbar-license-card[data-license-state='active'] {
+            border-color: rgba(34, 197, 94, 0.18);
+            background: linear-gradient(135deg, rgba(236, 253, 245, 0.94), rgba(239, 246, 255, 0.88));
+        }
+
+        .topbar-license-card[data-license-state='active'] .topbar-license-main {
+            color: #047857;
+        }
+
+        .topbar-license-card[data-license-state='inactive'] {
+            border-color: rgba(148, 163, 184, 0.2);
+            background: linear-gradient(135deg, rgba(248, 250, 252, 0.92), rgba(241, 245, 249, 0.8));
+        }
+
+        .topbar-controls {
+            margin-left: auto;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 0.55rem;
+            flex: 1 1 auto;
+            min-width: 0;
+        }
+
+        .topbar-account-tools {
+            display: grid;
+            grid-template-columns: auto minmax(330px, 1fr);
+            align-items: center;
+            column-gap: 0.55rem;
+            row-gap: 0;
+            flex: 0 1 auto;
+            justify-content: flex-end;
+            align-self: center;
+        }
+
+        .account-picker {
+            min-width: 330px;
+            width: 100%;
+            position: relative;
+            z-index: 1200;
+        }
+
+        .account-picker-toggle {
+            width: 100%;
+            min-height: 40px;
+            border-radius: 12px;
+            border: 1px solid var(--monster-control-border);
+            background: var(--monster-control-bg);
+            color: var(--monster-ink);
+            display: inline-flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.4rem;
+            font-size: 0.9rem;
+            font-weight: 700;
+        }
+
+        .account-picker-toggle::after {
+            margin-left: 0.35rem;
+        }
+
+        .account-picker-menu {
+            min-width: 360px;
+            padding: 0.55rem;
+            overflow: visible;
+            z-index: 1300;
+            border: 1px solid rgba(96, 165, 250, 0.32);
+            box-shadow: 0 20px 34px rgba(2, 6, 23, 0.45);
+        }
+
+        .account-picker-search {
+            min-height: 38px !important;
+            border-radius: 10px;
+            font-size: 0.84rem;
+            margin-bottom: 0.5rem;
+            position: relative;
+            z-index: 2;
+            border-width: 1px;
+            box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.24);
+            background-clip: padding-box;
+        }
+
+        .account-picker-options {
+            max-height: 260px;
+            overflow-y: auto;
+            display: grid;
+            gap: 0.2rem;
+            padding-top: 0.35rem;
+            border-top: 1px solid rgba(148, 163, 184, 0.24);
+            border-radius: 10px;
+            background: rgba(15, 23, 42, 0.14);
+        }
+
+        .account-picker-item {
+            border-radius: 9px;
+            font-size: 0.84rem;
+            white-space: normal;
+            line-height: 1.35;
+            padding-top: 0.48rem;
+            padding-bottom: 0.48rem;
+        }
+
+        body[data-theme='dark'] .account-picker-search {
+            background: rgba(9, 19, 39, 0.96);
+            border-color: rgba(89, 156, 255, 0.58);
+            color: #e2ecff;
+            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.22);
+        }
+
+        body[data-theme='dark'] .account-picker-menu {
+            background: rgba(7, 15, 30, 0.98);
+            border-color: rgba(96, 165, 250, 0.38);
+        }
+
+        body[data-theme='dark'] .account-picker-search::placeholder {
+            color: rgba(179, 203, 242, 0.68);
+        }
+
+        body[data-theme='dark'] .account-picker-options {
+            border-top-color: rgba(130, 163, 214, 0.32);
+            background: rgba(9, 19, 39, 0.72);
+        }
+
+        body:not([data-theme='dark']) .account-picker-search {
+            background: #ffffff;
+            border-color: #93c5fd;
+            color: #0f172a;
+            box-shadow: 0 0 0 2px rgba(147, 197, 253, 0.35);
+        }
+
+        body:not([data-theme='dark']) .account-picker-menu {
+            background: #ffffff;
+            border-color: rgba(147, 197, 253, 0.72);
+            box-shadow: 0 18px 30px rgba(15, 23, 42, 0.18);
+        }
+
+        body:not([data-theme='dark']) .account-picker-search::placeholder {
+            color: #94a3b8;
+        }
+
+        body:not([data-theme='dark']) .account-picker-options {
+            background: rgba(241, 245, 249, 0.85);
+            border-top-color: rgba(148, 163, 184, 0.4);
+        }
+
+        .topbar-account-label {
+            font-size: 0.72rem;
+            font-weight: 600;
+            letter-spacing: 0.03em;
+            text-transform: uppercase;
+            color: var(--monster-text-muted);
+            margin: 0;
+            white-space: nowrap;
+            min-height: 40px;
+            display: inline-flex;
+            align-items: center;
+            line-height: 1;
+        }
+
+        .account-picker-footer {
+            padding-top: 0.65rem;
+            margin-top: 0.65rem;
+            border-top: 1px solid rgba(148, 163, 184, 0.28);
+        }
+
+        .theme-toggle {
+            border-radius: 999px;
+            width: 40px;
+            min-width: 40px;
+            height: 40px;
+            padding: 0;
+            font-size: 1.05rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+        }
+
+        .topbar-actions {
+            display: flex;
+            flex-wrap: nowrap;
+            gap: 0.35rem;
+            align-items: center;
+            margin-left: auto;
+            align-self: center;
+        }
+
+        .topbar-controls .topbar-meta {
+            margin-right: 0.15rem;
+        }
+
+        .topbar-menu-btn {
+            min-height: 40px;
+            height: 40px;
+            border-radius: 999px;
+            padding: 0.45rem 0.9rem;
+            font-size: 0.86rem;
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        .topbar-actions .hero-action-btn,
+        .topbar-actions .theme-toggle,
+        .account-picker-toggle,
+        .topbar-meta .mini-chip {
+            min-height: 40px;
+            height: 40px;
+            line-height: 1;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .topbar-action-form {
+            margin: 0;
+        }
+
+        .dashboard-topbar .dropdown-menu {
+            min-width: 220px;
+            border-radius: 12px;
+            border: 1px solid rgba(15, 23, 42, 0.12);
+            box-shadow: 0 14px 28px rgba(15, 23, 42, 0.16);
+            padding: 0.4rem;
+            z-index: 5100;
+        }
+
+        .dashboard-topbar .dropdown-item {
+            border-radius: 8px;
+            font-size: 0.88rem;
+            color: #0f172a;
+        }
+
+        .dashboard-topbar .dropdown-item:hover {
+            background: rgba(37, 99, 235, 0.1);
+            color: #0f172a;
+        }
+
+        body[data-theme='dark'] .dashboard-topbar .dropdown-menu {
+            background: rgba(12, 23, 42, 0.98);
+            border-color: rgba(130, 163, 214, 0.3);
+            box-shadow: 0 16px 30px rgba(2, 6, 23, 0.55);
+        }
+
+        body[data-theme='dark'] .dashboard-topbar .dropdown-item {
+            color: #e2e8f0;
+        }
+
+        body[data-theme='dark'] .dashboard-topbar .dropdown-item:hover {
+            background: rgba(59, 130, 246, 0.18);
+            color: #f8fafc;
+        }
+
+        body[data-theme='dark'] .dashboard-topbar .dropdown-item.text-danger {
+            color: #fda4af !important;
+        }
+
+        body:not([data-theme='dark']) .dashboard-topbar .dropdown-item.text-danger {
+            color: #dc2626 !important;
+        }
+
+        body[data-theme='dark'] .topbar-license-card {
+            border-color: rgba(96, 165, 250, 0.22);
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.88), rgba(17, 24, 39, 0.84));
+            box-shadow: 0 12px 22px rgba(2, 6, 23, 0.35);
+        }
+
+        body[data-theme='dark'] .topbar-license-main {
+            color: #e2e8f0;
+        }
+
+        body[data-theme='dark'] .topbar-license-sub,
+        body[data-theme='dark'] .topbar-license-label {
+            color: rgba(191, 219, 254, 0.72);
+        }
+
+        body[data-theme='dark'] .topbar-license-card[data-license-state='expired'] {
+            border-color: rgba(248, 113, 113, 0.22);
+            background: linear-gradient(135deg, rgba(69, 10, 10, 0.84), rgba(91, 33, 17, 0.78));
+        }
+
+        body[data-theme='dark'] .topbar-license-card[data-license-state='expired'] .topbar-license-main {
+            color: #fecaca;
+        }
+
+        body[data-theme='dark'] .topbar-license-card[data-license-state='active'] {
+            border-color: rgba(52, 211, 153, 0.22);
+            background: linear-gradient(135deg, rgba(2, 44, 34, 0.86), rgba(15, 23, 42, 0.8));
+        }
+
+        body[data-theme='dark'] .topbar-license-card[data-license-state='active'] .topbar-license-main {
+            color: #a7f3d0;
+        }
+
+        .hero-shell::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            pointer-events: none;
+            border: 1px solid rgba(148, 163, 184, 0.18);
+            z-index: 0;
+        }
+
+        .top-nav-title {
+            font-size: clamp(1.05rem, 1.5vw, 1.4rem);
+            font-weight: 800;
+            letter-spacing: 0.01em;
+            line-height: 1.15;
+            word-break: break-word;
+        }
+
+        .top-account-select {
+            min-width: 220px;
+            max-width: 330px;
+        }
+
+        .topbar-controls .strategy-select {
+            min-height: 40px;
+            border-radius: 12px;
+            font-size: 0.92rem;
+            font-weight: 700;
+            padding-top: 0.2rem;
+            padding-bottom: 0.2rem;
+        }
+
+        .topbar-controls .hero-action-btn {
+            padding: 0.36rem 0.8rem;
+            min-height: 38px;
+            font-size: 0.82rem;
+        }
+
+        body[data-theme='dark'] .top-nav-title {
+            color: #e2e8f0;
+        }
+
+        .hero-shell::after {
+            content: '';
+            position: absolute;
+            inset: auto -10% -45% auto;
+            width: 320px;
+            height: 320px;
+            border-radius: 999px;
+            background: radial-gradient(circle, rgba(212, 160, 23, 0.28), transparent 65%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .eyebrow {
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: var(--monster-text-muted);
+        }
+
+        .hero-title {
+            font-size: clamp(1.9rem, 2.6vw, 3rem);
+            line-height: 1.05;
+            font-weight: 800;
+        }
+
+        .hero-chip,
+        .mini-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            border-radius: 999px;
+            padding: 0.45rem 0.85rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .hero-chip {
+            background: var(--monster-chip-bg);
+            color: var(--monster-night);
+        }
+
+        .mini-chip {
+            background: rgba(37, 99, 235, 0.08);
+            color: var(--monster-sky);
+            padding: 0.34rem 0.72rem;
+            font-size: 0.78rem;
+        }
+
+        .monitor-toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.45rem;
+            justify-content: flex-end;
+            align-items: center;
+        }
+
+        .monitor-toolbar .btn {
+            min-height: 34px;
+            border-radius: 10px;
+            font-size: 0.78rem;
+            padding: 0.35rem 0.65rem;
+            line-height: 1.1;
+        }
+
+        .monitor-toolbar #btn-bot-toggle {
+            min-height: 36px;
+            border-radius: 12px;
+            padding: 0.38rem 0.8rem;
+            font-size: 0.8rem;
+            min-width: 112px;
+        }
+
+        .monitor-toolbar #btn-bot-start-all,
+        .monitor-toolbar #btn-bot-stop-all,
+        .monitor-toolbar #btn-bot-reset-dd {
+            border-width: 1px;
+            background: transparent;
+        }
+
+        .monitor-bulk-hint {
+            width: 100%;
+            text-align: right;
+            margin-top: 0.15rem;
+            font-size: 0.78rem;
+            color: var(--monster-text-secondary);
+        }
+
+        body[data-theme='dark'] .monitor-bulk-hint {
+            color: rgba(203, 213, 225, 0.88);
+        }
+
+        body:not([data-theme='dark']) .monitor-bulk-hint {
+            color: #475569;
+        }
+
+        #bulk-whitelist-save-msg {
+            font-size: 0.8rem;
+        }
+
+        #bulk-whitelist-list .badge {
+            border-radius: 999px;
+            font-size: 0.74rem;
+            font-weight: 700;
+        }
+
+        body:not([data-theme='dark']) #bulk-whitelist-list .badge {
+            background: #e0f2fe !important;
+            border-color: #7dd3fc !important;
+            color: #0c4a6e !important;
+        }
+
+        body[data-theme='dark'] #bulk-whitelist-list .badge {
+            background: rgba(8, 145, 178, 0.22) !important;
+            border-color: rgba(103, 232, 249, 0.35) !important;
+            color: #a5f3fc !important;
+        }
+
+        .strategy-select {
+            min-height: 52px;
+            font-size: 1.05rem;
+            font-weight: 700;
+            border-radius: 18px;
+            border: 1px solid var(--monster-control-border);
+            box-shadow: none;
+        }
+
+        .section-card {
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            border-radius: 22px;
+            padding: 1.35rem;
+            background: linear-gradient(180deg, rgba(255,255,255,0.92), rgba(248,250,252,0.9));
+        }
+
+        .section-card[data-strategy='0'] {
+            border-color: rgba(212, 160, 23, 0.22);
+        }
+
+        .section-card[data-strategy='1'] {
+            border-color: rgba(37, 99, 235, 0.22);
+        }
+
+        .section-card[data-strategy='2'] {
+            border-color: rgba(31, 157, 122, 0.22);
+        }
+
+        .section-card.is-hidden {
+            display: none;
+        }
+
+        .section-title {
+            font-size: 1.05rem;
+            font-weight: 800;
+            margin-bottom: 0.2rem;
+            color: var(--monster-ink);
+        }
+
+        .section-copy {
+            font-size: 0.9rem;
+            color: var(--monster-text-muted);
+            margin-bottom: 1rem;
+        }
+
+        .sub-group {
+            border-top: 1px dashed rgba(15, 23, 42, 0.12);
+            margin-top: 1rem;
+            padding-top: 1rem;
+        }
+
+        body[data-theme='dark'] .sub-group {
+            border-top-color: rgba(130, 163, 214, 0.2);
+        }
+
+        .sub-group-title {
+            font-size: 0.82rem;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            font-weight: 800;
+            color: var(--monster-text-muted);
+            margin-bottom: 0.9rem;
+        }
+
+        .form-label {
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: var(--monster-text-muted);
+            margin-bottom: 0.45rem;
+        }
+
+        .form-control,
+        .form-select {
+            min-height: 48px;
+            border-radius: 16px;
+            border-color: var(--monster-control-border);
+            background: var(--monster-control-bg);
+            color: var(--monster-ink);
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+            border-color: rgba(37, 99, 235, 0.62);
+            box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.18);
+            background: var(--monster-control-bg);
+            color: var(--monster-ink);
+        }
+
+        .form-control:disabled,
+        .form-select:disabled {
+            border-color: var(--monster-control-border);
+            background: rgba(148, 163, 184, 0.18);
+            color: var(--monster-text-muted);
+            opacity: 1;
+        }
+
+        body[data-theme='dark'] .form-control:disabled,
+        body[data-theme='dark'] .form-select:disabled {
+            background: rgba(92, 125, 175, 0.26);
+            color: rgba(208, 226, 255, 0.72);
+        }
+
+        .form-row-compact .form-label {
+            min-height: 20px;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .form-row-compact.core-exec-grid > [class*='col-'] {
+            display: flex;
+        }
+
+        .form-row-compact.core-exec-grid .field-stack {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-row-compact.core-exec-grid .field-stack .form-label {
+            min-height: 2.25rem;
+            align-items: flex-end;
+            gap: 0.35rem;
+            line-height: 1.2;
+        }
+
+        .form-row-compact.core-exec-grid .field-stack .form-text {
+            margin-top: 0.45rem;
+            min-height: 2.2em;
+            line-height: 1.35;
+        }
+
+        .form-text.inline-help {
+            font-size: 0.75rem;
+            opacity: 0.86;
+        }
+
+        .auto-close-badge {
+            font-size: 0.65rem;
+            vertical-align: middle;
+            line-height: 1;
+            border-radius: 999px;
+            padding: 0.25rem 0.4rem;
+        }
+
+        .label-text-nowrap {
+            white-space: nowrap;
+        }
+
+        @media (max-width: 767.98px) {
+            .form-row-compact.core-exec-grid .field-stack .form-label {
+                min-height: 0;
+            }
+
+            .form-row-compact.core-exec-grid .field-stack .form-text {
+                min-height: 0;
+            }
+        }
+
+        .form-row-compact .form-control,
+        .form-row-compact .form-select {
+            min-height: 52px;
+        }
+
+        .form-text {
+            font-size: 0.78rem;
+            color: var(--monster-text-muted);
+        }
+
+        body[data-theme='dark'] .section-title,
+        body[data-theme='dark'] .sub-group-title,
+        body[data-theme='dark'] .switch-title,
+        body[data-theme='dark'] .form-label {
+            color: #dbeafe;
+        }
+
+        .switch-tile {
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            border-radius: 18px;
+            padding: 0.95rem 1rem;
+            background: rgba(255, 255, 255, 0.7);
+            height: 100%;
+        }
+
+        #workspace-pane-logic .settings-card {
+            border: 1px solid rgba(59, 130, 246, 0.16);
+            background: linear-gradient(180deg, rgba(239, 246, 255, 0.92), rgba(255, 255, 255, 0.86));
+        }
+
+        #workspace-pane-logic .switch-tile {
+            border-color: rgba(59, 130, 246, 0.16);
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.88), rgba(248, 250, 252, 0.76));
+        }
+
+        .switch-tile .form-check-input {
+            width: 2.8rem;
+            height: 1.5rem;
+        }
+
+        .switch-title {
+            font-weight: 700;
+            font-size: 0.95rem;
+        }
+
+        .switch-copy {
+            font-size: 0.82rem;
+            color: var(--monster-text-muted);
+            margin-top: 0.35rem;
+        }
+
+        .report-toolbar-select {
+            min-height: 36px;
+            border-radius: 14px;
+            padding-top: 0.25rem;
+            padding-bottom: 0.25rem;
+        }
+
+        .report-toolbar-btn {
+            min-height: 36px;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .calc-debug-box {
+            white-space: pre-wrap;
+            max-height: 260px;
+            overflow: auto;
+            font-family: Consolas, Monaco, 'Courier New', monospace;
+            font-size: 0.78rem;
+            background: rgba(15, 23, 42, 0.05);
+            border: 1px solid rgba(15, 23, 42, 0.12);
+            border-radius: 10px;
+            padding: 0.75rem;
+            margin-top: 0.5rem;
+        }
+
+        .session-box {
+            border: 1px solid rgba(37, 99, 235, 0.2);
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.74), rgba(246, 250, 255, 0.66));
+        }
+
+        .session-box .session-title-wrap {
+            display: grid;
+            gap: 0.25rem;
+            width: 100%;
+            padding-right: 3.4rem;
+        }
+
+        .session-box .session-toggle {
+            position: relative;
+            align-items: flex-start !important;
+            min-height: 48px;
+        }
+
+        .session-box .session-toggle .form-check-input {
+            position: absolute;
+            top: 0.1rem;
+            right: 0;
+            margin-top: 0;
+        }
+
+        .session-hint {
+            font-size: 0.78rem;
+            color: var(--monster-text-muted);
+        }
+
+        .session-time {
+            padding-right: 2.4rem;
+        }
+
+        .session-time::-webkit-calendar-picker-indicator {
+            opacity: 0.92;
+            cursor: pointer;
+            filter: none;
+        }
+
+        .session-reference-grid {
+            display: grid;
+            gap: 0.7rem;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        }
+
+        .session-reference-card {
+            border: 1px solid rgba(37, 99, 235, 0.2);
+            border-radius: 14px;
+            padding: 0.7rem 0.8rem;
+            background: linear-gradient(140deg, rgba(37, 99, 235, 0.09), rgba(212, 160, 23, 0.08));
+        }
+
+        .session-reference-name {
+            font-size: 0.78rem;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: var(--monster-text-muted);
+            margin-bottom: 0.25rem;
+            font-weight: 700;
+        }
+
+        .session-reference-hours {
+            font-weight: 800;
+            color: var(--monster-night);
+            font-size: 0.95rem;
+        }
+
+        .meta-card {
+            border: 1px solid var(--monster-border);
+            border-radius: 18px;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.6);
+        }
+
+        #grid-tier-wrap {
+            border: 1px solid rgba(37, 99, 235, 0.22);
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.74), rgba(248, 250, 252, 0.68));
+        }
+
+        body[data-theme='dark'] .meta-card,
+        body[data-theme='dark'] .switch-tile,
+        body[data-theme='dark'] .news-item,
+        body[data-theme='dark'] .section-card {
+            background: rgba(12, 23, 42, 0.72);
+        }
+
+        body[data-theme='dark'] .news-item {
+            border-left-color: rgba(100, 200, 255, 0.3);
+        }
+
+        body[data-theme='dark'] .news-item-next {
+            border-left-color: rgba(59, 180, 255, 0.5);
+            background: linear-gradient(135deg, rgba(30, 100, 150, 0.3), rgba(12, 23, 42, 0.8));
+        }
+
+        body[data-theme='dark'] .news-item:hover {
+            background: rgba(12, 23, 42, 0.95);
+            border-color: rgba(96, 165, 250, 0.3);
+            border-left-color: rgba(100, 220, 255, 0.6);
+        }
+
+        body[data-theme='dark'] .news-item-next:hover {
+            border-left-color: rgba(150, 230, 255, 0.8);
+            background: linear-gradient(135deg, rgba(30, 100, 150, 0.5), rgba(12, 23, 42, 0.95));
+            box-shadow: 0 4px 16px rgba(59, 180, 255, 0.25);
+        }
+
+        body[data-theme='dark'] .news-data-item {
+            background: rgba(96, 165, 250, 0.12);
+            border-color: rgba(96, 165, 250, 0.2);
+        }
+
+        body[data-theme='dark'] .verdict-box {
+            background: linear-gradient(135deg, rgba(30, 58, 138, 0.4), rgba(88, 40, 12, 0.4));
+            border-color: rgba(59, 130, 246, 0.4);
+        }
+
+        body[data-theme='dark'] .verdict-box:hover {
+            background: linear-gradient(135deg, rgba(30, 58, 138, 0.5), rgba(88, 40, 12, 0.5));
+            border-color: rgba(59, 130, 246, 0.6);
+            box-shadow: 0 8px 24px rgba(59, 130, 246, 0.25);
+        }
+
+        body[data-theme='dark'] .verdict-label {
+            color: #60a5fa;
+        }
+
+        body[data-theme='dark'] .verdict-value {
+            background: linear-gradient(135deg, #60a5fa, #fb923c);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        body[data-theme='dark'] .verdict-description {
+            color: rgba(226, 232, 240, 0.9);
+        }
+
+        body[data-theme='dark'] .verdict-data-line {
+            color: rgba(226, 232, 240, 0.95);
+            font-weight: 700;
+        }
+
+        body[data-theme='dark'] #workspace-pane-logic .settings-card {
+            border-color: rgba(96, 165, 250, 0.22);
+            background: linear-gradient(180deg, rgba(15, 23, 42, 0.94), rgba(10, 16, 30, 0.9));
+        }
+
+        body[data-theme='dark'] #workspace-pane-logic .switch-tile {
+            border-color: rgba(96, 165, 250, 0.2);
+            background: linear-gradient(180deg, rgba(12, 23, 42, 0.9), rgba(9, 17, 31, 0.84));
+        }
+
+        body[data-theme='dark'] .session-box {
+            border-color: rgba(130, 163, 214, 0.34);
+            background: linear-gradient(160deg, rgba(16, 33, 56, 0.9), rgba(12, 26, 47, 0.82));
+        }
+
+        body[data-theme='dark'] .session-reference-card {
+            border-color: rgba(130, 163, 214, 0.34);
+            background: linear-gradient(140deg, rgba(26, 56, 99, 0.42), rgba(82, 67, 28, 0.34));
+        }
+
+        body[data-theme='dark'] .session-reference-hours {
+            color: #dbeafe;
+        }
+
+        body[data-theme='dark'] .session-time::-webkit-calendar-picker-indicator {
+            opacity: 1;
+            filter: invert(0.92) sepia(0.3) saturate(1.2);
+        }
+
+        body[data-theme='dark'] #grid-tier-wrap {
+            border-color: rgba(130, 163, 214, 0.28);
+            background: linear-gradient(180deg, rgba(14, 28, 49, 0.8), rgba(11, 24, 44, 0.74));
+        }
+
+        body[data-theme='dark'] .mini-chip {
+            background: linear-gradient(140deg, rgba(37, 99, 235, 0.3), rgba(30, 64, 175, 0.28));
+            color: #eff6ff;
+            border: 1px solid rgba(147, 197, 253, 0.45);
+            box-shadow: 0 2px 8px rgba(2, 6, 23, 0.35);
+        }
+
+        .table-slim {
+            font-size: 0.86rem;
+        }
+
+        .table-slim > :not(caption) > * > * {
+            padding: 0.45rem 0.5rem;
+            border-color: rgba(118, 152, 201, 0.28);
+            color: var(--monster-ink);
+            background: transparent;
+        }
+
+        .news-source-badge {
+            border: 1px solid rgba(63, 121, 214, 0.5);
+            border-radius: 14px;
+            background: linear-gradient(145deg, rgba(18, 42, 84, 0.92), rgba(14, 34, 68, 0.92));
+            color: #dbeafe;
+            font-size: 0.74rem;
+            line-height: 1.35;
+            font-weight: 700;
+            padding: 0.45rem 0.6rem;
+            min-width: 150px;
+            text-align: right;
+            white-space: pre-line;
+        }
+
+        .workspace-nav {
+            border: 1px solid var(--monster-border);
+            border-radius: 18px;
+            background: rgba(255, 255, 255, 0.62);
+            padding: 0.4rem;
+        }
+
+        #workspace-tabs {
+            align-items: stretch;
+        }
+
+        #workspace-tabs .nav-item {
+            display: flex;
+        }
+
+        .workspace-tab-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.42rem;
+        }
+
+        .workspace-tab-icon {
+            width: 1.05rem;
+            height: 1.05rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0.9;
+        }
+
+        .workspace-tab-icon svg {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .workspace-tab-label {
+            display: inline-block;
+            line-height: 1;
+        }
+
+        .workspace-nav .nav-link {
+            border-radius: 12px;
+            font-weight: 700;
+            color: var(--monster-ink);
+            position: relative;
+            transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+        }
+
+        .workspace-nav .nav-link.active {
+            background: linear-gradient(120deg, rgba(37, 99, 235, 0.18), rgba(212, 160, 23, 0.2));
+            color: var(--monster-night);
+        }
+
+        body[data-theme='dark'] .workspace-nav {
+            background: rgba(9, 18, 34, 0.72);
+        }
+
+        .workspace-pane {
+            display: none;
+        }
+
+        .workspace-pane.is-active {
+            display: block;
+        }
+
+        .pair-tabs-shell {
+            border: 1px solid var(--monster-border);
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.48);
+            padding: 0.7rem;
+        }
+
+        .pair-tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .pair-tab-btn {
+            border: 1px solid rgba(63, 121, 214, 0.35);
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.82);
+            color: var(--monster-ink);
+            font-size: 0.78rem;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+            padding: 0.35rem 0.75rem;
+            line-height: 1.2;
+            transition: all 0.2s ease;
+        }
+
+        .pair-tab-btn:hover {
+            border-color: rgba(37, 99, 235, 0.55);
+            transform: translateY(-1px);
+        }
+
+        .pair-tab-btn.active {
+            border-color: rgba(37, 99, 235, 0.85);
+            background: linear-gradient(120deg, rgba(37, 99, 235, 0.2), rgba(212, 160, 23, 0.2));
+            color: var(--monster-night);
+            box-shadow: 0 8px 18px -14px rgba(37, 99, 235, 0.9);
+        }
+
+        body[data-theme='dark'] .pair-tabs-shell {
+            background: rgba(11, 26, 51, 0.72);
+            border-color: rgba(91, 135, 215, 0.4);
+        }
+
+        body[data-theme='dark'] .pair-tab-btn {
+            background: rgba(10, 30, 59, 0.86);
+            color: #dbeafe;
+            border-color: rgba(96, 165, 250, 0.38);
+        }
+
+        body[data-theme='dark'] .pair-tab-btn.active {
+            color: #f8fafc;
+            border-color: rgba(125, 211, 252, 0.95);
+            background: linear-gradient(125deg, rgba(30, 64, 175, 0.45), rgba(161, 98, 7, 0.44));
+        }
+
+        .stat-card {
+            border: 1px solid var(--monster-border);
+            border-radius: 16px;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.68);
+        }
+
+        .analysis-power-card {
+            border: 1px solid rgba(37, 99, 235, 0.2);
+            border-radius: 18px;
+            padding: 1.1rem;
+            background: linear-gradient(145deg, rgba(37, 99, 235, 0.12), rgba(212, 160, 23, 0.12));
+        }
+
+        .analysis-power-title {
+            font-size: 0.78rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--monster-text-muted);
+            margin-bottom: 0.35rem;
+        }
+
+        .analysis-power-value {
+            font-size: 1.5rem;
+            font-weight: 800;
+            line-height: 1.05;
+            color: var(--monster-night);
+        }
+
+        .analysis-chip {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 999px;
+            padding: 0.35rem 0.7rem;
+            font-size: 0.78rem;
+            font-weight: 800;
+            letter-spacing: 0.03em;
+            border: 1px solid transparent;
+            margin-right: 0.35rem;
+            margin-bottom: 0.35rem;
+        }
+
+        .analysis-chip.is-bull {
+            color: #065f46;
+            background: rgba(16, 185, 129, 0.2);
+            border-color: rgba(16, 185, 129, 0.45);
+        }
+
+        .analysis-chip.is-bear {
+            color: #9f1239;
+            background: rgba(244, 63, 94, 0.2);
+            border-color: rgba(244, 63, 94, 0.45);
+        }
+
+        .analysis-chip.is-neutral {
+            color: #0f172a;
+            background: rgba(148, 163, 184, 0.25);
+            border-color: rgba(100, 116, 139, 0.32);
+        }
+
+        body[data-theme='dark'] .analysis-power-card {
+            border-color: rgba(125, 164, 224, 0.35);
+            background: linear-gradient(145deg, rgba(21, 50, 88, 0.82), rgba(52, 42, 20, 0.72));
+        }
+
+        body[data-theme='dark'] .analysis-chip {
+            color: #f8fbff;
+            border-color: rgba(186, 211, 247, 0.45);
+            box-shadow: 0 2px 8px rgba(2, 6, 23, 0.28);
+        }
+
+        body[data-theme='dark'] .analysis-chip.is-bull {
+            color: #d1fae5;
+            background: linear-gradient(135deg, rgba(5, 150, 105, 0.42), rgba(6, 95, 70, 0.36));
+            border-color: rgba(110, 231, 183, 0.62);
+        }
+
+        body[data-theme='dark'] .analysis-chip.is-bear {
+            color: #ffe4e6;
+            background: linear-gradient(135deg, rgba(225, 29, 72, 0.44), rgba(159, 18, 57, 0.36));
+            border-color: rgba(253, 164, 175, 0.62);
+        }
+
+        body[data-theme='dark'] .analysis-chip.is-neutral {
+            color: #e2e8f0;
+            background: linear-gradient(135deg, rgba(100, 116, 139, 0.42), rgba(71, 85, 105, 0.34));
+            border-color: rgba(186, 211, 247, 0.45);
+        }
+
+        body[data-theme='dark'] #analysis-last-update {
+            color: #d1fae5;
+            background: linear-gradient(140deg, rgba(5, 150, 105, 0.36), rgba(4, 120, 87, 0.34));
+            border-color: rgba(110, 231, 183, 0.66);
+            text-shadow: 0 1px 0 rgba(0, 0, 0, 0.25);
+        }
+
+        body[data-theme='dark'] .stat-card,
+        body[data-theme='dark'] .report-card {
+            background: linear-gradient(160deg, rgba(19, 37, 64, 0.92), rgba(12, 27, 48, 0.9));
+            border-color: rgba(125, 164, 224, 0.35);
+        }
+
+        body[data-theme='dark'] .monitor-table td {
+            border-bottom-color: rgba(112, 147, 205, 0.35);
+            color: #e2e8f0;
+        }
+
+        body[data-theme='dark'] .monitor-table td:first-child {
+            color: rgba(178, 207, 247, 0.9);
+        }
+
+        .stat-label {
+            font-size: 0.76rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--monster-text-muted);
+            margin-bottom: 0.35rem;
+        }
+
+        .stat-value {
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: var(--monster-night);
+            transition: color 0.28s ease;
+        }
+
+        @keyframes mon-val-in {
+            from { opacity: 0.45; transform: translateY(-3px); }
+            to   { opacity: 1;    transform: translateY(0); }
+        }
+
+        .mon-updated {
+            animation: mon-val-in 0.22s ease;
+        }
+
+        .monitor-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        .monitor-table td {
+            border-bottom: 1px dashed var(--monster-border);
+            padding: 0.55rem 0.2rem;
+            vertical-align: top;
+            color: #1e293b;
+        }
+
+        .monitor-table td:first-child {
+            width: 42%;
+            color: #5a6b7d;
+            font-weight: 500;
+        }
+
+        .report-card {
+            border: 1px solid var(--monster-border);
+            border-radius: 16px;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.65);
+        }
+
+        .telemetry-table th {
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: var(--monster-text-muted);
+            border-bottom-width: 1px;
+            white-space: nowrap;
+        }
+
+        .telemetry-table {
+            --bs-table-bg: transparent;
+            --bs-table-accent-bg: transparent;
+            --bs-table-striped-bg: transparent;
+            --bs-table-hover-bg: rgba(37, 99, 235, 0.08);
+            --bs-table-color: #1e293b;
+            --bs-table-border-color: var(--monster-border);
+            background: transparent;
+        }
+
+        .telemetry-table thead th {
+            background: rgba(15, 23, 42, 0.04);
+            color: #334155;
+            font-weight: 600;
+        }
+
+        .telemetry-table td {
+            font-size: 0.86rem;
+            white-space: nowrap;
+            border-color: var(--monster-border);
+            color: #1e293b;
+        }
+
+        body[data-theme='dark'] .telemetry-table th,
+        body[data-theme='dark'] .telemetry-table td {
+            border-color: rgba(112, 147, 205, 0.25);
+            color: #e2e8f0;
+        }
+
+        body[data-theme='dark'] .telemetry-table {
+            --bs-table-bg: transparent;
+            --bs-table-accent-bg: transparent;
+            --bs-table-striped-bg: transparent;
+            --bs-table-hover-bg: rgba(125, 164, 224, 0.12);
+            --bs-table-color: #e2e8f0;
+            --bs-table-border-color: rgba(112, 147, 205, 0.25);
+        }
+
+        body[data-theme='dark'] .telemetry-table thead th {
+            background: rgba(123, 162, 221, 0.12);
+            color: #cbd5e1;
+            font-weight: 600;
+        }
+
+        .dashboard-table-responsive {
+            max-width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-gutter: stable both-edges;
+        }
+
+        .dashboard-table-responsive > .monitor-table,
+        .dashboard-table-responsive > .telemetry-table {
+            margin-bottom: 0;
+        }
+
+        .signal-reason-item {
+            padding: 0.75rem 1rem;
+            border-left: 3px solid #cbd5e1;
+            background: #f8fafc;
+            margin-bottom: 0.5rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            transition: all 0.2s ease;
+        }
+
+        .signal-reason-item.is-bull {
+            border-left-color: #10b981;
+            background: rgba(16, 185, 129, 0.08);
+        }
+
+        .signal-reason-item.is-bear {
+            border-left-color: #ef4444;
+            background: rgba(239, 68, 68, 0.08);
+        }
+
+        .signal-reason-item.is-neutral {
+            border-left-color: #8b5cf6;
+            background: rgba(139, 92, 246, 0.08);
+        }
+
+        .signal-reason-time {
+            display: block;
+            font-size: 0.75rem;
+            color: #94a3b8;
+            margin-bottom: 0.25rem;
+            font-weight: 500;
+        }
+
+        .signal-reason-text {
+            display: block;
+            color: #1e293b;
+            margin-bottom: 0.25rem;
+        }
+
+        .signal-reason-subtext {
+            display: block;
+            color: #64748b;
+            margin-bottom: 0.25rem;
+            font-size: 0.75rem;
+            line-height: 1.35;
+        }
+
+        .signal-reason-power {
+            display: inline-block;
+            font-size: 0.75rem;
+            padding: 0.125rem 0.5rem;
+            border-radius: 3px;
+            background: rgba(0, 0, 0, 0.08);
+            color: #475569;
+            font-weight: 500;
+        }
+
+        body[data-theme='dark'] .signal-reason-item {
+            background: rgba(30, 41, 59, 0.4);
+            border-left-color: #64748b;
+        }
+
+        body[data-theme='dark'] .signal-reason-item.is-bull {
+            border-left-color: #34d399;
+            background: rgba(52, 211, 153, 0.1);
+        }
+
+        body[data-theme='dark'] .signal-reason-item.is-bear {
+            border-left-color: #f87171;
+            background: rgba(248, 113, 113, 0.1);
+        }
+
+        body[data-theme='dark'] .signal-reason-item.is-neutral {
+            border-left-color: #a78bfa;
+            background: rgba(167, 139, 250, 0.1);
+        }
+
+        body[data-theme='dark'] .signal-reason-time {
+            color: #7c8fa3;
+        }
+
+        body[data-theme='dark'] .signal-reason-text {
+            color: #e2e8f0;
+        }
+
+        body[data-theme='dark'] .signal-reason-subtext {
+            color: #94a3b8;
+        }
+
+        body[data-theme='dark'] .signal-reason-power {
+            background: rgba(255, 255, 255, 0.1);
+            color: #cbd5e1;
+        }
+
+        .users-toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.65rem;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.75rem;
+        }
+
+        .users-pagination {
+            display: flex;
+            gap: 0.45rem;
+            align-items: center;
+            justify-content: flex-end;
+            margin-top: 0.75rem;
+        }
+
+        .modal-content {
+            border: 1px solid var(--monster-border);
+            border-radius: 20px;
+            background: var(--monster-surface);
+            backdrop-filter: blur(14px);
+            box-shadow: 0 24px 60px rgba(2, 6, 23, 0.35);
+        }
+
+        .modal {
+            z-index: 6200;
+        }
+
+        .modal-backdrop {
+            z-index: 6190;
+            background: rgba(2, 6, 23, 0.68);
+        }
+
+        .modal-header {
+            border-bottom: 1px solid var(--monster-border);
+            padding: 1.05rem 1.2rem;
+        }
+
+        .modal-body {
+            padding: 1.1rem 1.2rem 1.2rem;
+        }
+
+        .modal-header .h5,
+        .modal-header h3 {
+            letter-spacing: 0.01em;
+            font-weight: 800;
+        }
+
+        .modal-header .btn-close {
+            width: 2.05rem;
+            height: 2.05rem;
+            padding: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            border: 1px solid rgba(100, 116, 139, 0.3);
+            margin: 0 0 0 auto;
+            opacity: 1;
+            background-color: rgba(248, 250, 252, 0.86);
+            background-position: center;
+            background-size: 14px 14px;
+            background-repeat: no-repeat;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M3.5 3.5L12.5 12.5M12.5 3.5L3.5 12.5' stroke='%23475569' stroke-width='1.9' stroke-linecap='round'/%3E%3C/svg%3E");
+            box-shadow: none;
+            transition: transform 0.15s ease, opacity 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
+        }
+
+        .modal-header .btn-close:hover {
+            opacity: 1;
+            transform: translateY(-1px);
+            background-color: rgba(241, 245, 249, 0.98);
+            border-color: rgba(59, 130, 246, 0.46);
+        }
+
+        body[data-theme='dark'] .modal-content {
+            background: linear-gradient(180deg, rgba(9, 19, 36, 0.98), rgba(10, 21, 38, 0.95));
+            border-color: rgba(130, 163, 214, 0.3);
+            box-shadow: 0 26px 70px rgba(2, 6, 23, 0.7);
+        }
+
+        body[data-theme='dark'] .modal-header {
+            border-bottom-color: rgba(130, 163, 214, 0.28);
+        }
+
+        body[data-theme='dark'] .modal-header .btn-close {
+            border-color: rgba(147, 197, 253, 0.32);
+            background-color: rgba(15, 23, 42, 0.85);
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M3.5 3.5L12.5 12.5M12.5 3.5L3.5 12.5' stroke='%23dbeafe' stroke-width='1.9' stroke-linecap='round'/%3E%3C/svg%3E");
+            box-shadow: none;
+            opacity: 1;
+        }
+
+        body[data-theme='dark'] .modal-header .btn-close:hover {
+            background-color: rgba(30, 41, 59, 0.96);
+            border-color: rgba(96, 165, 250, 0.64);
+        }
+
+        #profile-modal .modal-dialog {
+            max-width: 560px;
+        }
+
+        #profile-modal .modal-body {
+            padding-top: 0.75rem;
+        }
+
+        #users-modal .modal-body {
+            display: grid;
+            gap: 0.9rem;
+        }
+
+        #account-modal .modal-dialog {
+            max-width: 620px;
+        }
+
+        #users-modal .modal-dialog {
+            max-width: 1120px;
+        }
+
+        #users-modal .table-slim thead th {
+            text-transform: uppercase;
+            font-size: 0.72rem;
+            letter-spacing: 0.08em;
+            color: var(--monster-text-muted);
+            border-bottom-width: 1px;
+        }
+
+        #users-modal .table-slim tbody tr {
+            transition: background-color 0.18s ease;
+        }
+
+        #users-modal .table-slim tbody tr:hover {
+            background: rgba(37, 99, 235, 0.08);
+        }
+
+        body[data-theme='dark'] #users-modal .table-slim tbody tr:hover {
+            background: rgba(59, 130, 246, 0.16);
+        }
+
+        #users-modal #users-form,
+        #profile-modal #profile-form,
+        #account-modal #account-form {
+            border: 1px solid rgba(148, 163, 184, 0.24);
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.5);
+            padding: 0.85rem;
+        }
+
+        body[data-theme='dark'] #users-modal #users-form,
+        body[data-theme='dark'] #profile-modal #profile-form,
+        body[data-theme='dark'] #account-modal #account-form {
+            border-color: rgba(130, 163, 214, 0.28);
+            background: rgba(15, 23, 42, 0.55);
+        }
+
+        .sticky-side {
+            position: sticky;
+            top: 1.25rem;
+        }
+
+        .radar-hero {
+            background: linear-gradient(135deg, rgba(17, 24, 39, 0.96), rgba(30, 41, 59, 0.95));
+            border-radius: 20px;
+            color: #f8fafc;
+            padding: 1.25rem;
+        }
+
+        .countdown {
+            font-size: clamp(1.8rem, 3vw, 2.6rem);
+            font-weight: 800;
+            line-height: 1;
+            letter-spacing: -0.04em;
+        }
+
+        .verdict-box {
+            border-radius: 20px;
+            padding: 1.25rem;
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(251, 146, 60, 0.15));
+            border: 2px solid rgba(59, 130, 246, 0.3);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .verdict-box::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #3B82F6, #FB923C, #F97316);
+        }
+
+        .verdict-box:hover {
+            border-color: rgba(59, 130, 246, 0.5);
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.22), rgba(251, 146, 60, 0.22));
+            box-shadow: 0 8px 24px rgba(59, 130, 246, 0.15);
+        }
+
+        .verdict-label {
+            font-size: 0.75rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: rgba(59, 130, 246, 0.9);
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .verdict-value {
+            font-size: 1.75rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #3B82F6, #FB923C);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.75rem;
+            letter-spacing: -0.5px;
+        }
+
+        .verdict-description {
+            font-size: 0.9rem;
+            line-height: 1.5;
+            color: rgba(241, 245, 249, 0.8);
+        }
+
+        .verdict-data-line {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: rgba(226, 232, 240, 0.95);
+            margin-bottom: 0.75rem;
+            line-height: 1.6;
+            letter-spacing: 0.3px;
+        }
+
+        .news-item {
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            border-left: 3px solid rgba(100, 200, 255, 0.4);
+            border-radius: 18px;
+            padding: 0.95rem 1rem;
+            background: rgba(255, 255, 255, 0.7);
+            transition: all 0.3s ease;
+        }
+
+        .news-item-next {
+            border-left: 4px solid rgba(59, 180, 255, 0.6);
+            background: linear-gradient(135deg, rgba(100, 200, 255, 0.08), rgba(255, 255, 255, 0.7));
+        }
+
+        .news-item:hover {
+            background: rgba(255, 255, 255, 0.9);
+            border-color: rgba(15, 23, 42, 0.12);
+            border-left-color: rgba(59, 180, 255, 0.7);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .news-item-next:hover {
+            border-left-color: rgba(100, 220, 255, 0.8);
+            background: linear-gradient(135deg, rgba(100, 200, 255, 0.15), rgba(255, 255, 255, 0.85));
+            box-shadow: 0 4px 16px rgba(59, 180, 255, 0.2);
+        }
+
+        .news-data-item {
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 8px;
+            padding: 0.55rem 0.75rem;
+            min-width: fit-content;
+        }
+
+        .news-metric-label {
+            font-size: 0.72rem;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            font-weight: 700;
+            margin-bottom: 0.1rem;
+        }
+
+        .news-metric-label-actual { color: #f87171; }
+        .news-metric-label-forecast { color: #facc15; }
+        .news-metric-label-previous { color: #4ade80; }
+
+        .news-metric-value {
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: rgba(226, 232, 240, 0.95);
+            line-height: 1.2;
+        }
+
+        .news-history-card {
+            border-left-color: rgba(130, 170, 255, 0.45);
+            background: linear-gradient(145deg, rgba(15, 23, 42, 0.58), rgba(30, 41, 59, 0.44));
+        }
+
+        .news-impact-badge {
+            border: 1px solid rgba(148, 163, 184, 0.35);
+            background: rgba(15, 23, 42, 0.45);
+            color: #cbd5e1;
+            border-radius: 999px;
+            padding: 0.2rem 0.55rem;
+            font-size: 0.68rem;
+            letter-spacing: 0.08em;
+            font-weight: 700;
+        }
+
+        .news-history-note {
+            color: rgba(148, 163, 184, 0.88);
+            font-size: 0.82rem;
+            line-height: 1.45;
+        }
+
+        .hero-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.55rem;
+            align-items: center;
+            padding: 0.5rem;
+            border-radius: 14px;
+            background: rgba(148, 163, 184, 0.08);
+            border: 1px solid rgba(148, 163, 184, 0.24);
+        }
+
+        body[data-theme='dark'] .hero-actions {
+            background: rgba(30, 41, 59, 0.44);
+            border-color: rgba(130, 163, 214, 0.32);
+        }
+
+        .hero-actions form {
+            display: inline-flex;
+            margin: 0;
+        }
+
+        .hero-action-btn {
+            border-radius: 999px;
+            padding: 0.45rem 1rem;
+            font-weight: 700;
+            border-width: 1px;
+            transition: transform 0.18s ease, box-shadow 0.18s ease;
+        }
+
+        .hero-action-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 18px rgba(15, 23, 42, 0.16);
+        }
+
+        .hero-action-btn.is-neutral {
+            border-color: rgba(148, 163, 184, 0.5);
+            color: var(--monster-night);
+            background: rgba(255, 255, 255, 0.82);
+        }
+
+        .hero-action-btn.is-primary {
+            border-color: rgba(37, 99, 235, 0.8);
+            color: #1d4ed8;
+            background: rgba(219, 234, 254, 0.86);
+        }
+
+        .hero-action-btn.is-success {
+            border-color: rgba(22, 163, 74, 0.75);
+            color: #047857;
+            background: rgba(209, 250, 229, 0.86);
+        }
+
+        .hero-action-btn.is-warn {
+            border-color: rgba(217, 119, 6, 0.78);
+            color: #b45309;
+            background: rgba(255, 237, 213, 0.9);
+        }
+
+        body[data-theme='dark'] .hero-action-btn.is-neutral {
+            border-color: rgba(148, 163, 184, 0.55);
+            color: #e2e8f0;
+            background: rgba(30, 41, 59, 0.68);
+        }
+
+        body[data-theme='dark'] .hero-action-btn.is-primary {
+            border-color: rgba(96, 165, 250, 0.85);
+            color: #bfdbfe;
+            background: rgba(30, 64, 175, 0.45);
+        }
+
+        body[data-theme='dark'] .hero-action-btn.is-success {
+            border-color: rgba(52, 211, 153, 0.85);
+            color: #6ee7b7;
+            background: rgba(6, 95, 70, 0.45);
+        }
+
+        body[data-theme='dark'] .hero-action-btn.is-warn {
+            border-color: rgba(251, 191, 36, 0.85);
+            color: #fde68a;
+            background: rgba(146, 64, 14, 0.5);
+        }
+
+        body[data-theme='dark'] .hero-action-btn:hover {
+            box-shadow: 0 12px 22px rgba(2, 6, 23, 0.4);
+        }
+
+        .save-bar {
+            border-top: 1px solid rgba(15, 23, 42, 0.08);
+            margin-top: 1.5rem;
+            padding-top: 1rem;
+        }
+
+        body[data-theme='dark'] .save-bar {
+            border-top-color: rgba(130, 163, 214, 0.2);
+        }
+
+        body:not([data-theme='dark']) .save-bar {
+            border-top-color: #e2e8f0;
+        }
+
+        body:not([data-theme='dark']) .hero-title {
+            color: #0f172a;
+        }
+
+        .disabled-block {
+            opacity: 0.62;
+        }
+
+        .pane-license-locked .section-card,
+        .pane-license-locked .sub-group,
+        .pane-license-locked .switch-tile,
+        .pane-license-locked .meta-card,
+        .pane-license-locked .save-bar,
+        .pane-license-locked .field-stack,
+        .pane-license-locked .radar-card {
+            opacity: 0.58;
+        }
+
+        .pane-license-locked #license-lock-msg-settings,
+        .pane-license-locked #license-lock-msg-logic {
+            opacity: 1;
+        }
+
+        .license-warning-banner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.85rem;
+            padding: 0.95rem 1rem;
+            border-radius: 16px;
+            border: 1px solid rgba(239, 68, 68, 0.28);
+            background: linear-gradient(135deg, rgba(255, 237, 213, 0.92), rgba(254, 242, 242, 0.94));
+            box-shadow: 0 12px 24px rgba(127, 29, 29, 0.08);
+        }
+
+        .license-warning-copy {
+            min-width: 0;
+        }
+
+        .license-warning-title {
+            font-size: 0.94rem;
+            font-weight: 800;
+            color: #991b1b;
+            line-height: 1.25;
+            margin-bottom: 0.2rem;
+        }
+
+        .license-warning-text {
+            font-size: 0.82rem;
+            color: #7f1d1d;
+            line-height: 1.45;
+        }
+
+        .license-warning-action {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            white-space: nowrap;
+            min-height: 40px;
+            padding: 0.55rem 0.95rem;
+            border-radius: 999px;
+            border: 1px solid rgba(220, 38, 38, 0.22);
+            background: linear-gradient(135deg, #dc2626, #f97316);
+            color: #fffaf5;
+            text-decoration: none;
+            font-size: 0.8rem;
+            font-weight: 800;
+            box-shadow: 0 12px 18px rgba(220, 38, 38, 0.18);
+        }
+
+        .license-warning-action:hover {
+            color: #ffffff;
+            text-decoration: none;
+            transform: translateY(-1px);
+        }
+
+        body[data-theme='dark'] .license-warning-banner {
+            border-color: rgba(248, 113, 113, 0.28);
+            background: linear-gradient(135deg, rgba(69, 10, 10, 0.9), rgba(91, 33, 17, 0.88));
+            box-shadow: 0 14px 28px rgba(2, 6, 23, 0.32);
+        }
+
+        body[data-theme='dark'] .license-warning-title {
+            color: #fecaca;
+        }
+
+        body[data-theme='dark'] .license-warning-text {
+            color: #fca5a5;
+        }
+
+        @media (max-width: 767.98px) {
+            .license-warning-banner {
+                flex-direction: column;
+                align-items: stretch;
+                padding: 0.85rem 0.9rem;
+            }
+
+            .license-warning-action {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 1199.98px) {
+            .topbar-shell {
+                padding: 0.75rem !important;
+            }
+
+            .dashboard-topbar {
+                display: grid;
+                gap: 0.65rem;
+                grid-template-columns: 1fr;
+            }
+
+            .topbar-main,
+            .topbar-controls,
+            .topbar-brand {
+                width: 100%;
+                min-width: 0;
+            }
+
+            .topbar-controls {
+                width: 100%;
+                margin-left: 0;
+                display: grid;
+                grid-template-columns: 1fr;
+                gap: 0.6rem;
+                align-items: stretch;
+                justify-items: stretch;
+            }
+
+            .topbar-meta,
+            .topbar-account-tools,
+            .topbar-actions {
+                margin: 0;
+            }
+
+            .topbar-meta {
+                width: 100%;
+                grid-column: 1;
+                flex-wrap: wrap;
+                justify-content: flex-start;
+            }
+
+            .topbar-account-tools {
+                display: grid;
+                grid-template-columns: 1fr;
+                align-items: stretch;
+                gap: 0.32rem;
+                width: 100%;
+                grid-column: 1;
+            }
+
+            .topbar-account-label {
+                margin-bottom: 0;
+                min-height: 0;
+                display: block;
+            }
+
+            .account-picker {
+                min-width: 0;
+                width: 100%;
+            }
+
+            .account-picker-menu {
+                min-width: 100%;
+                width: 100%;
+            }
+
+            .topbar-actions {
+                display: grid;
+                grid-template-columns: repeat(4, minmax(0, 1fr));
+                align-items: stretch;
+                justify-content: flex-start;
+                flex-wrap: wrap;
+                gap: 0.45rem;
+                width: 100%;
+                grid-column: 1;
+            }
+
+            .topbar-actions .theme-toggle,
+            .topbar-actions > .hero-action-btn:not(.theme-toggle),
+            .topbar-actions > .dropdown,
+            .topbar-actions .topbar-menu-btn {
+                width: 100%;
+                min-width: 0;
+            }
+
+            .monitor-toolbar {
+                width: 100%;
+                justify-content: flex-start;
+            }
+
+            .monitor-bulk-hint {
+                text-align: left;
+            }
+        }
+
+        @media (max-width: 991.98px) {
+            body {
+                padding-bottom: calc(5.9rem + env(safe-area-inset-bottom));
+                padding-bottom: calc(5.9rem + constant(safe-area-inset-bottom));
+            }
+
+            .sticky-side {
+                position: static;
+            }
+
+            .topbar-main,
+            .topbar-controls {
+                width: 100%;
+            }
+
+            .topbar-controls {
+                grid-template-columns: 1fr;
+                align-items: stretch;
+                gap: 0.5rem;
+            }
+
+            .topbar-meta,
+            .topbar-account-tools,
+            .topbar-actions {
+                grid-column: 1;
+                width: 100%;
+            }
+
+            .topbar-actions {
+                grid-template-columns: repeat(4, minmax(0, 1fr));
+                justify-content: stretch;
+            }
+
+            .workspace-nav {
+                position: fixed !important;
+                left: 0.5rem;
+                right: 0.5rem;
+                width: auto;
+                max-width: 860px;
+                margin-inline: auto !important;
+                bottom: max(0.45rem, calc(0.45rem + env(safe-area-inset-bottom)));
+                z-index: 6100;
+                margin: 0 !important;
+                border-radius: 18px;
+                border-color: rgba(59, 130, 246, 0.4);
+                background: rgba(255, 255, 255, 0.93);
+                box-shadow: 0 14px 32px rgba(15, 23, 42, 0.24);
+                backdrop-filter: blur(12px);
+                -webkit-backdrop-filter: blur(12px);
+                padding: 0.35rem;
+                backface-visibility: hidden;
+                transform: translateZ(0);
+                will-change: transform;
+            }
+
+            body[data-theme='dark'] .workspace-nav {
+                background: rgba(8, 16, 31, 0.92);
+                border-color: rgba(130, 163, 214, 0.35);
+                box-shadow: 0 16px 36px rgba(2, 6, 23, 0.5);
+            }
+
+            @supports (-webkit-touch-callout: none) {
+                .workspace-nav {
+                    bottom: calc(0.45rem + env(safe-area-inset-bottom));
+                    width: calc(100% - 1rem);
+                    max-width: 860px;
+                }
+            }
+
+            #workspace-tabs {
+                display: grid;
+                grid-template-columns: repeat(5, minmax(0, 1fr));
+                gap: 0.25rem;
+            }
+
+            #workspace-tabs .nav-item {
+                width: 100%;
+            }
+
+            #workspace-tabs .workspace-tab-btn {
+                width: 100%;
+                min-height: 3.35rem;
+                padding: 0.32rem 0.2rem;
+                border-radius: 12px;
+                flex-direction: column;
+                gap: 0.18rem;
+            }
+
+            #workspace-tabs .workspace-tab-btn.active {
+                background: linear-gradient(180deg, rgba(37, 99, 235, 0.24), rgba(37, 99, 235, 0.08));
+                box-shadow: 0 8px 16px rgba(37, 99, 235, 0.28), inset 0 0 0 1px rgba(37, 99, 235, 0.4);
+                color: #1d4ed8;
+                transform: translateY(-1px);
+            }
+
+            #workspace-tabs .workspace-tab-btn.active::after {
+                content: '';
+                position: absolute;
+                left: 50%;
+                bottom: 0.2rem;
+                width: 16px;
+                height: 3px;
+                border-radius: 999px;
+                transform: translateX(-50%);
+                background: linear-gradient(90deg, #60a5fa, #f59e0b);
+            }
+
+            #workspace-tabs .workspace-tab-btn.active .workspace-tab-icon {
+                transform: translateY(-1px) scale(1.08);
+                opacity: 1;
+            }
+
+            body[data-theme='dark'] #workspace-tabs .workspace-tab-btn.active {
+                background: linear-gradient(180deg, rgba(59, 130, 246, 0.38), rgba(30, 64, 175, 0.16));
+                box-shadow: 0 8px 18px rgba(15, 23, 42, 0.6), inset 0 0 0 1px rgba(147, 197, 253, 0.45);
+                color: #dbeafe;
+            }
+
+            #workspace-tabs .workspace-tab-label {
+                font-size: 0.62rem;
+                font-weight: 700;
+                letter-spacing: 0.01em;
+            }
+
+            #workspace-tabs .workspace-tab-icon {
+                width: 1.05rem;
+                height: 1.05rem;
+                transition: transform 0.2s ease, opacity 0.2s ease;
+            }
+
+            .settings-card,
+            .section-card {
+                padding: 1rem !important;
+            }
+
+            .report-card,
+            .stat-card,
+            .analysis-power-card {
+                padding: 0.85rem 0.95rem;
+                border-radius: 14px;
+            }
+
+            .stat-label,
+            .monitor-table,
+            .telemetry-table th,
+            .telemetry-table td {
+                font-size: 0.8rem;
+            }
+
+            .stat-value,
+            .analysis-power-value {
+                font-size: 1.08rem;
+            }
+
+            .analysis-chip {
+                padding: 0.28rem 0.55rem;
+                font-size: 0.72rem;
+            }
+
+            .monitor-table td {
+                padding: 0.42rem 0.15rem;
+            }
+
+            .monitor-table td:first-child {
+                width: 48%;
+            }
+
+            #workspace-pane-monitoring .row,
+            #workspace-pane-analysis .row,
+            #workspace-pane-reports .row {
+                --bs-gutter-x: 0.75rem;
+                --bs-gutter-y: 0.75rem;
+            }
+        }
+
+        @media (max-width: 767.98px) {
+            body {
+                padding-bottom: calc(5.95rem + env(safe-area-inset-bottom));
+                padding-bottom: calc(5.95rem + constant(safe-area-inset-bottom));
+            }
+
+            .topbar-shell {
+                padding: 0.65rem !important;
+                border-radius: 20px;
+            }
+
+            .top-nav-title {
+                font-size: clamp(1.15rem, 4.6vw, 1.4rem);
+            }
+
+            .topbar-main,
+            .topbar-controls {
+                align-items: stretch;
+            }
+
+            .dashboard-topbar {
+                gap: 0.55rem;
+            }
+
+            .topbar-meta {
+                margin-left: 0;
+                gap: 0.32rem;
+                justify-content: flex-start;
+            }
+
+            .topbar-license-card {
+                width: 100%;
+                min-width: 0;
+            }
+
+            .top-account-select {
+                min-width: 100%;
+                max-width: 100%;
+            }
+
+            .topbar-brand,
+            .topbar-main,
+            .topbar-controls,
+            .topbar-meta,
+            .topbar-account-tools,
+            .topbar-actions {
+                width: 100%;
+            }
+
+            .topbar-account-tools,
+            .topbar-actions {
+                justify-content: flex-start;
+            }
+
+            .topbar-account-tools {
+                grid-template-columns: 1fr;
+                gap: 0.3rem;
+            }
+
+            .topbar-account-label {
+                font-size: 0.68rem;
+                min-height: 0;
+                display: block;
+            }
+
+            .topbar-actions {
+                margin-left: 0;
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                align-items: stretch;
+                gap: 0.35rem;
+            }
+
+            .topbar-actions .theme-toggle {
+                justify-self: stretch;
+                width: 100%;
+            }
+
+            .topbar-actions > .hero-action-btn:not(.theme-toggle),
+            .topbar-actions > .dropdown {
+                width: 100%;
+            }
+
+            .topbar-actions .topbar-menu-btn {
+                width: 100%;
+            }
+
+            .topbar-actions .hero-action-btn,
+            .topbar-actions .topbar-menu-btn,
+            .topbar-actions .theme-toggle {
+                min-height: 38px;
+                height: 38px;
+                padding-inline: 0.42rem;
+                font-size: 0.78rem;
+            }
+
+            .topbar-license-card {
+                min-height: 0;
+                padding: 0.7rem 0.8rem;
+            }
+
+            .topbar-license-main {
+                font-size: 0.88rem;
+            }
+
+            .topbar-license-sub {
+                font-size: 0.74rem;
+            }
+
+            .account-picker,
+            .account-picker-menu {
+                min-width: 100%;
+                width: 100%;
+            }
+
+            .account-picker-toggle {
+                min-height: 40px;
+                height: 40px;
+                font-size: 0.84rem;
+            }
+
+            .monitor-toolbar .btn,
+            .monitor-toolbar #btn-bot-toggle {
+                min-height: 32px;
+                font-size: 0.75rem;
+                padding: 0.32rem 0.55rem;
+            }
+
+            .hero-actions {
+                width: 100%;
+                padding: 0.45rem;
+            }
+
+            #workspace-tabs .workspace-tab-label {
+                display: none;
+            }
+
+            #workspace-tabs .workspace-tab-icon {
+                width: 1.2rem;
+                height: 1.2rem;
+            }
+
+            .hero-actions .hero-action-btn,
+            .hero-actions form {
+                flex: 1 1 calc(50% - 0.35rem);
+            }
+
+            .hero-actions form .hero-action-btn {
+                width: 100%;
+            }
+
+            .settings-card,
+            .section-card {
+                padding: 0.85rem !important;
+            }
+
+            .report-card,
+            .stat-card,
+            .analysis-power-card {
+                padding: 0.75rem 0.8rem;
+            }
+
+            .eyebrow {
+                font-size: 0.72rem;
+            }
+
+            .h4,
+            h2.h4 {
+                font-size: 1.08rem;
+            }
+
+            .stat-label,
+            .monitor-table,
+            .telemetry-table th,
+            .telemetry-table td {
+                font-size: 0.76rem;
+            }
+
+            .stat-value,
+            .analysis-power-value {
+                font-size: 1rem;
+            }
+
+            .monitor-table td {
+                padding: 0.35rem 0.1rem;
+            }
+
+            .monitor-table td:first-child {
+                width: 46%;
+            }
+
+            .telemetry-table th,
+            .telemetry-table td {
+                padding: 0.42rem 0.3rem;
+            }
+
+            .table-responsive {
+                border-radius: 0.75rem;
+            }
+
+            #profile-modal .modal-dialog {
+                margin: 0.6rem;
+            }
+
+            #profile-modal #btn-profile-save,
+            #users-modal #btn-user-save,
+            #users-modal #btn-user-reset {
+                width: 100%;
+            }
+
+            #users-modal .users-toolbar {
+                align-items: stretch;
+            }
+
+            #users-modal #users-search {
+                max-width: none !important;
+            }
+
+            #users-modal .users-pagination {
+                justify-content: space-between;
+            }
+
+            .modal-header {
+                padding: 0.9rem;
+            }
+
+            .modal-body {
+                padding: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+@php
+    $newsPayload = $news->map(fn ($item) => [
+        'title' => $item->title,
+        'impact' => $item->impact,
+        'event_at' => optional($item->event_at)->toIso8601String(),
+        'event_clock' => optional($item->event_at)?->timezone('Asia/Jakarta')?->format('H:i'),
+        'actual' => (string) data_get($item->raw_payload, 'actual', '-'),
+        'forecast' => (string) data_get($item->raw_payload, 'forecast', '-'),
+        'previous' => (string) data_get($item->raw_payload, 'previous', '-'),
+        'ai_analysis' => $item->ai_analysis,
+        'ai_verdict' => $item->ai_verdict,
+    ])->values();
+@endphp
+
+<div class="container-fluid px-3 px-lg-4 py-4 py-lg-5" style="max-width:1600px; margin-inline:auto;">
+    <div class="hero-shell topbar-shell mb-4 mb-lg-4">
+        <div class="dashboard-topbar">
+            <div class="topbar-main">
+                <div class="topbar-brand">
+                    <div class="eyebrow mb-1">EA MONSTER CLOUD SERVICE</div>
+                    <div class="top-nav-title">Dashboard Patch {{ strtoupper((string) ($dashboardPatch ?? 'v209')) }}</div>
+                </div>
+            </div>
+
+            <div class="topbar-controls">
+                <div class="topbar-meta">
+                    <div class="topbar-license-card" id="topbar-license-card" data-license-state="inactive">
+                        <div class="topbar-license-label">Status Lisensi</div>
+                        <div class="topbar-license-main" id="topbar-license-status">Belum dipilih</div>
+                        <div class="topbar-license-sub" id="topbar-license-remaining">Sisa: --:--:--</div>
+                    </div>
+                </div>
+                <div class="topbar-account-tools">
+                    <label class="topbar-account-label mb-0">Pilih Account MT5</label>
+                    <div class="dropdown account-picker">
+                        <button id="account-picker-toggle" class="btn account-picker-toggle dropdown-toggle" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+                            Pilih account
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-end account-picker-menu">
+                            <input id="account-search" type="text" class="form-control account-picker-search" placeholder="Cari account / alias / user" aria-label="Cari account">
+                            <div id="account-picker-options" class="account-picker-options"></div>
+                            <div class="account-picker-footer">
+                                <button id="btn-open-account-modal" type="button" class="btn btn-sm btn-outline-primary w-100">+ Tambah account baru</button>
+                            </div>
+                        </div>
+                    </div>
+                    <select id="account_id" class="form-select strategy-select top-account-select d-none">
+                        @forelse($accounts as $account)
+                            <option value="{{ $account->account_id }}">{{ $account->account_id }}</option>
+                        @empty
+                            <option value="">Belum ada account terdaftar</option>
+                        @endforelse
+                    </select>
+                </div>
+
+                <div class="topbar-actions">
+                    <button id="theme-toggle" type="button" class="btn hero-action-btn is-neutral theme-toggle" title="Toggle theme" aria-label="Toggle theme">&#9790;</button>
+                    @if($isAdmin)
+                        <button id="btn-account-alias" type="button" class="btn hero-action-btn is-neutral" data-bs-toggle="modal" data-bs-target="#account-alias-modal" title="Kelola alias account">Alias</button>
+                    @endif
+                    <button class="btn hero-action-btn is-primary" type="button" data-bs-toggle="modal" data-bs-target="#profile-modal">Profile</button>
+
+                    <div class="dropdown">
+                        <button class="btn hero-action-btn is-neutral topbar-menu-btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Menu
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            @if($isAdmin)
+                                <li><button class="dropdown-item" type="button" data-bs-toggle="modal" data-bs-target="#users-modal">User Management</button></li>
+                                <li><a class="dropdown-item" href="{{ route('licenses.admin.page') }}">Admin Lisensi</a></li>
+                            @else
+                                <li><a class="dropdown-item" href="{{ route('licenses.billing.page') }}">Billing Lisensi</a></li>
+                            @endif
+                            <li><hr class="dropdown-divider"></li>
+                            @if (Route::has('logout'))
+                                <li>
+                                    <form action="{{ route('logout') }}" method="post" class="topbar-action-form">
+                                        @csrf
+                                        <button class="dropdown-item text-danger" type="submit">Logout</button>
+                                    </form>
+                                </li>
+                            @endif
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if($isAdmin)
+    <div class="modal fade" id="account-alias-modal" tabindex="-1" aria-labelledby="account-alias-title" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div>
+                        <div class="eyebrow mb-1">Admin Label</div>
+                        <h3 id="account-alias-title" class="h5 mb-0">Alias Account</h3>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="account-alias-form" class="d-grid gap-3">
+                        <div>
+                            <label for="alias_account_id" class="form-label">Account ID</label>
+                            <input id="alias_account_id" class="form-control" readonly>
+                        </div>
+                        <div>
+                            <label for="alias_account_name" class="form-label">Alias (khusus tampilan admin)</label>
+                            <input id="alias_account_name" class="form-control" maxlength="50" placeholder="Contoh: Akun Haji / Client A">
+                            <div class="form-text">Alias hanya tampil di dashboard admin sebagai pembeda account.</div>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button id="btn-alias-save" type="submit" class="btn btn-primary">Simpan Alias</button>
+                            <button id="btn-alias-clear" type="button" class="btn btn-outline-danger">Hapus Alias</button>
+                        </div>
+                        <div id="account-alias-msg" class="small text-secondary">Atur alias untuk account aktif.</div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
+
+    <div class="workspace-nav mb-4 mb-lg-5">
+        <ul class="nav nav-pills gap-2" id="workspace-tabs">
+            <li class="nav-item">
+                <button type="button" class="nav-link active workspace-tab-btn" data-workspace-tab="settings" aria-label="Settings">
+                    <span class="workspace-tab-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="3"></circle>
+                            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h0A1.65 1.65 0 0 0 10 3.09V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h0a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                        </svg>
+                    </span>
+                    <span class="workspace-tab-label">Settings</span>
+                </button>
+            </li>
+            <li class="nav-item">
+                <button type="button" class="nav-link workspace-tab-btn" data-workspace-tab="logic" aria-label="Logic Lainnya">
+                    <span class="workspace-tab-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="4" y1="21" x2="4" y2="14"></line>
+                            <line x1="4" y1="10" x2="4" y2="3"></line>
+                            <line x1="12" y1="21" x2="12" y2="12"></line>
+                            <line x1="12" y1="8" x2="12" y2="3"></line>
+                            <line x1="20" y1="21" x2="20" y2="16"></line>
+                            <line x1="20" y1="12" x2="20" y2="3"></line>
+                            <line x1="1" y1="14" x2="7" y2="14"></line>
+                            <line x1="9" y1="8" x2="15" y2="8"></line>
+                            <line x1="17" y1="12" x2="23" y2="12"></line>
+                        </svg>
+                    </span>
+                    <span class="workspace-tab-label">Logic</span>
+                </button>
+            </li>
+            <li class="nav-item">
+                <button type="button" class="nav-link workspace-tab-btn" data-workspace-tab="monitoring" aria-label="Monitoring">
+                    <span class="workspace-tab-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="4" width="18" height="12" rx="2"></rect>
+                            <line x1="8" y1="20" x2="16" y2="20"></line>
+                            <line x1="12" y1="16" x2="12" y2="20"></line>
+                        </svg>
+                    </span>
+                    <span class="workspace-tab-label">Monitor</span>
+                </button>
+            </li>
+            <li class="nav-item">
+                <button type="button" class="nav-link workspace-tab-btn" data-workspace-tab="analysis" aria-label="Analysis">
+                    <span class="workspace-tab-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M3 3v18h18"></path>
+                            <path d="M7 15l4-4 3 3 5-6"></path>
+                        </svg>
+                    </span>
+                    <span class="workspace-tab-label">Analysis</span>
+                </button>
+            </li>
+            <li class="nav-item">
+                <button type="button" class="nav-link workspace-tab-btn" data-workspace-tab="reports" aria-label="Report">
+                    <span class="workspace-tab-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                            <line x1="8" y1="13" x2="16" y2="13"></line>
+                            <line x1="8" y1="17" x2="13" y2="17"></line>
+                        </svg>
+                    </span>
+                    <span class="workspace-tab-label">Report</span>
+                </button>
+            </li>
+        </ul>
+    </div>
+
+    <section id="workspace-pane-settings" class="workspace-pane is-active">
+    <div class="row g-4 g-xl-5 align-items-start">
+        <div class="col-xl-8">
+            <div class="settings-card p-4 p-lg-5">
+                <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
+                    <div>
+                        <div class="eyebrow mb-2">Component 1</div>
+                        <h1 class="h3 mb-1">Choose Active Strategy Selector</h1>
+                        <p class="text-secondary mb-0">Hanya konfigurasi milik strategi aktif yang terbuka. Yang lain otomatis disembunyikan.</p>
+                    </div>
+                    <div class="text-secondary small">Semua perubahan disimpan per account MT5.</div>
+                </div>
+
+                <div class="pair-tabs-shell mb-4">
+                    <div class="small text-secondary fw-semibold mb-2">Pair Terhubung</div>
+                    <div id="pair-tabs-settings" class="pair-tabs"></div>
+                    <div id="pair-tabs-note" class="small text-secondary mt-2">Tab pair menyesuaikan pair yang terhubung pada account aktif.</div>
+                </div>
+
+                <div id="license-lock-msg-settings" class="mb-4"></div>
+
+                <div class="section-card mb-4">
+                    <div class="row g-3 align-items-start form-row-compact core-exec-grid">
+                        <div class="col-lg-6">
+                            <div class="field-stack">
+                            <label for="active_strategy" class="form-label">Strategi Utama Aktif</label>
+                            <select id="active_strategy" class="form-select strategy-select">
+                                <option value="0">GRID SPAM</option>
+                                <option value="1">ZERO GAP</option>
+                                <option value="2">PURE MARTINGALE</option>
+                            </select>
+                            <div class="form-text">Dropdown ini mengontrol panel mana yang muncul di bawah.</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-lg-3">
+                            <div class="field-stack">
+                            <label for="base_lot" class="form-label">Base Lot</label>
+                            <input id="base_lot" type="number" step="0.01" min="0.01" class="form-control">
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-lg-3">
+                            <div class="field-stack">
+                            <label for="timeframe_logic" class="form-label">Timeframe Logic</label>
+                            <select id="timeframe_logic" class="form-select">
+                                <option value="1">M1</option>
+                                <option value="5">M5</option>
+                                <option value="15">M15</option>
+                                <option value="30">M30</option>
+                                <option value="60">H1</option>
+                                <option value="240">H4</option>
+                                <option value="1440">D1</option>
+                            </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-lg-3">
+                            <div class="field-stack">
+                            <label for="max_drawdown_pct" class="form-label"><span class="label-text-nowrap">Max Drawdown (%)</span>
+                                <span class="badge bg-danger auto-close-badge" title="Saat drawdown mencapai nilai ini, EA akan otomatis berhenti masuk order baru (guard_status → DD_STOP)">AUTO-CLOSE</span>
+                            </label>
+                            <input id="max_drawdown_pct" type="number" step="0.1" min="0" class="form-control" placeholder="0 = nonaktif">
+                            <div class="form-text inline-help">0 = nonaktif. Contoh: 10 = stop saat DD 10%</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-lg-3">
+                            <div class="field-stack">
+                            <label for="dd_breach_hits_required" class="form-label">DD Debounce (Heartbeat)</label>
+                            <input id="dd_breach_hits_required" type="number" step="1" min="1" max="120" class="form-control" placeholder="15">
+                            <div class="form-text inline-help">Semakin besar, auto-stop DD makin tidak sensitif spike sesaat.</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-lg-3">
+                            <div class="field-stack">
+                            <label for="max_drawdown_stop_delay" class="form-label">DD Stop Delay (detik)</label>
+                            <input id="max_drawdown_stop_delay" type="number" step="1" min="0" max="3600" class="form-control" placeholder="0">
+                            <div class="form-text inline-help">0 = langsung stop. Misal 300 = tunggu 5 menit sebelum stop.</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-lg-3">
+                            <div class="field-stack">
+                            <label for="daily_profit_target" class="form-label">Daily Profit Target</label>
+                            <input id="daily_profit_target" type="number" step="0.01" min="0" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="panel-grid" class="section-card mb-4" data-strategy="0">
+                    <div class="section-title">Component 2: Strategi Layering Grid Spam</div>
+                    <div class="section-copy">Fokus pada layering cepat, kontrol akumulasi lot, dan close logic per basket maupun single-layer profit.</div>
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label for="grid_max_layers" class="form-label">Max Layers</label>
+                            <input id="grid_max_layers" class="form-control" type="number" min="1">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="grid_max_accumulative_lot" class="form-label">Max Accumulative Lot</label>
+                            <input id="grid_max_accumulative_lot" class="form-control" type="number" step="0.01" min="0.01">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="grid_mode" class="form-label">Mode Jarak Jaring</label>
+                            <select id="grid_mode" class="form-select">
+                                <option value="0">Fix Points</option>
+                                <option value="1">ATR Dinamis</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="fix_grid_distance" class="form-label">Jarak Titik Grid</label>
+                            <input id="fix_grid_distance" class="form-control" type="number" min="1">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="atr_multiplier" class="form-label">ATR Multiplier</label>
+                            <input id="atr_multiplier" class="form-control" type="number" step="0.1" min="0.1">
+                        </div>
+                    </div>
+
+                    <div class="sub-group">
+                        <div class="sub-group-title">Mode Lot Layering</div>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label for="grid_mart_type" class="form-label">Mode Penambahan Lot</label>
+                                <select id="grid_mart_type" class="form-select">
+                                    <option value="0">Penambahan (+)</option>
+                                    <option value="1">Perkalian (x)</option>
+                                </select>
+                                <div class="form-text">Mode ini dipakai saat layer baru terbuka.</div>
+                            </div>
+                            <div class="col-md-4" id="grid-mart-addition-wrap">
+                                <label for="grid_mart_addition" class="form-label">Penambahan per Layer</label>
+                                <input id="grid_mart_addition" class="form-control" type="number" step="0.01" min="0">
+                                <div class="form-text">Contoh: 0.01, 0.02, 0.05</div>
+                            </div>
+                            <div class="col-md-4" id="grid-mart-multiplier-wrap">
+                                <label for="grid_mart_multiplier" class="form-label">Multiplier per Layer</label>
+                                <input id="grid_mart_multiplier" class="form-control" type="number" step="0.01" min="0.01">
+                                <div class="form-text">Mendukung desimal: 0.5x, 1.2x, 1.5x, 2x</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="sub-group">
+                        <div class="sub-group-title">Sub-Group TP / SL</div>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="grid_tp_points" class="form-label">Target TP Points</label>
+                                <input id="grid_tp_points" class="form-control" type="number" min="0">
+                                <div class="form-text">Setel 0 untuk menonaktifkan atau lepas tanpa batasan.</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="grid_sl_points" class="form-label">SL Points</label>
+                                <input id="grid_sl_points" class="form-control" type="number" min="0">
+                                <div class="form-text">Setel 0 untuk menonaktifkan atau lepas tanpa batasan.</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="sub-group">
+                        <div class="row g-3">
+                            <div class="col-lg-6">
+                                <div class="switch-tile">
+                                    <div class="form-check form-switch d-flex align-items-start justify-content-between gap-3">
+                                        <div>
+                                            <div class="switch-title">Auto Trailing Single Layer Profit</div>
+                                            <div class="switch-copy">Otomatis trailing virtual saat hanya 1 layer yang profit.</div>
+                                        </div>
+                                        <input id="grid_use_trailing_layer1" class="form-check-input" type="checkbox" role="switch">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="switch-tile h-100">
+                                    <div class="form-check form-switch d-flex align-items-start justify-content-between gap-3 mb-3">
+                                        <div>
+                                            <div class="switch-title">Basket Close All by Percentage</div>
+                                            <div class="switch-copy">Tutup seluruh basket saat target persentase tercapai.</div>
+                                        </div>
+                                        <input id="grid_use_basket_tp_percent" class="form-check-input" type="checkbox" role="switch">
+                                    </div>
+                                    <div id="grid-basket-field-wrap">
+                                        <label for="grid_basket_tp_percent" class="form-label">Nilai Persentase Basket</label>
+                                        <input id="grid_basket_tp_percent" class="form-control" type="number" step="0.1" min="0">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-12">
+                                <div class="meta-card" id="grid-tier-wrap">
+                                    <div class="row g-3">
+                                        <div class="col-md-4">
+                                            <label for="grid_tp_mode" class="form-label">Mode TP Basket</label>
+                                            <select id="grid_tp_mode" class="form-select">
+                                                <option value="0">Single Target</option>
+                                                <option value="1">Tiered by Layer</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label for="grid_tier1_tp_percent" class="form-label">Tier 1 (1-3)</label>
+                                            <input id="grid_tier1_tp_percent" class="form-control" type="number" step="0.1" min="0">
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label for="grid_tier2_tp_percent" class="form-label">Tier 2 (4-5)</label>
+                                            <input id="grid_tier2_tp_percent" class="form-control" type="number" step="0.1" min="0">
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label for="grid_tier3_tp_percent" class="form-label">Tier 3 (6-10)</label>
+                                            <input id="grid_tier3_tp_percent" class="form-control" type="number" step="0.1" min="0">
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label for="grid_tier4_tp_percent" class="form-label">Tier 4 (11-50)</label>
+                                            <input id="grid_tier4_tp_percent" class="form-control" type="number" step="0.1" min="0">
+                                        </div>
+                                    </div>
+                                    <div class="form-text mt-2">Tiered mode akan memakai target TP berbeda berdasarkan jumlah layer terbuka.</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="panel-zero-gap" class="section-card mb-4 is-hidden" data-strategy="1">
+                    <div class="section-title">Component 3: Strategi Zero Gap</div>
+                    <div class="section-copy">Konfigurasi ringkas untuk re-entry cepat, pending distance presisi, dan trailing yang terukur.</div>
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label for="zero_gap_tp_points" class="form-label">Target TP Points</label>
+                            <input id="zero_gap_tp_points" class="form-control" type="number" min="0">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="zero_gap_sl_points" class="form-label">SL Points</label>
+                            <input id="zero_gap_sl_points" class="form-control" type="number" min="0">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="zero_gap_max_layers" class="form-label">Max Layers</label>
+                            <input id="zero_gap_max_layers" class="form-control" type="number" min="1">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="mirror_pending_distance_points" class="form-label">Jarak Pending Order (Points)</label>
+                            <input id="mirror_pending_distance_points" class="form-control" type="number" min="1">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="mirror_multiplier" class="form-label">Mirror Trap Multiplier</label>
+                            <input id="mirror_multiplier" class="form-control" type="number" step="0.1" min="1">
+                        </div>
+                    </div>
+
+                    <div class="sub-group">
+                        <div class="sub-group-title">Sub-Group Trailing</div>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="zero_gap_trailing_start_points" class="form-label">Trailing Start Points</label>
+                                <input id="zero_gap_trailing_start_points" class="form-control" type="number" min="0">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="zero_gap_trailing_step_points" class="form-label">Trailing Step Points</label>
+                                <input id="zero_gap_trailing_step_points" class="form-control" type="number" min="0">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="sub-group">
+                        <div class="switch-tile">
+                            <div class="form-check form-switch d-flex align-items-start justify-content-between gap-3">
+                                <div>
+                                    <div class="switch-title">Aktifkan Fitur Mirror Trap (SAR Guard)</div>
+                                    <div class="switch-copy">Pending order pelindung otomatis saat skenario zero-gap membutuhkan penguncian arah balik.</div>
+                                </div>
+                                <input id="use_mirror_trap" class="form-check-input" type="checkbox" role="switch">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="panel-martingale" class="section-card mb-4 is-hidden" data-strategy="2">
+                    <div class="section-title">Component 4: Strategi Pure Martingale</div>
+                    <div class="section-copy">Konfigurasi khusus untuk mode pelipatan linear atau geometris dengan trailing terpisah dari strategi lain.</div>
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label for="mart_tp_points" class="form-label">Target TP Points</label>
+                            <input id="mart_tp_points" class="form-control" type="number" min="0">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="mart_sl_points" class="form-label">SL Points</label>
+                            <input id="mart_sl_points" class="form-control" type="number" min="0">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="mart_max_steps" class="form-label">Max Steps Martingale</label>
+                            <input id="mart_max_steps" class="form-control" type="number" min="1">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="mart_type" class="form-label">Tipe Pelipatan</label>
+                            <select id="mart_type" class="form-select">
+                                <option value="0">Linear</option>
+                                <option value="1">Geometris</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="mart_multiplier" class="form-label">Nilai Pengali Multiplier</label>
+                            <input id="mart_multiplier" class="form-control" type="number" step="0.1" min="1">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="mart_addition" class="form-label">Nilai Penambahan Lot</label>
+                            <input id="mart_addition" class="form-control" type="number" step="0.01" min="0">
+                        </div>
+                    </div>
+
+                    <div class="sub-group">
+                        <div class="sub-group-title">Sub-Group Trailing</div>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="mart_trailing_start_points" class="form-label">Trailing Start Points</label>
+                                <input id="mart_trailing_start_points" class="form-control" type="number" min="0">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="mart_trailing_step_points" class="form-label">Trailing Step Points</label>
+                                <input id="mart_trailing_step_points" class="form-control" type="number" min="0">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="sub-group">
+                        <div class="switch-tile">
+                            <div class="form-check form-switch d-flex align-items-start justify-content-between gap-3">
+                                <div>
+                                    <div class="switch-title">Aktifkan Fitur Mirror Trap (SAR Guard)</div>
+                                    <div class="switch-copy">Gunakan pending guard sebagai proteksi tambahan ketika martingale perlu menahan perubahan momentum mendadak.</div>
+                                </div>
+                                <input id="use_mirror_trap_mart" class="form-check-input" type="checkbox" role="switch">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section-card mb-4">
+                    <div class="section-title">Component 5: Global Stealth & Trading Sessions Scheduler</div>
+                    <div class="section-copy">Bagian ini selalu muncul dan berlaku lintas strategi aktif.</div>
+
+                    <div class="switch-tile mb-4">
+                        <div class="form-check form-switch d-flex align-items-start justify-content-between gap-3">
+                            <div>
+                                <div class="switch-title">Aktifkan Stealth & Virtual Mode</div>
+                                <div class="switch-copy">Menyembunyikan TP, SL, dan trailing dari broker. Otomatis mendeteksi parameter masing-masing strategi yang sedang aktif.</div>
+                            </div>
+                            <input id="use_stealth_mode" class="form-check-input" type="checkbox" role="switch">
+                        </div>
+                    </div>
+
+                    <div class="switch-tile mb-4">
+                        <div class="form-check form-switch d-flex align-items-start justify-content-between gap-3">
+                            <div>
+                                <div class="switch-title">Tampilkan Log Fallback Indicator</div>
+                                <div class="switch-copy">Menampilkan log [INDICATOR] saat buffer indikator fallback dipakai. Matikan untuk mengurangi spam log terminal.</div>
+                            </div>
+                            <input id="show_indicator_fallback_logs" class="form-check-input" type="checkbox" role="switch">
+                        </div>
+                    </div>
+
+                    <div class="sub-group">
+                        <div class="sub-group-title">Behavior Eksekusi Entry</div>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="switch-tile">
+                                    <div class="form-check form-switch d-flex align-items-start justify-content-between gap-3">
+                                        <div>
+                                            <div class="switch-title">Always In Market</div>
+                                            <div class="switch-copy">Jika flat, EA akan tetap mencari entry agar selalu ada eksposur sesuai strategi aktif.</div>
+                                        </div>
+                                        <input id="always_in_market" class="form-check-input" type="checkbox" role="switch">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="switch-tile">
+                                    <div class="form-check form-switch d-flex align-items-start justify-content-between gap-3">
+                                        <div>
+                                            <div class="switch-title">Instant Re-Entry</div>
+                                            <div class="switch-copy">Setelah posisi close, izinkan entry ulang tanpa menunggu candle baru.</div>
+                                        </div>
+                                        <input id="instant_reentry" class="form-check-input" type="checkbox" role="switch">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="switch-tile">
+                                    <label for="min_confluence_score" class="switch-title d-block mb-1">Min. Confluence Score</label>
+                                    <div class="switch-copy mb-2">Ambang skor minimum konfluensi EA sebelum mengeksekusi entry. Nilai <strong>0</strong> = Auto-Pass (selalu masuk), nilai <strong>10</strong> = sangat ketat.</div>
+                                    <select id="min_confluence_score" class="form-select form-select-sm">
+                                        <option value="0">0 — Auto-Pass (Selalu Masuk)</option>
+                                        <option value="1">1 — Sangat Agresif</option>
+                                        <option value="2">2 — Agresif</option>
+                                        <option value="3">3 — Lebih Agresif</option>
+                                        <option value="4">4 — Moderat Agresif</option>
+                                        <option value="5" selected>5 — Normal (Default)</option>
+                                        <option value="6">6 — Moderat Konservatif</option>
+                                        <option value="7">7 — Konservatif</option>
+                                        <option value="8">8 — Lebih Konservatif</option>
+                                        <option value="9">9 — Sangat Konservatif</option>
+                                        <option value="10">10 — Maksimal (Hanya Sinyal Terkuat)</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="sub-group">
+                        <div class="sub-group-title">Sesi Trading Berbasis Waktu WIB</div>
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <div class="switch-tile session-box" data-session="sydney">
+                                    <div class="row g-3 align-items-end">
+                                        <div class="col-lg-4">
+                                            <div class="form-check form-switch d-flex align-items-center justify-content-between session-toggle">
+                                                <div class="session-title-wrap">
+                                                    <label class="switch-title mb-0" for="use_sydney_session">Sesi Sydney</label>
+                                                    <div class="session-hint">Pembuka awal market sebelum Tokyo aktif penuh.</div>
+                                                </div>
+                                                <input id="use_sydney_session" class="form-check-input" type="checkbox" role="switch">
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-4 session-time-wrap">
+                                            <label for="sydney_start_wib" class="form-label">Jam Mulai WIB</label>
+                                            <input id="sydney_start_wib" class="form-control session-time" type="time" step="60">
+                                        </div>
+                                        <div class="col-lg-4 session-time-wrap">
+                                            <label for="sydney_end_wib" class="form-label">Jam Selesai WIB</label>
+                                            <input id="sydney_end_wib" class="form-control session-time" type="time" step="60">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="switch-tile session-box" data-session="asia">
+                                    <div class="row g-3 align-items-end">
+                                        <div class="col-lg-4">
+                                            <div class="form-check form-switch d-flex align-items-center justify-content-between session-toggle">
+                                                <div class="session-title-wrap">
+                                                    <label class="switch-title mb-0" for="use_asia_session">Sesi Asia (Tokyo)</label>
+                                                    <div class="session-hint">Aktif untuk overlap awal market Asia.</div>
+                                                </div>
+                                                <input id="use_asia_session" class="form-check-input" type="checkbox" role="switch">
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-4 session-time-wrap">
+                                            <label for="asia_start_wib" class="form-label">Jam Mulai WIB</label>
+                                            <input id="asia_start_wib" class="form-control session-time" type="time" step="60">
+                                        </div>
+                                        <div class="col-lg-4 session-time-wrap">
+                                            <label for="asia_end_wib" class="form-label">Jam Selesai WIB</label>
+                                            <input id="asia_end_wib" class="form-control session-time" type="time" step="60">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="switch-tile session-box" data-session="europe">
+                                    <div class="row g-3 align-items-end">
+                                        <div class="col-lg-4">
+                                            <div class="form-check form-switch d-flex align-items-center justify-content-between session-toggle">
+                                                <div class="session-title-wrap">
+                                                    <label class="switch-title mb-0" for="use_europe_session">Sesi London</label>
+                                                    <div class="session-hint">Core likuiditas Eropa (London session).</div>
+                                                </div>
+                                                <input id="use_europe_session" class="form-check-input" type="checkbox" role="switch">
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-4 session-time-wrap">
+                                            <label for="europe_start_wib" class="form-label">Jam Mulai WIB</label>
+                                            <input id="europe_start_wib" class="form-control session-time" type="time" step="60">
+                                        </div>
+                                        <div class="col-lg-4 session-time-wrap">
+                                            <label for="europe_end_wib" class="form-label">Jam Selesai WIB</label>
+                                            <input id="europe_end_wib" class="form-control session-time" type="time" step="60">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="switch-tile session-box" data-session="us">
+                                    <div class="row g-3 align-items-end">
+                                        <div class="col-lg-4">
+                                            <div class="form-check form-switch d-flex align-items-center justify-content-between session-toggle">
+                                                <div class="session-title-wrap">
+                                                    <label class="switch-title mb-0" for="use_us_session">Sesi New York (US)</label>
+                                                    <div class="session-hint">Sesi Amerika dengan volatilitas tertinggi.</div>
+                                                </div>
+                                                <input id="use_us_session" class="form-check-input" type="checkbox" role="switch">
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-4 session-time-wrap">
+                                            <label for="us_start_wib" class="form-label">Jam Mulai WIB</label>
+                                            <input id="us_start_wib" class="form-control session-time" type="time" step="60">
+                                        </div>
+                                        <div class="col-lg-4 session-time-wrap">
+                                            <label for="us_end_wib" class="form-label">Jam Selesai WIB</label>
+                                            <input id="us_end_wib" class="form-control session-time" type="time" step="60">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="meta-card">
+                                    <div class="small fw-semibold mb-2">Referensi Jam Sesi Global (WIB)</div>
+                                    <div class="session-reference-grid">
+                                        <div class="session-reference-card">
+                                            <div class="session-reference-name">Sydney</div>
+                                            <div class="session-reference-hours">05:00 - 14:00</div>
+                                        </div>
+                                        <div class="session-reference-card">
+                                            <div class="session-reference-name">Tokyo</div>
+                                            <div class="session-reference-hours">07:00 - 16:00</div>
+                                        </div>
+                                        <div class="session-reference-card">
+                                            <div class="session-reference-name">London</div>
+                                            <div class="session-reference-hours">14:00 - 23:00</div>
+                                        </div>
+                                        <div class="session-reference-card">
+                                            <div class="session-reference-name">New York</div>
+                                            <div class="session-reference-hours">20:00 - 05:00</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section-card">
+                    <div class="section-title">Filter Berita & Guard Tambahan</div>
+                    <div class="section-copy">Kontrol ini tetap tersedia agar dashboard baru tetap nyambung dengan guard backend yang sudah berjalan.</div>
+                    <div class="row g-3 align-items-end">
+                        <div class="col-md-4">
+                            <label for="news_filter_severity" class="form-label">Severity Filter</label>
+                            <select id="news_filter_severity" class="form-select">
+                                <option value="HIGH">High Only</option>
+                                <option value="MEDIUM">Medium Only</option>
+                                <option value="LOW">Low Only</option>
+                                <option value="BOTH">High + Medium</option>
+                                <option value="ALL">All (High + Medium + Low)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="news_pause_before_minutes" class="form-label">Pause Before News (Minutes)</label>
+                            <input id="news_pause_before_minutes" class="form-control" type="number" min="0">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="news_pause_after_minutes" class="form-label">Pause After News (Minutes)</label>
+                            <input id="news_pause_after_minutes" class="form-control" type="number" min="0">
+                        </div>
+                        <div class="col-md-6">
+                            <div class="switch-tile">
+                                <div class="form-check form-switch d-flex align-items-start justify-content-between gap-3">
+                                    <div>
+                                        <div class="switch-title">Aktifkan Filter SNR</div>
+                                        <div class="switch-copy">Menjaga entry tetap melewati gate support/resistance backend jika dibutuhkan.</div>
+                                    </div>
+                                    <input id="filter_snr_activation" class="form-check-input" type="checkbox" role="switch">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="switch-tile">
+                                <div class="form-check form-switch d-flex align-items-start justify-content-between gap-3">
+                                    <div>
+                                        <div class="switch-title">⏸️ Close All Saat News Approach</div>
+                                        <div class="switch-copy">Otomatis close semua posisi aktif & pause EA saat news event mendekati.</div>
+                                    </div>
+                                    <input id="close_all_on_news" class="form-check-input" type="checkbox" role="switch">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="save-bar d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
+                    <div>
+                        <button id="btn-save" class="btn btn-dark rounded-pill px-4 py-2">Simpan Pengaturan Dashboard</button>
+                        <div id="save-msg" class="small mt-2 text-secondary">Belum ada perubahan tersimpan.</div>
+                    </div>
+                    <div class="small text-secondary">Semua nilai dikirim ke endpoint dashboard settings dengan payload JSON per account.</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-4">
+            <div class="sticky-side d-grid gap-4">
+                <div class="radar-card p-4 p-lg-4">
+                    <div class="d-flex justify-content-between align-items-start gap-3 mb-3">
+                        <div>
+                            <div class="eyebrow mb-2">Component 6</div>
+                            <h2 class="h4 mb-1">Radar Berita AI & Timer Countdown</h2>
+                            <p class="text-secondary mb-0">Ringkas, langsung ke event berikutnya, dan tetap memberi konteks arah emas.</p>
+                        </div>
+                        <div class="d-flex flex-column align-items-end gap-2">
+                            <button id="btn-refresh-news" type="button" class="btn btn-sm btn-outline-primary rounded-pill">Refresh News</button>
+                            <button id="btn-news-history" type="button" class="btn btn-sm btn-outline-secondary rounded-pill" data-bs-toggle="modal" data-bs-target="#newsHistoryModal">Riwayat News</button>
+                            <span id="news-source-badge" class="news-source-badge">SOURCE LIVE
+7 EVENTS • 00:00</span>
+                        </div>
+                    </div>
+
+                    <div class="radar-hero mb-3">
+                        <div class="small text-uppercase text-white-50 mb-2">Next High Impact News</div>
+                        <div class="countdown mb-2" id="next-news-countdown">--:--:--</div>
+                        <div class="small text-white-50" id="next-news-meta">Menunggu data berita ekonomi hari ini.</div>
+                    </div>
+
+                    <div class="verdict-box mb-3">
+                        <div class="verdict-label">📊 Vonis Arah Emas</div>
+                        <div class="verdict-value" id="ai-verdict-label">N/A</div>
+                        <div class="verdict-description" id="ai-verdict-copy">Belum ada analisis AI yang bisa dijadikan ringkasan arah emas hari ini.</div>
+                    </div>
+
+                    <div class="d-grid gap-3" id="news-list">
+                        @forelse($news as $item)
+                            <div class="news-item {{ $loop->first ? 'news-item-next' : '' }} py-2">
+                                <div class="fw-semibold text-dark mb-2">{{ $item->title }}</div>
+                                <div class="small text-secondary mb-3">{{ $item->event_at?->timezone('Asia/Jakarta')?->locale('id')?->translatedFormat('l, d F Y') ?? '-' }} | {{ $item->event_at?->timezone('Asia/Jakarta')?->format('H:i') ?? '--:--' }} WIB</div>
+                                
+                                <div class="d-flex flex-wrap gap-3">
+                                    @if(data_get($item->raw_payload, 'actual') || data_get($item->raw_payload, 'actual') === 0)
+                                        <div class="news-data-item">
+                                            <div class="small text-uppercase fw-bold text-danger" style="letter-spacing: 0.5px;">Actual</div>
+                                            <div class="fw-bold text-info" style="font-size: 0.95rem;">{{ data_get($item->raw_payload, 'actual') }}</div>
+                                        </div>
+                                    @endif
+                                    
+                                    @if(data_get($item->raw_payload, 'forecast'))
+                                        <div class="news-data-item">
+                                            <div class="small text-uppercase fw-bold text-warning" style="letter-spacing: 0.5px;">Forecast</div>
+                                            <div class="fw-bold text-dark" style="font-size: 0.95rem;">{{ data_get($item->raw_payload, 'forecast') }}</div>
+                                        </div>
+                                    @endif
+                                    
+                                    @if(data_get($item->raw_payload, 'previous') || data_get($item->raw_payload, 'previous') === 0)
+                                        <div class="news-data-item">
+                                            <div class="small text-uppercase fw-bold text-success" style="letter-spacing: 0.5px;">Previous</div>
+                                            <div class="fw-bold text-dark" style="font-size: 0.95rem;">{{ data_get($item->raw_payload, 'previous') }}</div>
+                                        </div>
+                                    @endif
+                                </div>
+                            </div>
+                        @empty
+                            <div class="news-item text-secondary small py-3">Belum ada data berita ekonomi hari ini.</div>
+                        @endforelse
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    </section>
+
+    <div class="modal fade" id="newsHistoryModal" tabindex="-1" aria-labelledby="newsHistoryModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="newsHistoryModalLabel">Riwayat News Terakhir (Live Provider)</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="news-history-list" class="d-grid gap-2">
+                        <div class="small text-secondary">Belum ada data riwayat news.</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Tutup</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="profile-modal" tabindex="-1" aria-labelledby="profile-modal-title" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div>
+                        <div class="eyebrow mb-1">User Profile</div>
+                        <h3 id="profile-modal-title" class="h5 mb-0">Pengaturan Profile</h3>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="profile-form" class="d-grid gap-3">
+                        <div>
+                            <label for="profile_name" class="form-label">Nama</label>
+                            <input id="profile_name" class="form-control" value="{{ $currentUser->name }}" required>
+                        </div>
+                        <div>
+                            <label for="profile_username" class="form-label">Username</label>
+                            <input id="profile_username" class="form-control" value="{{ $currentUser->username }}" required>
+                        </div>
+                        <div>
+                            <label for="profile_email" class="form-label">Email</label>
+                            <input id="profile_email" type="email" class="form-control" value="{{ $currentUser->email }}" required>
+                        </div>
+                        <div class="meta-card">
+                            <div class="small fw-semibold mb-2">Ubah Password (opsional)</div>
+                            <div class="d-grid gap-2">
+                                <input id="profile_current_password" class="form-control" type="password" placeholder="Password saat ini">
+                                <input id="profile_new_password" class="form-control" type="password" placeholder="Password baru (min 8)">
+                                <input id="profile_new_password_confirmation" class="form-control" type="password" placeholder="Konfirmasi password baru">
+                            </div>
+                        </div>
+                        <div>
+                            <button id="btn-profile-save" type="submit" class="btn btn-primary rounded-pill px-4">Simpan Profile</button>
+                            <div id="profile-msg" class="small text-secondary mt-2">Data profile belum diubah.</div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="account-modal" tabindex="-1" aria-labelledby="account-modal-title" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div>
+                        <div class="eyebrow mb-1">Account MT5</div>
+                        <h3 id="account-modal-title" class="h5 mb-0">Tambah Account Baru</h3>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="account-form" class="d-grid gap-3">
+                        <div>
+                            <label for="new_account_id" class="form-label">Account ID</label>
+                            <input id="new_account_id" class="form-control" placeholder="Contoh: 49662626" required>
+                        </div>
+                        <div>
+                            <label for="new_pair_symbol" class="form-label">Pair Symbol</label>
+                            <input id="new_pair_symbol" class="form-control" value="XAUUSD" placeholder="XAUUSD" required>
+                        </div>
+                        <div>
+                            <label for="new_base_lot" class="form-label">Base Lot</label>
+                            <input id="new_base_lot" class="form-control" type="number" step="0.01" min="0.01" value="0.01" required>
+                        </div>
+                        <div>
+                            <button id="btn-account-save" type="submit" class="btn btn-primary rounded-pill px-4">Tambah Account</button>
+                            <div id="account-msg" class="small text-secondary mt-2">
+                                @if($isAdmin)
+                                    Admin: bisa tambah account baru atau input account yang sudah dipakai user untuk ditautkan ke dashboard admin.
+                                @else
+                                    User: bisa tambah account milik sendiri yang belum terdaftar, atau ambil account yang sudah terdaftar.
+                                @endif
+                            </div>
+                        </div>
+                        <div class="meta-card">
+                            <div class="small fw-semibold mb-2">Hapus Account MT5</div>
+                            <div class="d-grid gap-2">
+                                <input id="delete_account_id" class="form-control" placeholder="Isi account yang ingin dihapus">
+                                <button id="btn-account-delete" type="button" class="btn btn-outline-danger rounded-pill px-4">Hapus Account</button>
+                            </div>
+                            <div class="small text-secondary mt-2">User hanya bisa hapus account miliknya. Admin bisa hapus account lintas user jika account tidak aktif.</div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if($isAdmin)
+    <div class="modal fade" id="users-modal" tabindex="-1" aria-labelledby="users-modal-title" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable modal-fullscreen-lg-down">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div>
+                        <div class="eyebrow mb-1">Administration</div>
+                        <h3 id="users-modal-title" class="h5 mb-0">User Management</h3>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="users-toolbar">
+                        <input id="users-search" class="form-control" placeholder="Cari nama, username, email" style="max-width: 320px;">
+                        <div class="small text-secondary" id="users-count-chip">0 users</div>
+                    </div>
+
+                    <div class="table-responsive mb-3">
+                        <table class="table table-slim align-middle mb-0">
+                            <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nama</th>
+                                <th>Username</th>
+                                <th>Role</th>
+                                <th>Aksi</th>
+                            </tr>
+                            </thead>
+                            <tbody id="users-tbody"></tbody>
+                        </table>
+                    </div>
+
+                    <div class="users-pagination mb-3">
+                        <button id="users-prev" type="button" class="btn btn-sm btn-outline-secondary">Prev</button>
+                        <span id="users-page-info" class="small text-secondary">Page 1/1</span>
+                        <button id="users-next" type="button" class="btn btn-sm btn-outline-secondary">Next</button>
+                    </div>
+
+                    <form id="users-form" class="d-grid gap-2">
+                        <input type="hidden" id="manage_user_id">
+                        <input id="manage_name" class="form-control" placeholder="Nama" required>
+                        <input id="manage_username" class="form-control" placeholder="Username" required>
+                        <input id="manage_email" type="email" class="form-control" placeholder="Email" required>
+                        <select id="manage_role" class="form-select" required>
+                            <option value="user">user</option>
+                            <option value="manager">manager</option>
+                            <option value="admin">admin</option>
+                        </select>
+                        <input id="manage_password" type="password" class="form-control" placeholder="Password (wajib saat create, opsional saat edit)">
+                        <div class="d-flex flex-wrap gap-2">
+                            <button id="btn-user-save" type="submit" class="btn btn-success rounded-pill px-4">Simpan User</button>
+                            <button id="btn-user-reset" type="button" class="btn btn-outline-secondary rounded-pill px-4">Reset Form</button>
+                        </div>
+                        <div id="users-msg" class="small text-secondary">Kelola akun user langsung dari dashboard.</div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
+
+    <section id="workspace-pane-logic" class="workspace-pane">
+        <div class="settings-card p-4 p-lg-5">
+            <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-4">
+                <div>
+                    <div class="eyebrow mb-2">Logic Settings</div>
+                    <h2 class="h4 mb-1">Behaviour & Execution Logic</h2>
+                    <p class="text-secondary mb-0">Toggle di tab ini khusus untuk logika entry, filter, dan eksekusi yang dipakai EA.</p>
+                </div>
+                <span class="mini-chip">Web only</span>
+            </div>
+
+            <div id="license-lock-msg-logic" class="mb-4"></div>
+
+            <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+                <span class="small text-secondary">Preset Cepat:</span>
+                <button id="logic-preset-default" type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3">Default</button>
+                <button id="logic-preset-scalper" type="button" class="btn btn-sm btn-outline-warning rounded-pill px-3">Scalper</button>
+                <button id="logic-preset-medium" type="button" class="btn btn-sm btn-outline-info rounded-pill px-3">Medium</button>
+                <button id="logic-preset-conservative" type="button" class="btn btn-sm btn-outline-success rounded-pill px-3">Conservative</button>
+            </div>
+
+            <div class="row g-3">
+                <div class="col-lg-6">
+                    <div class="switch-tile h-100">
+                        <div class="form-check form-switch d-flex align-items-start justify-content-between gap-3">
+                            <div>
+                                <div class="switch-title" title="Proteksi order agar tidak langsung entry balik beruntun di harga dekat.">Use Pending Guard</div>
+                                <div class="switch-copy">Aktifkan pending guard sebagai proteksi entry balik.</div>
+                            </div>
+                            <input id="use_pending_guard" class="form-check-input" type="checkbox" role="switch">
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="switch-tile h-100">
+                        <div class="form-check form-switch d-flex align-items-start justify-content-between gap-3">
+                            <div>
+                                <div class="switch-title">Auto Flip</div>
+                                <div class="switch-copy">Balik arah otomatis saat posisi lawan muncul di sisi yang sama.</div>
+                            </div>
+                            <input id="auto_flip" class="form-check-input" type="checkbox" role="switch">
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="switch-tile h-100">
+                        <div class="form-check form-switch d-flex align-items-start justify-content-between gap-3">
+                            <div>
+                                <div class="switch-title" title="Mengaktifkan filter trend utama sebelum sinyal entry dieksekusi.">Use Trend Filter</div>
+                                <div class="switch-copy">Filter tren utama ikut aktif saat entry logic berjalan.</div>
+                            </div>
+                            <input id="use_trend_filter" class="form-check-input" type="checkbox" role="switch">
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="switch-tile h-100">
+                        <div class="form-check form-switch d-flex align-items-start justify-content-between gap-3">
+                            <div>
+                                <div class="switch-title">AI Core Sharpening</div>
+                                <div class="switch-copy">Entry lebih ketat dengan core AI sharpening.</div>
+                            </div>
+                            <input id="use_ai_core_sharpening" class="form-check-input" type="checkbox" role="switch">
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="switch-tile h-100">
+                        <div class="form-check form-switch d-flex align-items-start justify-content-between gap-3">
+                            <div>
+                                <div class="switch-title" title="Filter arah menggunakan perbandingan EMA cepat vs EMA lambat.">EMA Ribbon</div>
+                                <div class="switch-copy">Gunakan bias EMA cepat/lambat sebagai filter arah.</div>
+                            </div>
+                            <input id="use_ema_ribbon" class="form-check-input" type="checkbox" role="switch">
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="switch-tile h-100">
+                        <div class="form-check form-switch d-flex align-items-start justify-content-between gap-3">
+                            <div>
+                                <div class="switch-title" title="Konfirmasi arah dari dominasi +DI terhadap -DI (atau sebaliknya).">DMI Dominance</div>
+                                <div class="switch-copy">Memakai dominasi +DI/-DI untuk konfirmasi arah.</div>
+                            </div>
+                            <input id="use_dmi" class="form-check-input" type="checkbox" role="switch">
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="switch-tile h-100">
+                        <div class="form-check form-switch d-flex align-items-start justify-content-between gap-3">
+                            <div>
+                                <div class="switch-title">Market Structure</div>
+                                <div class="switch-copy">Konfirmasi arah tambahan dari struktur market / fractal.</div>
+                            </div>
+                            <input id="use_mkt_struct" class="form-check-input" type="checkbox" role="switch">
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="switch-tile h-100">
+                        <div class="form-check form-switch d-flex align-items-start justify-content-between gap-3">
+                            <div>
+                                <div class="switch-title">Early Trend</div>
+                                <div class="switch-copy">Membuka ruang entry lebih cepat saat trend awal mulai terbentuk.</div>
+                            </div>
+                            <input id="use_early_trend" class="form-check-input" type="checkbox" role="switch">
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="switch-tile h-100">
+                        <div class="form-check form-switch d-flex align-items-start justify-content-between gap-3">
+                            <div>
+                                <div class="switch-title">Sniper Entry</div>
+                                <div class="switch-copy">Gunakan mode entry lebih ketat dan disiplin.</div>
+                            </div>
+                            <input id="use_sniper_entry" class="form-check-input" type="checkbox" role="switch">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-3 mt-2">
+                <div class="col-xl-6">
+                    <div class="switch-tile h-100 p-3">
+                        <div class="switch-title mb-2">EMA / Trend Group</div>
+                        <div class="switch-copy mb-3">Parameter MA/EMA utama untuk arah trend dan slope.</div>
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <label for="ema_period" class="form-label small text-secondary mb-1" title="Period EMA utama untuk filter trend umum.">EMA Period</label>
+                                <input id="ema_period" type="number" min="1" step="1" class="form-control" placeholder="50">
+                            </div>
+                            <div class="col-6">
+                                <label for="ema_fast" class="form-label small text-secondary mb-1" title="EMA cepat. Harus lebih kecil dari EMA Slow.">EMA Fast</label>
+                                <input id="ema_fast" type="number" min="1" step="1" class="form-control" placeholder="20">
+                            </div>
+                            <div class="col-6">
+                                <label for="ema_slow" class="form-label small text-secondary mb-1" title="EMA lambat. Harus lebih besar dari EMA Fast.">EMA Slow</label>
+                                <input id="ema_slow" type="number" min="1" step="1" class="form-control" placeholder="50">
+                            </div>
+                            <div class="col-6">
+                                <label for="ema_slope_min" class="form-label small text-secondary mb-1">EMA Slope Min</label>
+                                <input id="ema_slope_min" type="number" min="0" step="0.001" class="form-control" placeholder="0.03">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-6">
+                    <div class="switch-tile h-100 p-3">
+                        <div class="switch-title mb-2">Bollinger / RSI Group</div>
+                        <div class="switch-copy mb-3">Setting volatilitas dan momentum untuk filter entry.</div>
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <label for="bb_period" class="form-label small text-secondary mb-1" title="Jumlah candle untuk perhitungan Bollinger Bands.">BB Period</label>
+                                <input id="bb_period" type="number" min="1" step="1" class="form-control" placeholder="20">
+                            </div>
+                            <div class="col-6">
+                                <label for="bb_deviation" class="form-label small text-secondary mb-1" title="Deviasi standar BB. Makin besar, band makin lebar.">BB Deviation</label>
+                                <input id="bb_deviation" type="number" min="0.1" step="0.1" class="form-control" placeholder="2.0">
+                            </div>
+                            <div class="col-4">
+                                <label for="rsi_period" class="form-label small text-secondary mb-1">RSI Period</label>
+                                <input id="rsi_period" type="number" min="1" step="1" class="form-control" placeholder="14">
+                            </div>
+                            <div class="col-4">
+                                <label for="rsi_buy_level" class="form-label small text-secondary mb-1">RSI Buy</label>
+                                <input id="rsi_buy_level" type="number" min="0" max="100" step="0.1" class="form-control" placeholder="45">
+                            </div>
+                            <div class="col-4">
+                                <label for="rsi_sell_level" class="form-label small text-secondary mb-1">RSI Sell</label>
+                                <input id="rsi_sell_level" type="number" min="0" max="100" step="0.1" class="form-control" placeholder="55">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-6">
+                    <div class="switch-tile h-100 p-3">
+                        <div class="switch-title mb-2">ADX / ATR Group</div>
+                        <div class="switch-copy mb-3">Konfirmasi trend strength dan reaktivitas indikator.</div>
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <label for="adx_period" class="form-label small text-secondary mb-1">ADX Period</label>
+                                <input id="adx_period" type="number" min="1" step="1" class="form-control" placeholder="14">
+                            </div>
+                            <div class="col-6">
+                                <label for="adx_level" class="form-label small text-secondary mb-1" title="Ambang kekuatan trend minimal agar dianggap valid.">ADX Level</label>
+                                <input id="adx_level" type="number" min="0" step="0.1" class="form-control" placeholder="25">
+                            </div>
+                            <div class="col-6">
+                                <label for="adx_bars" class="form-label small text-secondary mb-1">ADX Rising Bars</label>
+                                <input id="adx_bars" type="number" min="1" step="1" class="form-control" placeholder="3">
+                            </div>
+                            <div class="col-6">
+                                <label for="adx_sideways" class="form-label small text-secondary mb-1">ADX Sideways</label>
+                                <input id="adx_sideways" type="number" min="0" step="0.1" class="form-control" placeholder="18">
+                            </div>
+                            <div class="col-6">
+                                <label for="atr_period" class="form-label small text-secondary mb-1">ATR Period</label>
+                                <input id="atr_period" type="number" min="1" step="1" class="form-control" placeholder="14">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-6">
+                    <div class="switch-tile h-100 p-3">
+                        <div class="switch-title mb-2">Runtime Market Group</div>
+                        <div class="switch-copy mb-3">Kontrol timeframe logic dan filter makro tambahan.</div>
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <div class="small text-secondary mt-2">Timeframe Logic diatur di tab Core Execution agar konsisten lintas strategi.</div>
+                            </div>
+                            <div class="col-6 d-flex align-items-end">
+                                <div class="switch-tile w-100 p-2">
+                                    <div class="form-check form-switch d-flex align-items-start justify-content-between gap-3 m-0">
+                                        <div>
+                                            <div class="switch-title">Use DXY Filter</div>
+                                            <div class="switch-copy">Filter kondisi pasar dari indeks dolar.</div>
+                                        </div>
+                                        <input id="use_dxy_filter" class="form-check-input" type="checkbox" role="switch">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-4 pt-3 border-top">
+                <div class="d-flex gap-2 flex-wrap align-items-center">
+                    <button id="btn-save-logic" class="btn btn-success rounded-pill px-4 py-2">Simpan Pengaturan Logic</button>
+                    <div id="save-msg-logic" class="small text-secondary">Klik untuk menyimpan perubahan logic di panel ini.</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="workspace-pane-monitoring" class="workspace-pane">
+        <div class="settings-card p-4 p-lg-5">
+            <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-4">
+                <div>
+                    <div class="eyebrow mb-2">Live Monitoring</div>
+                    <h2 class="h4 mb-1">Statistik, Entry Posisi, dan Pending Order</h2>
+                    <p class="text-secondary mb-0">Open layer realtime, pending order terpisah, dan status akun aktif.</p>
+                    <div id="license-lock-msg-monitor" class="small text-secondary mt-1"></div>
+                </div>
+                <div class="monitor-toolbar">
+                    <span class="mini-chip" id="monitor-account-chip">Account: -</span>
+                    <span class="mini-chip" id="monitor-license-enforcement-chip">License Enforcement: {{ ($licenseEnforcementEnabled ?? false) ? 'ON' : 'OFF' }}</span>
+                    <button id="btn-bot-toggle" type="button" class="btn btn-success bot-toggle-btn" disabled>
+                        <span id="btn-bot-icon" class="bot-icon">&gt;</span><span id="btn-bot-label">Start Bot</span>
+                    </button>
+                    @if($isAdmin)
+                        <button id="btn-bot-start-all" type="button" class="btn btn-sm btn-outline-success" disabled>Start All</button>
+                        <button id="btn-bot-stop-all" type="button" class="btn btn-sm btn-outline-danger" disabled>Stop All</button>
+                    @endif
+                                    <button id="btn-bot-reset-dd" type="button" class="btn btn-sm btn-outline-warning" title="Reset DD / buka kembali guard bot">
+                                        ↻ Reset DD
+                                    </button>
+                </div>
+                @if($isAdmin)
+                    <div class="monitor-bulk-hint" id="bot-bulk-hint">Whitelist bulk control: -</div>
+                @endif
+            </div>
+
+            @if($isAdmin)
+                <div class="report-card mb-3">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
+                        <div class="fw-semibold">Admin Bulk Control Settings</div>
+                        <span class="small text-secondary">Atur whitelist Start All / Stop All langsung dari web admin.</span>
+                    </div>
+                    <div class="row g-2 align-items-center">
+                        <div class="col-md-4">
+                            <div class="form-check form-switch mt-1">
+                                <input id="bulk-enabled-input" class="form-check-input" type="checkbox" role="switch">
+                                <label class="form-check-label" for="bulk-enabled-input">Enable Start All / Stop All</label>
+                            </div>
+                        </div>
+                        <div class="col-md-8 d-flex justify-content-md-end">
+                            <button id="bulk-whitelist-manage-btn" type="button" class="btn btn-sm btn-outline-info" style="min-width:180px;">Manage Whitelist</button>
+                        </div>
+                    </div>
+                    <div id="bulk-whitelist-save-msg" class="small text-secondary mt-2">Whitelist tersimpan otomatis saat diubah dari Manage Whitelist.</div>
+                </div>
+
+                <div class="modal fade" id="bulkWhitelistModal" tabindex="-1" aria-labelledby="bulkWhitelistModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="bulkWhitelistModalLabel">Kelola Whitelist Start All / Stop All</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="row g-2 align-items-end mb-3">
+                                    <div class="col-md-6">
+                                        <label for="bulk-account-input" class="form-label mb-1">Tambah Account ID</label>
+                                        <input id="bulk-account-input" type="text" class="form-control" placeholder="Contoh: 205025220">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label for="bulk-account-select" class="form-label mb-1">Pilih dari account aktif</label>
+                                        <select id="bulk-account-select" class="form-select">
+                                            <option value="">-- Pilih account --</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-2 d-grid">
+                                        <button id="bulk-account-add-btn" type="button" class="btn btn-primary">Tambah</button>
+                                    </div>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <div class="small text-secondary">Daftar whitelist account</div>
+                                    <button id="bulk-account-clear-btn" type="button" class="btn btn-sm btn-outline-danger">Clear All</button>
+                                </div>
+                                <div id="bulk-whitelist-list" class="d-flex flex-wrap gap-2"></div>
+                                <div id="bulk-whitelist-modal-msg" class="small text-secondary mt-2"></div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Tutup</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @endif
+
+            <div class="row g-2 g-lg-3 mb-3">
+                <div class="col-6 col-lg-3">
+                    <div class="stat-card">
+                        <div class="stat-label">Status EA</div>
+                        <div class="stat-value" id="mon-status">OFFLINE</div>
+                    </div>
+                </div>
+                <div class="col-6 col-lg-3">
+                    <div class="stat-card">
+                        <div class="stat-label">Floating PnL</div>
+                        <div class="stat-value" id="mon-floating">0.00</div>
+                    </div>
+                </div>
+                <div class="col-6 col-lg-3">
+                    <div class="stat-card">
+                        <div class="stat-label">Open Layers</div>
+                        <div class="stat-value" id="mon-layers">0</div>
+                    </div>
+                </div>
+                <div class="col-6 col-lg-3">
+                    <div class="stat-card">
+                        <div class="stat-label">Accumulative Lot</div>
+                        <div class="stat-value" id="mon-lot">0.00</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-2 g-lg-3 mb-3">
+                <div class="col-6 col-lg-3">
+                    <div class="stat-card">
+                        <div class="stat-label">Daily Profit</div>
+                        <div class="stat-value" id="mon-daily-profit">0.00</div>
+                    </div>
+                </div>
+                <div class="col-6 col-lg-3">
+                    <div class="stat-card">
+                        <div class="stat-label">Win Rate</div>
+                        <div class="stat-value" id="mon-winrate">0.00%</div>
+                    </div>
+                </div>
+                <div class="col-6 col-lg-3">
+                    <div class="stat-card">
+                        <div class="stat-label">Realized Profit</div>
+                        <div class="stat-value" id="mon-realized-profit">0.00</div>
+                    </div>
+                </div>
+                <div class="col-6 col-lg-3">
+                    <div class="stat-card">
+                        <div class="stat-label">Drawdown</div>
+                        <div class="stat-value" id="mon-drawdown">0.00%</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-lg-6">
+                    <div class="report-card h-100">
+                        <div class="fw-semibold mb-2">Ringkasan Runtime</div>
+                        <div class="table-responsive dashboard-table-responsive">
+                            <table class="monitor-table">
+                                <tr><td>Strategi Aktif</td><td id="mon-strategy">-</td></tr>
+                                <tr><td>Timeframe Logic</td><td id="mon-timeframe">-</td></tr>
+                                <tr><td>Guard Status</td><td id="mon-guard">-</td></tr>
+                                <tr><td>License</td><td id="mon-license">No license</td></tr>
+                                <tr><td>DD Debounce (Hits)</td><td id="mon-dd-debounce">15</td></tr>
+                                <tr><td>Base Lot</td><td id="mon-base-lot">0.00</td></tr>
+                                <tr><td>Balance</td><td id="mon-balance">0.00</td></tr>
+                                <tr><td>Equity</td><td id="mon-equity">0.00</td></tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="report-card h-100">
+                        <div class="fw-semibold mb-2">Sistem & Session</div>
+                        <div class="table-responsive dashboard-table-responsive">
+                            <table class="monitor-table">
+                                <tr><td>Mirror Trap</td><td id="mon-mirror">OFF</td></tr>
+                                <tr><td>Pending Distance</td><td id="mon-pending-distance">0</td></tr>
+                                <tr><td>Multiplier</td><td id="mon-pending-multi">0</td></tr>
+                                <tr><td>Mode</td><td id="mon-mode">-</td></tr>
+                                <tr><td>Sydney</td><td id="mon-session-sydney">-</td></tr>
+                                <tr><td>Asia</td><td id="mon-session-asia">-</td></tr>
+                                <tr><td>Eropa</td><td id="mon-session-europe">-</td></tr>
+                                <tr><td>Amerika</td><td id="mon-session-us">-</td></tr>
+                                <tr><td>Stealth</td><td id="mon-stealth">-</td></tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-4 mt-1">
+                <div class="col-12">
+                    <div class="report-card">
+                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
+                            <div class="fw-semibold">Open Positions Realtime</div>
+                            <div class="d-flex align-items-center gap-2 flex-wrap justify-content-end">
+                                <span class="small text-secondary">Auto refresh 1s</span>
+                                <button id="btn-close-all-positions" type="button" class="btn btn-sm btn-outline-danger" disabled>Close All Positions</button>
+                            </div>
+                        </div>
+                        <div id="monitor-action-msg" class="small text-secondary mb-2">Gunakan tombol close untuk menutup semua posisi atau posisi per layer.</div>
+                        <div class="table-responsive dashboard-table-responsive">
+                            <table class="table table-sm align-middle telemetry-table mb-0">
+                                <thead>
+                                <tr>
+                                    <th>Ticket</th>
+                                    <th>Type</th>
+                                    <th>Symbol</th>
+                                    <th>Lot</th>
+                                    <th>Open Price</th>
+                                    <th>SL</th>
+                                    <th>TP</th>
+                                    <th>Floating</th>
+                                    <th>Open Time</th>
+                                    <th>Action</th>
+                                </tr>
+                                </thead>
+                                <tbody id="mon-open-positions-body">
+                                <tr><td colspan="10" class="text-secondary">Belum ada data open positions.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12">
+                    <div class="report-card">
+                        <div class="fw-semibold mb-2">Pending Orders</div>
+                        <div class="table-responsive dashboard-table-responsive">
+                            <table class="table table-sm align-middle telemetry-table mb-0">
+                                <thead>
+                                <tr>
+                                    <th>Ticket</th>
+                                    <th>Type</th>
+                                    <th>Symbol</th>
+                                    <th>Lot</th>
+                                    <th>Price</th>
+                                    <th>SL</th>
+                                    <th>TP</th>
+                                    <th>Time</th>
+                                </tr>
+                                </thead>
+                                <tbody id="mon-pending-orders-body">
+                                <tr><td colspan="8" class="text-secondary">Belum ada data pending orders.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="workspace-pane-analysis" class="workspace-pane">
+        <div class="settings-card p-4 p-lg-5">
+            <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-4">
+                <div>
+                    <div class="eyebrow mb-2">Signal Analysis</div>
+                    <h2 class="h4 mb-1">Analisis Sinyal Runtime Paling Lengkap</h2>
+                    <p class="text-secondary mb-0">Ringkasan power Bullish/Bearish/Neutral, kekuatan konfluensi, dan konteks guard/filter realtime.</p>
+                    <div id="license-lock-msg-analysis" class="small text-secondary mt-1"></div>
+                </div>
+                <div class="d-flex align-items-center gap-2 flex-wrap">
+                    <span class="mini-chip" id="analysis-account-chip">Account: -</span>
+                    <span class="analysis-chip is-neutral" id="analysis-last-update">WAITING SIGNAL</span>
+                </div>
+            </div>
+
+            <div class="row g-2 g-lg-3 mb-3">
+                <div class="col-12 col-sm-6 col-lg-4">
+                    <div class="analysis-power-card h-100">
+                        <div class="analysis-power-title">Market Bias</div>
+                        <div class="analysis-power-value" id="analysis-bias">NEUTRAL</div>
+                        <div class="small text-secondary mt-2">Sinyal utama dari kombinasi vote dan score engine.</div>
+                        <div class="d-flex flex-wrap mt-3">
+                            <span class="analysis-chip is-neutral" id="analysis-bias-chip">POWER 0.00%</span>
+                            <span class="analysis-chip is-neutral" id="analysis-confidence-chip">CONF 0.00%</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 col-lg-4">
+                    <div class="stat-card h-100">
+                        <div class="stat-label">Confluence Score (Buy/Sell)</div>
+                        <div class="stat-value"><span id="analysis-score-buy">0</span> / <span id="analysis-score-sell">0</span></div>
+                        <div class="small text-secondary mt-2">Dominansi score menunjukkan arah sinyal internal engine entry.</div>
+                    </div>
+                </div>
+                <div class="col-6 col-lg-4">
+                    <div class="stat-card h-100">
+                        <div class="stat-label">Votes (Bull/Bear)</div>
+                        <div class="stat-value"><span id="analysis-votes-bull">0</span> / <span id="analysis-votes-bear">0</span></div>
+                        <div class="small text-secondary mt-2">Vote indikator multi-filter untuk penilaian struktur trend saat ini.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-2 g-lg-3">
+                <div class="col-12 col-md-6 col-lg-6">
+                    <div class="report-card h-100">
+                        <div class="fw-semibold mb-2">Core Signal Matrix</div>
+                        <div class="table-responsive dashboard-table-responsive">
+                            <table class="monitor-table">
+                                <tr><td>ADX Strength</td><td id="analysis-adx">0.00</td></tr>
+                                <tr><td>DXY Status</td><td id="analysis-dxy">-</td></tr>
+                                <tr><td>Micro Market</td><td id="analysis-micro">-</td></tr>
+                                <tr><td>Learning Status</td><td id="analysis-learning">-</td></tr>
+                                <tr><td>Signal Wait</td><td id="analysis-wait">0s</td></tr>
+                                <tr><td>API Queue Depth</td><td id="analysis-queue">0</td></tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-lg-6">
+                    <div class="report-card h-100">
+                        <div class="fw-semibold mb-2">Risk & Execution Context</div>
+                        <div class="table-responsive dashboard-table-responsive">
+                            <table class="monitor-table">
+                                <tr><td>Guard (Commanded)</td><td id="analysis-guard-commanded">-</td></tr>
+                                <tr><td>Guard (Live EA)</td><td id="analysis-guard-live">-</td></tr>
+                                <tr><td>DD Debounce (Hits)</td><td id="analysis-dd-debounce">15</td></tr>
+                                <tr><td>News Block</td><td id="analysis-news">-</td></tr>
+                                <tr><td>Remote Pause</td><td id="analysis-remote">-</td></tr>
+                                <tr><td>Strategy</td><td id="analysis-strategy">-</td></tr>
+                                <tr><td>Timeframe</td><td id="analysis-timeframe">-</td></tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-2 g-lg-3 mt-1">
+                <div class="col-12 col-md-6 col-lg-6">
+                    <div class="report-card h-100">
+                        <div class="fw-semibold mb-2">Spread & Volatility Guard</div>
+                        <div class="table-responsive dashboard-table-responsive">
+                            <table class="monitor-table">
+                                <tr><td>Spread Points</td><td id="analysis-spread">-</td></tr>
+                                <tr><td>ATR Points</td><td id="analysis-atr">-</td></tr>
+                                <tr><td>Spread/ATR Ratio</td><td id="analysis-spread-ratio">-</td></tr>
+                                <tr><td>Spread Expensive</td><td id="analysis-spread-expensive">-</td></tr>
+                                <tr><td>Support Level</td><td id="analysis-support">-</td></tr>
+                                <tr><td>Resistance Level</td><td id="analysis-resistance">-</td></tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-lg-6">
+                    <div class="report-card h-100">
+                        <div class="fw-semibold mb-2">Session Gates</div>
+                        <div class="table-responsive dashboard-table-responsive">
+                            <table class="monitor-table">
+                                <tr><td>Sydney Session</td><td id="analysis-session-sydney">-</td></tr>
+                                <tr><td>Asia Session</td><td id="analysis-session-asia">-</td></tr>
+                                <tr><td>Europe Session</td><td id="analysis-session-europe">-</td></tr>
+                                <tr><td>US Session</td><td id="analysis-session-us">-</td></tr>
+                                <tr><td>EA Server Time</td><td id="analysis-server-time">-</td></tr>
+                                <tr><td>Snapshot Age</td><td id="analysis-age">-</td></tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-2 g-lg-3 mt-1">
+                <div class="col-12 col-md-6 col-lg-6">
+                    <div class="report-card h-100">
+                        <div class="fw-semibold mb-2">Multi-TF Bias Matrix</div>
+                        <div class="table-responsive dashboard-table-responsive">
+                            <table class="monitor-table">
+                                <tr><td>M1</td><td id="analysis-mtf-m1">-</td></tr>
+                                <tr><td>M5</td><td id="analysis-mtf-m5">-</td></tr>
+                                <tr><td>M15</td><td id="analysis-mtf-m15">-</td></tr>
+                                <tr><td>H1</td><td id="analysis-mtf-h1">-</td></tr>
+                                <tr><td>Summary Bias</td><td id="analysis-mtf-summary-bias">-</td></tr>
+                                <tr><td>Summary Score</td><td id="analysis-mtf-summary-score">-</td></tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-lg-6">
+                    <div class="report-card h-100">
+                        <div class="fw-semibold mb-2">Professional Reasoning</div>
+                        <div id="analysis-reason-summary" class="small mb-2 text-body">Menunggu snapshot analisis terbaru.</div>
+                        <div id="analysis-reason-details" class="small text-secondary">-</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Signal Reason Breakdown Timeline -->
+            <div class="row g-3 mt-4">
+                <div class="col-12">
+                    <div class="report-card">
+                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                            <div class="fw-semibold">Signal Reason Breakdown (Timeline)</div>
+                            <div class="small text-secondary">Last 10 signal changes</div>
+                        </div>
+                        <div id="signal-reason-timeline" style="max-height: 400px; overflow-y: auto;">
+                            <div class="text-secondary small p-3 text-center">Waiting for signal history...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="workspace-pane-reports" class="workspace-pane">
+        <div class="settings-card p-4 p-lg-5">
+            <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-4">
+                <div>
+                    <div class="eyebrow mb-2">Summary Report</div>
+                    <h2 class="h4 mb-1">History Trade, WR, dan Profit Periodik</h2>
+                    <p class="text-secondary mb-0">Laporan trade yang bisa diatur limit, plus hard reset profit per account.</p>
+                    <div id="license-lock-msg-reports" class="small text-secondary mt-1"></div>
+                </div>
+                <div class="d-flex align-items-center gap-2 flex-wrap">
+                    <label for="rep-history-limit" class="small text-secondary mb-0">History rows</label>
+                    <select id="rep-history-limit" class="form-select form-select-sm report-toolbar-select" style="width: 100px;">
+                        <option value="5">5</option>
+                        <option value="10" selected>10</option>
+                        <option value="25">25</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                    </select>
+                    <button type="button" class="btn btn-sm btn-outline-secondary report-toolbar-btn" id="rep-refresh-btn">Refresh</button>
+                    <button type="button" class="btn btn-sm btn-outline-danger report-toolbar-btn" id="rep-reset-wr-btn">Hard Reset Profit</button>
+                </div>
+            </div>
+
+            <div class="row g-2 g-lg-3 mb-3">
+                <div class="col-6 col-lg-3">
+                    <div class="stat-card">
+                        <div class="stat-label">Win Rate</div>
+                        <div class="stat-value" id="rep-winrate">0.00%</div>
+                    </div>
+                </div>
+                <div class="col-6 col-lg-3">
+                    <div class="stat-card">
+                        <div class="stat-label">Daily Profit</div>
+                        <div class="stat-value" id="rep-profit-daily">0.00</div>
+                    </div>
+                </div>
+                <div class="col-6 col-lg-3">
+                    <div class="stat-card">
+                        <div class="stat-label">Weekly Profit</div>
+                        <div class="stat-value" id="rep-profit-weekly">0.00</div>
+                    </div>
+                </div>
+                <div class="col-6 col-lg-3">
+                    <div class="stat-card">
+                        <div class="stat-label">Monthly Profit</div>
+                        <div class="stat-value" id="rep-profit-monthly">0.00</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-3">
+                <div class="col-lg-5">
+                    <div class="report-card h-100">
+                        <div class="fw-semibold mb-2">Konfigurasi Aktif</div>
+                        <div class="table-responsive dashboard-table-responsive">
+                            <table class="monitor-table">
+                                <tr><td>Account ID</td><td id="rep-account-id">-</td></tr>
+                                <tr><td>Strategi</td><td id="rep-strategy">-</td></tr>
+                                <tr><td>News Severity</td><td id="rep-news-severity">-</td></tr>
+                                <tr><td>SNR Filter</td><td id="rep-snr">-</td></tr>
+                                <tr><td>Status Save</td><td id="rep-last-save">-</td></tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-7">
+                    <div class="report-card h-100">
+                        <div class="fw-semibold mb-2">Catatan Eksekusi</div>
+                        <div class="table-responsive dashboard-table-responsive">
+                            <table class="monitor-table">
+                                <tr><td>Pause Before News</td><td id="rep-before-news">0</td></tr>
+                                <tr><td>Pause After News</td><td id="rep-after-news">0</td></tr>
+                                <tr><td>Waktu Update Widget</td><td id="rep-widget-time">-</td></tr>
+                                <tr><td>Jumlah Event News</td><td id="rep-news-count">0</td></tr>
+                                <tr><td>Mode Tema</td><td id="rep-theme">Light</td></tr>
+                                <tr><td>WR (W/L)</td><td id="rep-wl">0/0</td></tr>
+                                <tr><td>Realized Profit</td><td id="rep-profit-realized">0.00</td></tr>
+                                <tr><td>Reset Baseline</td><td id="rep-reset-at">Belum pernah</td></tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-3 mt-1">
+                <div class="col-12">
+                    <div class="report-card">
+                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
+                            <div class="fw-semibold">History Trades</div>
+                            <div class="d-flex align-items-center gap-2 flex-wrap">
+                                <span id="rep-history-page-info" class="small text-secondary">Page 1/1 • 0 rows</span>
+                                <button type="button" class="btn btn-sm btn-outline-secondary" id="rep-history-prev">Prev</button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary" id="rep-history-next">Next</button>
+                            </div>
+                        </div>
+                        <div class="table-responsive dashboard-table-responsive">
+                            <table class="table table-sm align-middle telemetry-table mb-0">
+                                <thead>
+                                <tr>
+                                    <th>Ticket</th>
+                                    <th>Symbol</th>
+                                    <th>Type</th>
+                                    <th>Lot</th>
+                                    <th>Open Price</th>
+                                    <th>Close Price</th>
+                                    <th>Profit</th>
+                                    <th>Swap</th>
+                                    <th>Commission</th>
+                                    <th>Close Time</th>
+                                </tr>
+                                </thead>
+                                <tbody id="rep-history-body">
+                                <tr><td colspan="10" class="text-secondary">Belum ada trade history.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <details id="calc-debug-wrap" class="mt-3" style="display:none;">
+                            <summary class="small text-secondary">Calculation Debug (monitoring + report)</summary>
+                            <pre id="calc-debug-output" class="calc-debug-box">Belum ada data debug.</pre>
+                        </details>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<style>
+    :root {
+        --billing-float-bottom-offset: max(0.55rem, calc(0.55rem + env(safe-area-inset-bottom)));
+        --billing-float-card-bottom-offset: max(4.9rem, calc(4.9rem + env(safe-area-inset-bottom)));
+    }
+    .billing-float-chat-toggle {
+        position: fixed;
+        right: 1rem;
+        bottom: var(--billing-float-bottom-offset);
+        z-index: 6205;
+        width: 36px;
+        height: 36px;
+        border-radius: 11px;
+        border: 1px solid rgba(29, 78, 216, 0.28);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: #1d4ed8;
+        background: rgba(241, 245, 249, 0.92);
+        backdrop-filter: blur(8px);
+        box-shadow: 0 8px 18px rgba(15, 23, 42, 0.24);
+        transition: transform .2s ease, box-shadow .2s ease;
+    }
+    .billing-float-chat-toggle:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 24px rgba(15, 23, 42, 0.32);
+    }
+    body[data-theme='dark'] .billing-float-chat-toggle {
+        color: #93c5fd;
+        background: rgba(15, 23, 42, 0.86);
+        border-color: rgba(96, 165, 250, 0.45);
+        box-shadow: 0 9px 20px rgba(2, 6, 23, 0.55);
+    }
+    .billing-float-chat-unread {
+        position: absolute;
+        top: -4px;
+        right: -4px;
+        min-width: 22px;
+        height: 22px;
+        border-radius: 999px;
+        background: #ef4444;
+        color: #fff;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 6px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        border: 2px solid rgba(255, 255, 255, 0.95);
+    }
+    .billing-float-chat-unread.is-warning {
+        top: auto;
+        right: -6px;
+        bottom: -4px;
+        background: #f59e0b;
+    }
+    .billing-float-chat-unread.is-hidden {
+        display: none;
+    }
+    .billing-float-chat-card {
+        position: fixed;
+        right: 1rem;
+        bottom: var(--billing-float-card-bottom-offset);
+        z-index: 6205;
+        width: min(420px, calc(100vw - 1.5rem));
+        height: min(72vh, 560px);
+        border: 1px solid rgba(148, 163, 184, 0.3);
+        border-radius: 16px;
+        background: var(--surface, #fff);
+        box-shadow: 0 20px 34px rgba(15, 23, 42, 0.28);
+        overflow: hidden;
+        overscroll-behavior: contain;
+        display: none;
+        grid-template-rows: auto 1fr auto;
+    }
+    body.billing-chat-lock-scroll {
+        overflow: hidden;
+    }
+    .billing-float-chat-card.is-admin {
+        width: min(1040px, calc(100vw - 2rem));
+        height: min(76vh, 660px);
+        max-width: calc(100vw - 2rem);
+        max-height: calc(100dvh - var(--billing-float-card-bottom-offset) - 0.9rem);
+    }
+    body[data-theme='dark'] .billing-float-chat-card {
+        background: #0f172a;
+        border-color: rgba(148, 163, 184, 0.32);
+    }
+    .billing-float-chat-card.is-open {
+        display: grid;
+    }
+    .billing-float-chat-head,
+    .billing-float-chat-form {
+        padding: 0.85rem 0.95rem;
+        border-bottom: 1px solid rgba(148, 163, 184, 0.24);
+    }
+    .billing-float-chat-shell {
+        height: 100%;
+        min-height: 0;
+        overflow: hidden;
+    }
+    .billing-float-chat-form {
+        border-bottom: 0;
+        border-top: 1px solid rgba(148, 163, 184, 0.24);
+    }
+    .billing-chat-compose {
+        position: relative;
+    }
+    .billing-chat-compose textarea {
+        padding-right: 3.1rem;
+        min-height: 72px;
+        resize: vertical;
+    }
+    .billing-chat-send-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        border: 1px solid rgba(59, 130, 246, 0.45);
+        background: rgba(37, 99, 235, 0.18);
+        color: #93c5fd;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        position: absolute;
+        right: 0.55rem;
+        bottom: 0.55rem;
+        z-index: 2;
+    }
+    .billing-chat-send-icon svg {
+        width: 15px;
+        height: 15px;
+        display: block;
+    }
+    .billing-chat-send-icon:disabled {
+        opacity: 0.45;
+    }
+    .billing-float-chat-head-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    .billing-float-chat-close {
+        border: 0;
+        background: transparent;
+        color: var(--muted, #6b7280);
+        font-size: 1.1rem;
+        line-height: 1;
+        padding: 0.15rem 0.35rem;
+    }
+    .billing-float-chat-messages {
+        padding: 0.85rem 0.95rem;
+        display: grid;
+        gap: 0.7rem;
+        align-content: start;
+        min-height: 0;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        touch-action: pan-y;
+        -webkit-overflow-scrolling: touch;
+    }
+    .billing-float-chat-row {
+        display: flex;
+    }
+    .billing-float-chat-row.is-self {
+        justify-content: flex-end;
+    }
+    .billing-float-chat-bubble {
+        max-width: min(90%, 320px);
+        border-radius: 14px;
+        padding: 0.65rem 0.75rem;
+        background: rgba(148, 163, 184, 0.12);
+    }
+    .billing-float-chat-row.is-self .billing-float-chat-bubble {
+        background: rgba(37, 99, 235, 0.16);
+    }
+    .billing-float-chat-meta {
+        font-size: 0.7rem;
+        margin-bottom: 0.25rem;
+        color: var(--muted, #6b7280);
+        font-weight: 700;
+    }
+    .billing-float-chat-text {
+        white-space: pre-wrap;
+        line-height: 1.45;
+        font-size: 0.92rem;
+        color: var(--ink, #0f172a);
+    }
+    body[data-theme='dark'] .billing-float-chat-text {
+        color: #e5e7eb;
+    }
+    .billing-float-chat-empty {
+        border: 1px dashed rgba(148, 163, 184, 0.32);
+        border-radius: 12px;
+        padding: 0.85rem;
+        color: var(--muted, #6b7280);
+        font-size: 0.88rem;
+    }
+    .billing-admin-summary {
+        border: 1px dashed rgba(148, 163, 184, 0.32);
+        border-radius: 12px;
+        padding: 0.8rem;
+        margin-bottom: 0.65rem;
+        background: rgba(148, 163, 184, 0.08);
+    }
+    .billing-admin-thread-item {
+        border: 1px solid rgba(148, 163, 184, 0.28);
+        border-radius: 10px;
+        padding: 0.6rem 0.7rem;
+        background: rgba(148, 163, 184, 0.08);
+    }
+    .billing-admin-thread-item + .billing-admin-thread-item {
+        margin-top: 0.5rem;
+    }
+    .billing-admin-inbox {
+        display: grid;
+        --billing-admin-rail: clamp(86px, 9vw, 96px);
+        --billing-admin-avatar-btn: clamp(56px, 6.2vw, 60px);
+        --billing-admin-avatar-img: clamp(44px, 5.2vw, 48px);
+        grid-template-columns: var(--billing-admin-rail) minmax(0, 1fr);
+        grid-template-rows: auto minmax(0, 1fr);
+        grid-template-areas:
+            'search search'
+            'sidebar main';
+        gap: 0.75rem;
+        height: 100%;
+    }
+    .billing-admin-search-top {
+        grid-area: search;
+    }
+    .billing-admin-sidebar {
+        grid-area: sidebar;
+        border: 1px solid rgba(148, 163, 184, 0.28);
+        border-radius: 12px;
+        padding: 0.65rem;
+        display: grid;
+        grid-template-rows: 1fr;
+        gap: 0.55rem;
+        background: linear-gradient(180deg, rgba(148, 163, 184, 0.11), rgba(148, 163, 184, 0.04));
+        min-height: 0;
+        align-self: start;
+    }
+    #billing-admin-user-search {
+        border-radius: 10px;
+        font-size: 0.82rem;
+    }
+    .billing-admin-user-list {
+        min-height: 0;
+        overflow-y: auto;
+        overflow-x: hidden;
+        display: grid;
+        gap: 0.45rem;
+        justify-items: center;
+        max-height: 360px;
+        padding: 0.2rem 0.15rem;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+        overscroll-behavior: contain;
+        touch-action: pan-y;
+    }
+    .billing-admin-user-list::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+    }
+    .billing-admin-user-item {
+        border: 1px solid rgba(148, 163, 184, 0.28);
+        border-radius: 999px;
+        background: rgba(148, 163, 184, 0.08);
+        padding: 0;
+        text-align: center;
+        width: var(--billing-admin-avatar-btn);
+        height: var(--billing-admin-avatar-btn);
+        max-width: var(--billing-admin-avatar-btn);
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        box-sizing: border-box;
+        transition: border-color .16s ease, box-shadow .16s ease, background-color .16s ease;
+    }
+    .billing-admin-user-item:hover {
+        border-color: rgba(96, 165, 250, 0.5);
+        background: rgba(148, 163, 184, 0.14);
+    }
+    .billing-admin-user-item.is-active {
+        border-color: rgba(37, 99, 235, 0.5);
+        box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.16);
+    }
+    .billing-admin-user-avatar {
+        width: var(--billing-admin-avatar-img);
+        height: var(--billing-admin-avatar-img);
+        border-radius: 999px;
+        margin: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, rgba(30, 64, 175, 0.92), rgba(59, 130, 246, 0.75));
+        border: 1px solid rgba(148, 163, 184, 0.35);
+        overflow: hidden;
+    }
+    .billing-admin-user-avatar img {
+        width: 94%;
+        height: 94%;
+        object-fit: contain;
+        object-position: center;
+        display: block;
+        border-radius: 999px;
+    }
+    .billing-admin-main {
+        grid-area: main;
+        border: 1px solid rgba(148, 163, 184, 0.28);
+        border-radius: 12px;
+        display: grid;
+        grid-template-rows: auto 1fr auto auto;
+        min-height: 0;
+        overflow: hidden;
+        background: rgba(15, 23, 42, 0.08);
+    }
+    .billing-admin-head {
+        padding: 0.7rem 0.8rem;
+        border-bottom: 1px solid rgba(148, 163, 184, 0.24);
+        background: rgba(15, 23, 42, 0.08);
+    }
+    .billing-admin-head-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.6rem;
+    }
+    .billing-admin-thread-info {
+        min-width: 0;
+    }
+    .billing-admin-thread-clear {
+        border: 1px solid rgba(148, 163, 184, 0.34);
+        background: rgba(148, 163, 184, 0.08);
+        color: var(--muted, #6b7280);
+        border-radius: 9px;
+        width: 30px;
+        height: 30px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        line-height: 1;
+        flex: 0 0 auto;
+        transition: border-color .16s ease, color .16s ease, background-color .16s ease;
+    }
+    .billing-admin-thread-clear:hover:not(:disabled) {
+        border-color: rgba(239, 68, 68, 0.45);
+        color: #ef4444;
+        background: rgba(239, 68, 68, 0.12);
+    }
+    .billing-admin-thread-clear:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+    }
+    .billing-admin-pending-list {
+        border-top: 1px solid rgba(148, 163, 184, 0.24);
+        padding: 0.55rem 0.65rem;
+        max-height: 104px;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        touch-action: pan-y;
+        -webkit-overflow-scrolling: touch;
+        transition: max-height .18s ease, padding .18s ease;
+    }
+    .billing-admin-pending-list.is-empty {
+        max-height: 34px;
+        padding: 0.3rem 0.65rem;
+        overflow: hidden;
+    }
+    .billing-admin-pending-item {
+        border: 1px solid rgba(148, 163, 184, 0.28);
+        border-radius: 10px;
+        padding: 0.52rem 0.6rem;
+        background: rgba(148, 163, 184, 0.08);
+    }
+    .billing-admin-pending-item + .billing-admin-pending-item {
+        margin-top: 0.45rem;
+    }
+    .billing-admin-pending-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.35rem;
+        margin-top: 0.45rem;
+    }
+    .billing-admin-action-btn {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        border: 1px solid rgba(148, 163, 184, 0.35);
+        background: rgba(148, 163, 184, 0.1);
+        color: var(--ink, #111827);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .billing-admin-action-btn.is-approve {
+        border-color: rgba(34, 197, 94, 0.45);
+        color: #16a34a;
+    }
+    .billing-admin-action-btn.is-reject {
+        border-color: rgba(239, 68, 68, 0.45);
+        color: #dc2626;
+    }
+    .billing-admin-action-btn svg {
+        width: 15px;
+        height: 15px;
+        display: block;
+    }
+    .billing-admin-help {
+        margin-top: 0.45rem;
+    }
+    @media (max-width: 991.98px) {
+        .billing-float-chat-card.is-admin {
+            left: 0.75rem;
+            right: 0.75rem;
+            width: auto;
+            max-width: none;
+            height: min(74vh, 620px);
+            max-height: calc(100dvh - var(--billing-float-card-bottom-offset) - 0.8rem);
+            bottom: calc(var(--billing-float-card-bottom-offset) + 0.35rem);
+        }
+        .billing-admin-inbox {
+            --billing-admin-rail: 100%;
+            --billing-admin-avatar-btn: 58px;
+            --billing-admin-avatar-img: 46px;
+            grid-template-columns: 1fr;
+            grid-template-rows: auto auto minmax(0, 1fr);
+            grid-template-areas:
+                'search'
+                'sidebar'
+                'main';
+        }
+        .billing-admin-sidebar {
+            gap: 0.45rem;
+            padding: 0.5rem;
+        }
+        .billing-admin-user-list {
+            grid-auto-flow: column;
+            grid-auto-columns: minmax(var(--billing-admin-avatar-btn), var(--billing-admin-avatar-btn));
+            justify-items: stretch;
+            justify-content: flex-start;
+            overflow-x: auto;
+            overflow-y: hidden;
+            padding-bottom: 0.25rem;
+            min-height: 66px;
+            align-items: center;
+            max-height: none;
+        }
+        .billing-admin-user-item {
+            max-width: var(--billing-admin-avatar-btn);
+            flex: 0 0 var(--billing-admin-avatar-btn);
+        }
+        .billing-admin-main {
+            min-height: 0;
+            grid-template-rows: auto minmax(0, 1fr) auto auto;
+        }
+        .billing-admin-main .billing-float-chat-messages {
+            padding: 0.58rem 0.62rem;
+        }
+        .billing-admin-pending-list {
+            max-height: 78px;
+        }
+        .billing-admin-pending-list.is-empty {
+            max-height: 30px;
+        }
+        .billing-admin-main .billing-float-chat-form {
+            padding: 0.55rem 0.62rem;
+            position: sticky;
+            bottom: 0;
+            background: var(--surface, #fff);
+            z-index: 2;
+        }
+        body[data-theme='dark'] .billing-admin-main .billing-float-chat-form {
+            background: #0f172a;
+        }
+    }
+    @media (min-width: 768px) and (max-width: 991.98px) {
+        .billing-admin-main {
+            grid-template-rows: auto minmax(0, 1fr) auto auto;
+        }
+        .billing-admin-pending-list {
+            max-height: 70px;
+        }
+        .billing-admin-main .billing-float-chat-messages {
+            padding-bottom: 0.65rem;
+        }
+    }
+    @media (max-width: 767.98px) {
+        .billing-float-chat-card {
+            right: 0.75rem;
+            width: calc(100vw - 1.5rem);
+            height: min(64vh, 520px);
+        }
+        .billing-float-chat-toggle {
+            right: 0.75rem;
+        }
+        .billing-float-chat-card.is-admin {
+            height: min(66vh, 560px);
+        }
+        .billing-admin-inbox {
+            gap: 0.42rem;
+        }
+        .billing-admin-main {
+            grid-template-rows: auto minmax(0, 1fr) auto auto;
+        }
+        .billing-admin-head {
+            padding: 0.58rem 0.62rem;
+        }
+        .billing-admin-main .billing-float-chat-messages {
+            padding: 0.55rem 0.6rem;
+            gap: 0.55rem;
+        }
+        .billing-admin-pending-list {
+            max-height: 64px;
+        }
+        .billing-admin-pending-list.is-empty {
+            max-height: 28px;
+            padding: 0.25rem 0.55rem;
+        }
+        .billing-admin-main .billing-float-chat-form {
+            position: sticky;
+            bottom: 0;
+            background: var(--surface, #fff);
+            z-index: 2;
+            padding: 0.5rem 0.58rem;
+        }
+        body[data-theme='dark'] .billing-admin-main .billing-float-chat-form {
+            background: #0f172a;
+        }
+        .billing-admin-help {
+            display: none;
+        }
+        .billing-chat-send-icon {
+            width: 34px;
+            height: 34px;
+            flex-basis: 34px;
+        }
+    }
+    .billing-float-chat-icon {
+        width: 22px;
+        height: 22px;
+        display: block;
+        transition: opacity .2s ease, transform .2s ease;
+    }
+    .billing-float-chat-icon.is-close {
+        display: none;
+        width: 18px;
+        height: 18px;
+    }
+    .billing-float-chat-toggle.is-open .billing-float-chat-icon.is-chat {
+        display: none;
+    }
+    .billing-float-chat-toggle.is-open .billing-float-chat-icon.is-close {
+        display: block;
+        transform: scale(1.05);
+    }
+    .billing-float-chat-toggle.is-open {
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    /* Keep dashboard admin livechat visuals consistent with admin license page. */
+    .admin-chat-float-toggle {
+        position: fixed;
+        right: 1rem;
+        bottom: var(--billing-float-bottom-offset);
+        z-index: 6205;
+        width: 36px;
+        height: 36px;
+        border-radius: 11px;
+        border: 1px solid rgba(29, 78, 216, 0.28);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: #1d4ed8;
+        background: rgba(241, 245, 249, 0.92);
+        backdrop-filter: blur(8px);
+        box-shadow: 0 8px 18px rgba(15, 23, 42, 0.24);
+    }
+    .admin-chat-float-card {
+        position: fixed;
+        right: 1rem;
+        bottom: var(--billing-float-card-bottom-offset);
+        z-index: 6205;
+        width: min(980px, calc(100vw - 1.5rem));
+        height: min(82vh, 720px);
+        border: 1px solid rgba(148, 163, 184, 0.3);
+        border-radius: 16px;
+        background: var(--surface, #fff);
+        box-shadow: 0 20px 34px rgba(15, 23, 42, 0.28);
+        overflow: hidden;
+        display: none;
+        grid-template-rows: auto 1fr;
+    }
+    .admin-chat-float-card.is-open {
+        display: grid;
+    }
+    .admin-chat-float-head {
+        padding: .75rem .85rem;
+        padding-right: 2.7rem;
+        border-bottom: 1px solid rgba(148, 163, 184, 0.24);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: .75rem;
+        position: relative;
+    }
+    .admin-chat-float-close {
+        position: absolute;
+        right: .55rem;
+        top: .55rem;
+        width: 28px;
+        height: 28px;
+        border: 0;
+        background: transparent;
+        color: var(--muted, #6b7280);
+        font-size: 1.1rem;
+        line-height: 1;
+        padding: 0;
+        border-radius: 9px;
+        border: 1px solid rgba(148, 163, 184, 0.28);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .admin-chat-float-body {
+        padding: .7rem;
+        overflow: hidden;
+        min-height: 0;
+    }
+    .admin-chat-inbox {
+        display: grid;
+        --admin-chat-rail: clamp(84px, 9vw, 96px);
+        --admin-chat-avatar-btn: clamp(56px, 6vw, 60px);
+        --admin-chat-avatar-img: clamp(44px, 4.8vw, 48px);
+        grid-template-columns: var(--admin-chat-rail) minmax(0, 1fr);
+        grid-template-rows: auto minmax(0, 1fr);
+        grid-template-areas: 'search search' 'sidebar main';
+        gap: .65rem;
+        height: 100%;
+        min-height: 0;
+    }
+    .admin-chat-search-top { grid-area: search; }
+    .admin-chat-sidebar {
+        grid-area: sidebar;
+        border: 1px solid rgba(148, 163, 184, 0.28);
+        border-radius: 12px;
+        padding: .55rem .4rem;
+        min-height: 0;
+        overflow: hidden;
+        background: rgba(148, 163, 184, 0.08);
+    }
+    .admin-chat-user-list {
+        min-height: 0;
+        max-height: 100%;
+        overflow-y: auto;
+        overflow-x: hidden;
+        display: grid;
+        justify-items: center;
+        align-content: start;
+        gap: .45rem;
+        padding: .1rem;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+    .admin-chat-user-list::-webkit-scrollbar { width: 0; height: 0; }
+    .admin-chat-user-item {
+        border: 1px solid rgba(148, 163, 184, 0.28);
+        border-radius: 999px;
+        background: rgba(148, 163, 184, 0.08);
+        width: var(--admin-chat-avatar-btn);
+        height: var(--admin-chat-avatar-btn);
+        max-width: var(--admin-chat-avatar-btn);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        box-sizing: border-box;
+    }
+    .admin-chat-user-item.is-active {
+        border-color: rgba(59, 130, 246, .58);
+        box-shadow: 0 0 0 2px rgba(59, 130, 246, .18);
+    }
+    .admin-chat-main {
+        grid-area: main;
+        border: 1px solid rgba(148, 163, 184, 0.28);
+        border-radius: 12px;
+        display: grid;
+        grid-template-rows: auto minmax(0, 1fr) auto auto;
+        min-height: 0;
+        overflow: hidden;
+        background: rgba(15, 23, 42, 0.08);
+    }
+    .admin-chat-main-head {
+        padding: .65rem .75rem;
+        border-bottom: 1px solid rgba(148, 163, 184, 0.24);
+    }
+    .admin-chat-main-head-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: .6rem;
+    }
+    .admin-chat-thread-clear {
+        border: 1px solid rgba(148, 163, 184, 0.28);
+        background: rgba(148, 163, 184, 0.08);
+        color: var(--muted, #6b7280);
+        border-radius: 9px;
+        width: 30px;
+        height: 30px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        line-height: 1;
+        flex: 0 0 auto;
+    }
+    .admin-chat-pending-list {
+        border-top: 1px solid rgba(148, 163, 184, 0.24);
+        padding: .55rem .65rem;
+        max-height: 96px;
+        overflow-y: auto;
+    }
+    .admin-chat-compose {
+        position: relative;
+    }
+    .admin-chat-compose textarea {
+        padding-right: 3.1rem;
+        min-height: 56px;
+        resize: vertical;
+        display: block;
+    }
+    .admin-chat-send-icon {
+        width: 34px;
+        height: 34px;
+        border-radius: 10px;
+        border: 1px solid rgba(59, 130, 246, 0.45);
+        background: rgba(37, 99, 235, 0.18);
+        color: #93c5fd;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        position: absolute;
+        right: .45rem;
+        bottom: .45rem;
+        z-index: 2;
+    }
+    @media (max-width: 991.98px) {
+        .admin-chat-float-card.billing-float-chat-card.is-admin {
+            left: .55rem;
+            right: .55rem;
+            width: auto;
+            top: max(.6rem, env(safe-area-inset-top));
+            bottom: max(.6rem, env(safe-area-inset-bottom));
+            height: auto;
+            max-height: calc(100dvh - max(1.2rem, calc(env(safe-area-inset-top) + env(safe-area-inset-bottom) + 1.2rem)));
+            border-radius: 18px;
+        }
+        .admin-chat-inbox {
+            --admin-chat-rail: 100%;
+            --admin-chat-avatar-btn: 52px;
+            --admin-chat-avatar-img: 40px;
+            grid-template-columns: 1fr;
+            grid-template-rows: auto auto minmax(0, 1fr);
+            grid-template-areas: 'search' 'sidebar' 'main';
+            gap: .45rem;
+        }
+        .admin-chat-float-body {
+            min-height: 0;
+        }
+    }
+    @media (max-width: 767.98px) {
+        .admin-chat-float-card.billing-float-chat-card.is-admin {
+            left: .5rem;
+            right: .5rem;
+            top: max(.45rem, env(safe-area-inset-top));
+            bottom: max(.45rem, env(safe-area-inset-bottom));
+            border-radius: 16px;
+        }
+    }
+</style>
+
+@include('partials.admin-livechat-shell', ['chatVariant' => $isAdmin ? 'admin' : 'billing', 'isAdmin' => $isAdmin])
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+const ACCOUNT_ROWS = @json($accounts->values());
+const ACCOUNTS = @json($accounts->keyBy('account_id'));
+const NEWS_PROVIDER_LABEL = @json(app(\App\Services\EconomicCalendarService::class)->providerLabel());
+const ACCOUNTS_BY_PAIR = {};
+const ACCOUNT_PAIR_INDEX = {};
+const SELECTED_PAIR_BY_ACCOUNT = {};
+let NEWS_ITEMS = @json($newsPayload);
+const INITIAL_NEWS_ITEMS = Array.isArray(NEWS_ITEMS) ? NEWS_ITEMS.slice() : [];
+let NEWS_HISTORY_ITEMS = [];
+const NEWS_HISTORY_MAX_ITEMS = 7;
+let NEWS_LAST_FETCH_MS = 0;
+let NEWS_IS_LIVE = false;
+const CURRENT_USER = @json(['name' => $currentUser->name, 'username' => $currentUser->username, 'email' => $currentUser->email]);
+const MANAGED_USERS = @json($managedUsers ?? []);
+const IS_ADMIN = @json($isAdmin);
+const LICENSE_SNAPSHOTS = @json($licenseSnapshots ?? []);
+const LICENSE_ENFORCEMENT_ENABLED = @json((bool) ($licenseEnforcementEnabled ?? false));
+const AUTH_SESSION_ID = @json(session()->getId());
+const DASHBOARD_TAB_STORAGE_KEY = 'ea_dashboard_active_tab_v1';
+const DASHBOARD_TAB_SESSION_KEY = 'ea_dashboard_active_tab_session_v1';
+const DASHBOARD_ACCOUNT_STORAGE_KEY = 'ea_dashboard_active_account_v1';
+const DASHBOARD_ACCOUNT_SESSION_KEY = 'ea_dashboard_active_account_session_v1';
+const DASHBOARD_PAIR_STORAGE_KEY = 'ea_dashboard_selected_pair_map_v1';
+const DASHBOARD_PAIR_SESSION_KEY = 'ea_dashboard_selected_pair_map_session_v1';
+const DEFAULT_WORKSPACE_TAB = 'settings';
+const WORKSPACE_TABS = ['settings', 'logic', 'monitoring', 'analysis', 'reports'];
+let BULK_CONTROL_WHITELIST = @json($bulkControlWhitelist ?? []);
+let BULK_CONTROL_ENABLED = @json((bool) ($bulkControlEnabled ?? true));
+let ACCOUNT_ALIASES = @json($accountAliases ?? []);
+let ACCOUNT_SEARCH_QUERY = '';
+const ROUTES = {
+    profileUpdate: @json(route('profile.update')),
+    accountStore: @json(route('dashboard.accounts.store')),
+    accountDelete: @json(route('dashboard.accounts.delete')),
+    licenseRenew: @json($isAdmin ? route('licenses.admin.page') : route('licenses.billing.page')),
+    userStore: @json(route('dashboard.users.store')),
+    userUpdateBase: @json(url('/dashboard/users')),
+    newsLive: @json(route('dashboard.news.live')),
+    newsCalendarApi: @json(url('/api/v1/economic-calendar')),
+    liveStream: @json(route('dashboard.live-stream')),
+    monitoringLive: @json(route('dashboard.monitoring.live')),
+    reportsLive: @json(route('dashboard.reports.live')),
+    reportsResetWr: @json(route('dashboard.reports.reset-wr')),
+    botToggle: @json(route('dashboard.bot.toggle')),
+    botBulkToggle: @json(route('dashboard.bot.toggle-all')),
+    botWhitelistGet: @json(route('dashboard.bot.whitelist.get')),
+    botWhitelistUpdate: @json(route('dashboard.bot.whitelist.update')),
+    accountAliasesGet: @json(route('dashboard.account-aliases.get')),
+    accountAliasesUpdate: @json(route('dashboard.account-aliases.update')),
+    botResetDd: @json(route('dashboard.bot.reset-dd')),
+    positionsCloseAll: @json(route('dashboard.positions.close-all')),
+    positionsCloseOne: @json(route('dashboard.positions.close-one')),
+    billingChatThread: @json(route('licenses.chat.thread')),
+    billingChatUnread: @json(route('licenses.chat.unread')),
+    billingChatSend: @json(route('licenses.chat.send')),
+    billingAdminThreads: @json(route('licenses.admin.chat.threads')),
+    billingAdminDecisionBase: @json(url('/admin/licenses/billing')),
+};
+
+let DASHBOARD_LIVE_SOURCE = null;
+let DASHBOARD_FALLBACK_MONITORING_TIMER = null;
+let DASHBOARD_FALLBACK_REPORT_TIMER = null;
+let DASHBOARD_STREAM_WATCHDOG_TIMER = null;
+let DASHBOARD_STREAM_RETRY_TIMER = null;
+let DASHBOARD_PAIR_DISCOVERY_TIMER = null;
+let DASHBOARD_LAST_STREAM_EVENT_AT = 0;
+let DASHBOARD_LAST_MONITORING_SYNC_AT = 0;
+let DASHBOARD_LAST_REPORT_SYNC_AT = 0;
+let DASHBOARD_LAST_REPORT_RECOVERY_AT = 0;
+let DASHBOARD_LAST_PAIR_DISCOVERY_AT = 0;
+
+const DASHBOARD_STALE_STREAM_MS = 4500;
+const DASHBOARD_STALE_MONITORING_MS = 2500;
+const DASHBOARD_STALE_REPORT_MS = 5500;
+const DASHBOARD_FALLBACK_MONITORING_MS = 1300;
+const DASHBOARD_FALLBACK_REPORT_MS = 2600;
+const DASHBOARD_PAIR_DISCOVERY_MS = 2200;
+
+const DASHBOARD_PAIR_DISCOVERY_INFLIGHT = {};
+
+const LIVE_LICENSE_COUNTDOWN = {
+    accountId: '',
+    active: false,
+    perpetual: false,
+    anchorSeconds: 0,
+    anchorMs: 0,
+    lastRenderedSeconds: null,
+};
+
+function touchDashboardStreamHeartbeat() {
+    const now = Date.now();
+    DASHBOARD_LAST_STREAM_EVENT_AT = now;
+    DASHBOARD_LAST_MONITORING_SYNC_AT = now;
+    DASHBOARD_LAST_REPORT_SYNC_AT = now;
+}
+
+function scheduleDashboardLiveReconnect(delayMs = 1200) {
+    if (DASHBOARD_STREAM_RETRY_TIMER) return;
+    DASHBOARD_STREAM_RETRY_TIMER = setTimeout(() => {
+        DASHBOARD_STREAM_RETRY_TIMER = null;
+        startDashboardLiveStream();
+    }, Math.max(400, Number(delayMs) || 1200));
+}
+
+function stopDashboardWatchdog() {
+    if (DASHBOARD_STREAM_WATCHDOG_TIMER) {
+        clearInterval(DASHBOARD_STREAM_WATCHDOG_TIMER);
+        DASHBOARD_STREAM_WATCHDOG_TIMER = null;
+    }
+    if (DASHBOARD_PAIR_DISCOVERY_TIMER) {
+        clearInterval(DASHBOARD_PAIR_DISCOVERY_TIMER);
+        DASHBOARD_PAIR_DISCOVERY_TIMER = null;
+    }
+}
+
+function startDashboardWatchdog() {
+    if (DASHBOARD_STREAM_WATCHDOG_TIMER) return;
+    DASHBOARD_STREAM_WATCHDOG_TIMER = setInterval(() => {
+        const accountId = currentAccount();
+        if (!accountId || document.hidden) return;
+
+        const now = Date.now();
+        const streamAge = now - Number(DASHBOARD_LAST_STREAM_EVENT_AT || 0);
+        const monitoringAge = now - Number(DASHBOARD_LAST_MONITORING_SYNC_AT || 0);
+        const reportAge = now - Number(DASHBOARD_LAST_REPORT_SYNC_AT || 0);
+        const streamOpen = Boolean(DASHBOARD_LIVE_SOURCE && DASHBOARD_LIVE_SOURCE.readyState === EventSource.OPEN);
+
+        if (!streamOpen || streamAge > DASHBOARD_STALE_STREAM_MS) {
+            startDashboardFallbackPolling();
+        } else {
+            stopDashboardFallbackPolling();
+        }
+
+        if (monitoringAge > DASHBOARD_STALE_MONITORING_MS) {
+            refreshMonitoringOnly();
+        }
+        if (reportAge > DASHBOARD_STALE_REPORT_MS) {
+            refreshReportOnly({ source: 'watchdog' });
+        }
+
+        if (!DASHBOARD_LIVE_SOURCE || DASHBOARD_LIVE_SOURCE.readyState === EventSource.CLOSED) {
+            scheduleDashboardLiveReconnect(1000);
+        }
+
+        const pairDiscoveryAge = now - Number(DASHBOARD_LAST_PAIR_DISCOVERY_AT || 0);
+        if (pairDiscoveryAge > DASHBOARD_PAIR_DISCOVERY_MS) {
+            refreshConnectedPairsRealtime();
+        }
+    }, 1200);
+
+    if (!DASHBOARD_PAIR_DISCOVERY_TIMER) {
+        DASHBOARD_PAIR_DISCOVERY_TIMER = setInterval(() => {
+            if (document.hidden) return;
+            refreshConnectedPairsRealtime();
+        }, DASHBOARD_PAIR_DISCOVERY_MS);
+    }
+}
+
+function stopDashboardFallbackPolling() {
+    if (DASHBOARD_FALLBACK_MONITORING_TIMER) {
+        clearInterval(DASHBOARD_FALLBACK_MONITORING_TIMER);
+        DASHBOARD_FALLBACK_MONITORING_TIMER = null;
+    }
+    if (DASHBOARD_FALLBACK_REPORT_TIMER) {
+        clearInterval(DASHBOARD_FALLBACK_REPORT_TIMER);
+        DASHBOARD_FALLBACK_REPORT_TIMER = null;
+    }
+}
+
+function startDashboardFallbackPolling() {
+    const accountId = currentAccount();
+    if (!accountId || document.hidden) return;
+
+    const now = Date.now();
+    const monitoringAge = now - Number(DASHBOARD_LAST_MONITORING_SYNC_AT || 0);
+    const reportAge = now - Number(DASHBOARD_LAST_REPORT_SYNC_AT || 0);
+    if (monitoringAge > 900) {
+        refreshMonitoringOnly();
+    }
+    if (reportAge > 1400) {
+        refreshReportOnly({ source: 'fallback-bootstrap' });
+    }
+
+    if (!DASHBOARD_FALLBACK_MONITORING_TIMER) {
+        DASHBOARD_FALLBACK_MONITORING_TIMER = setInterval(() => {
+            refreshMonitoringOnly();
+        }, DASHBOARD_FALLBACK_MONITORING_MS);
+    }
+
+    if (!DASHBOARD_FALLBACK_REPORT_TIMER) {
+        DASHBOARD_FALLBACK_REPORT_TIMER = setInterval(() => {
+            refreshReportOnly({ source: 'fallback' });
+        }, DASHBOARD_FALLBACK_REPORT_MS);
+    }
+}
+
+function stopDashboardLiveStream() {
+    if (DASHBOARD_LIVE_SOURCE) {
+        try {
+            DASHBOARD_LIVE_SOURCE.close();
+        } catch (_e) {
+        }
+        DASHBOARD_LIVE_SOURCE = null;
+    }
+    if (DASHBOARD_STREAM_RETRY_TIMER) {
+        clearTimeout(DASHBOARD_STREAM_RETRY_TIMER);
+        DASHBOARD_STREAM_RETRY_TIMER = null;
+    }
+}
+
+function buildLiveStreamUrl() {
+    const accountId = currentAccount();
+    if (!accountId) return '';
+    const pairSymbol = currentPairSymbol();
+
+    const limit = Math.max(5, Number(REPORTS_STATE.pendingPerPage ?? REPORTS_STATE.perPage ?? 10));
+    const page = Math.max(1, Number(REPORTS_STATE.pendingPage ?? REPORTS_STATE.page ?? 1));
+
+    return ROUTES.liveStream
+        + '?account_id=' + encodeURIComponent(accountId)
+        + '&pair_symbol=' + encodeURIComponent(pairSymbol)
+        + '&limit=' + encodeURIComponent(String(limit))
+        + '&page=' + encodeURIComponent(String(page))
+        + (CALC_DEBUG ? '&calc_debug=1' : '')
+        + '&_ts=' + Date.now();
+}
+
+function applyLiveStreamPayload(payload) {
+    const accountId = String(payload?.account_id || currentAccount() || '').trim();
+    const pairSymbol = normalizePairSymbol(payload?.pair_symbol || payload?.monitoring?.pair_symbol || payload?.report?.pair_symbol || currentPairSymbol());
+    if (!accountId) return;
+    DASHBOARD_LAST_STREAM_EVENT_AT = Date.now();
+
+    ensureAccountPairRegistered(accountId, pairSymbol);
+    setStateByAccountPair(accountId, pairSymbol, {});
+
+    const monitoring = payload?.monitoring;
+    if (monitoring && monitoring.success) {
+        const monitoringPatch = { ...monitoring };
+        delete monitoringPatch.success;
+        delete monitoringPatch.message;
+        ['daily_profit', 'weekly_profit', 'monthly_profit', 'realized_profit', 'wins', 'losses', 'win_rate_percent', 'history'].forEach((key) => {
+            delete monitoringPatch[key];
+        });
+        setStateByAccountPair(accountId, pairSymbol, monitoringPatch);
+        DASHBOARD_LAST_MONITORING_SYNC_AT = Date.now();
+        if (CALC_DEBUG) {
+            setStateByAccountPair(accountId, pairSymbol, { monitoring_calc_debug: monitoring?.calc_debug || null });
+        }
+
+        const hasLatestClosedTrades = safeArray(monitoring?.closed_trades_latest).length > 0;
+        const knownHistoryCount = safeArray(getStateByAccountPair(accountId, pairSymbol)?.history).length;
+        if (hasLatestClosedTrades && knownHistoryCount === 0) {
+            const now = Date.now();
+            if ((now - Number(DASHBOARD_LAST_REPORT_RECOVERY_AT || 0)) > 1200) {
+                DASHBOARD_LAST_REPORT_RECOVERY_AT = now;
+                refreshReportOnly({ source: 'stream-monitoring-bridge' });
+            }
+        }
+    }
+
+    const report = payload?.report;
+    if (report && report.success) {
+        const reportPatch = {
+            history: safeArray(report.history),
+            wins: Number(report?.wr?.wins ?? 0),
+            losses: Number(report?.wr?.losses ?? 0),
+            win_rate_percent: Number(report?.wr?.win_rate_percent ?? 0),
+            wr_reset_at: report?.wr?.reset_at || null,
+            realized_profit: Number(report?.profit?.realized ?? 0),
+            daily_profit: Number(report?.profit?.daily ?? 0),
+            weekly_profit: Number(report?.profit?.weekly ?? 0),
+            monthly_profit: Number(report?.profit?.monthly ?? 0),
+            report_daily_profit: Number(report?.profit?.daily ?? 0),
+            report_weekly_profit: Number(report?.profit?.weekly ?? 0),
+            report_monthly_profit: Number(report?.profit?.monthly ?? 0),
+            report_realized_profit: Number(report?.profit?.realized ?? 0),
+            analysis: report?.analysis || (getStateByAccountPair(accountId, pairSymbol)?.analysis || null),
+        };
+        setStateByAccountPair(accountId, pairSymbol, reportPatch);
+        DASHBOARD_LAST_REPORT_SYNC_AT = Date.now();
+        if (CALC_DEBUG) {
+            setStateByAccountPair(accountId, pairSymbol, { report_calc_debug: report?.calc_debug || null });
+        }
+        if (report?.history_meta) {
+            REPORTS_STATE.page = Number(report.history_meta.current_page ?? REPORTS_STATE.page ?? 1);
+            REPORTS_STATE.lastPage = Number(report.history_meta.last_page ?? REPORTS_STATE.lastPage ?? 1);
+            REPORTS_STATE.total = Number(report.history_meta.total ?? REPORTS_STATE.total ?? 0);
+            REPORTS_STATE.perPage = Number(report.history_meta.per_page ?? REPORTS_STATE.perPage ?? 10);
+        }
+    } else {
+        const now = Date.now();
+        const reportAge = now - Number(DASHBOARD_LAST_REPORT_SYNC_AT || 0);
+        if (reportAge > 2500 && (now - Number(DASHBOARD_LAST_REPORT_RECOVERY_AT || 0)) > 1500) {
+            DASHBOARD_LAST_REPORT_RECOVERY_AT = now;
+            refreshReportOnly({ source: 'stream-recover' });
+        }
+    }
+
+    renderMonitoring();
+    renderReport(el('save-msg')?.textContent || '');
+}
+
+function startDashboardLiveStream() {
+    const accountId = currentAccount();
+    if (!accountId) {
+        stopDashboardLiveStream();
+        stopDashboardFallbackPolling();
+        stopDashboardWatchdog();
+        return;
+    }
+
+    if (!window.EventSource) {
+        stopDashboardLiveStream();
+        startDashboardFallbackPolling();
+        startDashboardWatchdog();
+        return;
+    }
+
+    stopDashboardLiveStream();
+    const streamUrl = buildLiveStreamUrl();
+    if (!streamUrl) {
+        startDashboardFallbackPolling();
+        return;
+    }
+
+    try {
+        const source = new EventSource(streamUrl);
+        DASHBOARD_LIVE_SOURCE = source;
+        touchDashboardStreamHeartbeat();
+        startDashboardWatchdog();
+
+        source.addEventListener('open', () => {
+            touchDashboardStreamHeartbeat();
+            stopDashboardFallbackPolling();
+            // Eagerly fetch report on first stream connect; stream's first event may
+            // arrive a few seconds later (seeding on backend). Direct fetch is faster.
+            const reportAge = Date.now() - Number(DASHBOARD_LAST_REPORT_SYNC_AT || 0);
+            if (reportAge > 2000) {
+                refreshReportOnly({ source: 'stream-open' });
+            }
+        });
+
+        const handleEvent = (event) => {
+            try {
+                const payload = JSON.parse(event.data || '{}');
+                applyLiveStreamPayload(payload);
+            } catch (_e) {
+            }
+        };
+
+        source.addEventListener('update', handleEvent);
+        source.onmessage = handleEvent;
+        source.onerror = () => {
+            const sourceRef = DASHBOARD_LIVE_SOURCE;
+            if (!sourceRef || sourceRef.readyState !== EventSource.OPEN) {
+                startDashboardFallbackPolling();
+            }
+            if (!sourceRef || sourceRef.readyState === EventSource.CLOSED) {
+                scheduleDashboardLiveReconnect(1200);
+            }
+        };
+    } catch (_e) {
+        stopDashboardLiveStream();
+        startDashboardFallbackPolling();
+        startDashboardWatchdog();
+        scheduleDashboardLiveReconnect(1500);
+    }
+}
+
+function restartDashboardLiveStream() {
+    stopDashboardLiveStream();
+    startDashboardLiveStream();
+}
+
+// Signal Reason History Tracking
+const SIGNAL_REASON_HISTORY = {};
+
+function recordSignalReason(accountId, bias, power, reason, meta = null) {
+    if (!accountId) return;
+    if (!SIGNAL_REASON_HISTORY[accountId]) {
+        SIGNAL_REASON_HISTORY[accountId] = [];
+    }
+    
+    const entry = {
+        timestamp: new Date(),
+        bias: String(bias || 'NEUTRAL'),
+        power: Number(power || 0),
+        reason: String(reason || 'No reason provided'),
+        meta: meta && typeof meta === 'object' ? { ...meta } : null,
+    };
+    
+    SIGNAL_REASON_HISTORY[accountId].unshift(entry); // Add to beginning
+    if (SIGNAL_REASON_HISTORY[accountId].length > 50) {
+        SIGNAL_REASON_HISTORY[accountId].pop(); // Keep only last 50
+    }
+}
+
+function buildSignalReasonNarrative(analysis, bias, power) {
+    const narrative = [];
+    const scoreSource = String(analysis?.score_source || '').toLowerCase();
+    const scoreBuy = Number(analysis?.score_buy ?? 0);
+    const scoreSell = Number(analysis?.score_sell ?? 0);
+    const bullVotes = Number(analysis?.bull_votes ?? 0);
+    const bearVotes = Number(analysis?.bear_votes ?? 0);
+    const adx = Number(analysis?.adx ?? 0);
+    const spreadExpensive = Boolean(analysis?.spread_is_expensive);
+    const guardLiveText = String(analysis?.guard_status_live ?? '').toUpperCase();
+    const newsBlocked = Boolean(analysis?.news_blocked) || guardLiveText.includes('PAUSED_NEWS');
+    const remotePaused = Boolean(analysis?.remote_paused) || guardLiveText.includes('PAUSED_REMOTE');
+    const session = String(analysis?.session_status ?? analysis?.session ?? analysis?.guard_status_live ?? analysis?.guard_status_commanded ?? '').toUpperCase();
+
+    const scoreDiff = Math.trunc(scoreBuy - scoreSell);
+    const voteDiff = Math.trunc(bullVotes - bearVotes);
+
+    if (Number.isFinite(scoreBuy) && Number.isFinite(scoreSell)) {
+        if (scoreDiff >= 2) {
+            narrative.push(`Skor condong BUY (${Math.trunc(scoreBuy)} vs ${Math.trunc(scoreSell)}).`);
+        } else if (scoreDiff <= -2) {
+            narrative.push(`Skor condong SELL (${Math.trunc(scoreSell)} vs ${Math.trunc(scoreBuy)}).`);
+        } else {
+            narrative.push(`Skor masih imbang (${Math.trunc(scoreBuy)}:${Math.trunc(scoreSell)}).`);
+        }
+    }
+
+    if (scoreSource === 'votes_fallback') {
+        narrative.push('Nilai confluence sementara mengikuti vote karena skor engine belum update.');
+    }
+
+    if (bullVotes > 0 || bearVotes > 0) {
+        if (voteDiff >= 1) {
+            narrative.push(`Vote mengarah bullish (${bullVotes}:${bearVotes}).`);
+        } else if (voteDiff <= -1) {
+            narrative.push(`Vote mengarah bearish (${bearVotes}:${bullVotes}).`);
+        } else {
+            narrative.push(`Vote seimbang (${bullVotes}:${bearVotes}).`);
+        }
+    }
+
+    if (Number.isFinite(adx) && adx > 0) {
+        if (adx >= 25) {
+            narrative.push(`Trend cukup kuat (ADX ${formatNumber(adx, 2)}).`);
+        } else if (adx >= 20) {
+            narrative.push(`Trend mulai terbentuk (ADX ${formatNumber(adx, 2)}).`);
+        } else {
+            narrative.push(`Trend masih lemah (ADX ${formatNumber(adx, 2)}).`);
+        }
+    }
+
+    if (spreadExpensive) {
+        narrative.push('Spread relatif mahal, entry dibuat lebih selektif.');
+    }
+    if (newsBlocked) {
+        narrative.push('Ada news block aktif, entry ditahan sementara.');
+    }
+    if (remotePaused) {
+        narrative.push('Remote pause aktif dari dashboard.');
+    }
+
+    if (session === 'OPEN') {
+        narrative.push('Sesi trading sedang aktif.');
+    } else if (session === 'CLOSED') {
+        narrative.push('Sesi trading sedang nonaktif.');
+    }
+
+    if (narrative.length === 0) {
+        return bias === 'NEUTRAL'
+            ? 'Belum ada konfirmasi kuat, market masih menunggu validasi.'
+            : `Bias ${bias} sudah terlihat, tapi data pendukung masih tipis.`;
+    }
+
+    return narrative.join(' ');
+}
+
+function buildSignalReasonEvidence(meta) {
+    if (!meta || typeof meta !== 'object') {
+        return '';
+    }
+
+    const parts = [];
+    const scoreBuy = Number(meta.score_buy ?? NaN);
+    const scoreSell = Number(meta.score_sell ?? NaN);
+    const bullVotes = Number(meta.bull_votes ?? NaN);
+    const bearVotes = Number(meta.bear_votes ?? NaN);
+    const adx = Number(meta.adx ?? NaN);
+
+    if (Number.isFinite(scoreBuy) || Number.isFinite(scoreSell)) {
+        parts.push(`Score BUY/SELL ${Number.isFinite(scoreBuy) ? Math.trunc(scoreBuy) : '-'}:${Number.isFinite(scoreSell) ? Math.trunc(scoreSell) : '-'}`);
+    }
+    if (Number.isFinite(bullVotes) || Number.isFinite(bearVotes)) {
+        parts.push(`Vote ${Number.isFinite(bullVotes) ? Math.trunc(bullVotes) : '-'}:${Number.isFinite(bearVotes) ? Math.trunc(bearVotes) : '-'}`);
+    }
+    if (Number.isFinite(adx)) {
+        parts.push(`ADX ${formatNumber(adx, 2)}`);
+    }
+    if (meta.bias) {
+        parts.push(`Bias ${String(meta.bias).toUpperCase()}`);
+    }
+
+    return parts.join(' | ');
+}
+
+const URL_QUERY = new URLSearchParams(window.location.search);
+const CALC_DEBUG = URL_QUERY.get('calc_debug') === '1';
+
+const DEFAULTS = {
+    active_strategy: 0,
+    base_lot: 0.01,
+    timeframe_logic: 1,
+    max_drawdown_pct: 5,
+    max_drawdown_stop_delay: 0,
+    dd_breach_hits_required: 15,
+    daily_profit_target: 0,
+    grid_max_layers: 10,
+    grid_max_accumulative_lot: 5.0,
+    grid_mode: 0,
+    fix_grid_distance: 4,
+    atr_multiplier: 0.5,
+    grid_tp_points: 0,
+    grid_sl_points: 0,
+    grid_use_trailing_layer1: true,
+    grid_use_basket_tp_percent: true,
+    grid_basket_tp_percent: 60,
+    grid_tp_mode: 0,
+    grid_tier1_tp_percent: 60,
+    grid_tier2_tp_percent: 45,
+    grid_tier3_tp_percent: 30,
+    grid_tier4_tp_percent: 20,
+    zero_gap_tp_points: 50,
+    zero_gap_sl_points: 100,
+    zero_gap_max_layers: 3,
+    mirror_pending_distance_points: 50,
+    mirror_multiplier: 2,
+    zero_gap_trailing_start_points: 30,
+    zero_gap_trailing_step_points: 5,
+    mart_tp_points: 100,
+    mart_sl_points: 200,
+    mart_max_steps: 7,
+    mart_type: 1,
+    mart_multiplier: 1.5,
+    mart_addition: 0.01,
+    mart_trailing_start_points: 50,
+    mart_trailing_step_points: 10,
+    use_mirror_trap: false,
+    always_in_market: false,
+    instant_reentry: false,
+    min_confluence_score: 5,
+    use_pending_guard: false,
+    auto_flip: false,
+    use_trend_filter: false,
+    use_ai_core_sharpening: false,
+    use_ema_ribbon: true,
+    use_dmi: true,
+    use_mkt_struct: true,
+    use_early_trend: true,
+    use_sniper_entry: true,
+    bb_period: 20,
+    bb_deviation: 2.0,
+    rsi_period: 14,
+    rsi_buy_level: 45,
+    rsi_sell_level: 55,
+    adx_period: 14,
+    adx_level: 25,
+    adx_bars: 3,
+    adx_sideways: 18,
+    ema_period: 50,
+    ema_fast: 20,
+    ema_slow: 50,
+    ema_slope_min: 0.03,
+    atr_period: 14,
+    use_dxy_filter: false,
+    use_stealth_mode: true,
+    show_indicator_fallback_logs: false,
+    use_sydney_session: true,
+    sydney_start_wib: '05:00',
+    sydney_end_wib: '14:00',
+    use_asia_session: true,
+    asia_start_wib: '07:00',
+    asia_end_wib: '14:00',
+    use_europe_session: true,
+    europe_start_wib: '14:00',
+    europe_end_wib: '21:00',
+    use_us_session: true,
+    us_start_wib: '21:00',
+    us_end_wib: '04:00',
+    news_filter_severity: 'HIGH',
+    news_pause_before_minutes: 15,
+    news_pause_after_minutes: 15,
+    filter_snr_activation: true,
+};
+
+const FIELD_IDS = [
+    'active_strategy', 'base_lot', 'timeframe_logic', 'max_drawdown_pct', 'max_drawdown_stop_delay', 'dd_breach_hits_required', 'daily_profit_target',
+    'grid_max_layers', 'grid_max_accumulative_lot', 'grid_mode', 'fix_grid_distance', 'atr_multiplier',
+    'grid_tp_points', 'grid_sl_points', 'grid_use_trailing_layer1', 'grid_use_basket_tp_percent', 'grid_basket_tp_percent',
+    'grid_tp_mode', 'grid_tier1_tp_percent', 'grid_tier2_tp_percent', 'grid_tier3_tp_percent', 'grid_tier4_tp_percent',
+    'zero_gap_tp_points', 'zero_gap_sl_points', 'zero_gap_max_layers', 'mirror_pending_distance_points', 'mirror_multiplier',
+    'zero_gap_trailing_start_points', 'zero_gap_trailing_step_points',
+    'mart_tp_points', 'mart_sl_points', 'mart_max_steps', 'mart_type', 'mart_multiplier', 'mart_addition',
+    'mart_trailing_start_points', 'mart_trailing_step_points',
+    'use_mirror_trap', 'always_in_market', 'instant_reentry', 'min_confluence_score', 'use_pending_guard', 'auto_flip',
+    'use_trend_filter', 'use_ai_core_sharpening', 'use_ema_ribbon', 'use_dmi', 'use_mkt_struct', 'use_early_trend', 'use_sniper_entry', 'use_stealth_mode', 'show_indicator_fallback_logs',
+    'bb_period', 'bb_deviation', 'rsi_period', 'rsi_buy_level', 'rsi_sell_level',
+    'adx_period', 'adx_level', 'adx_bars', 'adx_sideways',
+    'ema_period', 'ema_fast', 'ema_slow', 'ema_slope_min', 'atr_period', 'use_dxy_filter',
+    'use_sydney_session', 'sydney_start_wib', 'sydney_end_wib',
+    'use_asia_session', 'asia_start_wib', 'asia_end_wib',
+    'use_europe_session', 'europe_start_wib', 'europe_end_wib',
+    'use_us_session', 'us_start_wib', 'us_end_wib',
+    'news_filter_severity', 'news_pause_before_minutes', 'news_pause_after_minutes', 'filter_snr_activation', 'close_all_on_news'
+];
+
+const CHECKBOX_FIELDS = [
+    'grid_use_trailing_layer1', 'grid_use_basket_tp_percent', 'use_mirror_trap', 'always_in_market', 'instant_reentry', 'use_pending_guard', 'auto_flip',
+    'use_trend_filter', 'use_ai_core_sharpening', 'use_ema_ribbon', 'use_dmi', 'use_mkt_struct', 'use_early_trend', 'use_sniper_entry', 'use_stealth_mode', 'show_indicator_fallback_logs',
+    'use_dxy_filter',
+    'use_sydney_session', 'use_asia_session', 'use_europe_session', 'use_us_session', 'filter_snr_activation', 'close_all_on_news'
+];
+
+const LOGIC_PRESETS = {
+    default: {
+        ema_period: 50,
+        ema_fast: 20,
+        ema_slow: 50,
+        ema_slope_min: 0.03,
+        bb_period: 20,
+        bb_deviation: 2.0,
+        rsi_period: 14,
+        rsi_buy_level: 45,
+        rsi_sell_level: 55,
+        adx_period: 14,
+        adx_level: 25,
+        adx_bars: 3,
+        adx_sideways: 18,
+        atr_period: 14,
+        use_trend_filter: false,
+        use_ema_ribbon: true,
+        use_dmi: true,
+        use_mkt_struct: true,
+        use_early_trend: true,
+        use_sniper_entry: true,
+    },
+    scalper: {
+        ema_period: 34,
+        ema_fast: 8,
+        ema_slow: 21,
+        ema_slope_min: 0.02,
+        bb_period: 14,
+        bb_deviation: 1.8,
+        rsi_period: 9,
+        rsi_buy_level: 42,
+        rsi_sell_level: 58,
+        adx_period: 10,
+        adx_level: 20,
+        adx_bars: 2,
+        adx_sideways: 15,
+        atr_period: 10,
+        use_trend_filter: true,
+        use_ema_ribbon: true,
+        use_dmi: true,
+        use_mkt_struct: false,
+        use_early_trend: true,
+        use_sniper_entry: false,
+    },
+    medium: {
+        ema_period: 50,
+        ema_fast: 13,
+        ema_slow: 34,
+        ema_slope_min: 0.03,
+        bb_period: 20,
+        bb_deviation: 2.0,
+        rsi_period: 14,
+        rsi_buy_level: 45,
+        rsi_sell_level: 55,
+        adx_period: 14,
+        adx_level: 24,
+        adx_bars: 3,
+        adx_sideways: 18,
+        atr_period: 14,
+        use_trend_filter: true,
+        use_ema_ribbon: true,
+        use_dmi: true,
+        use_mkt_struct: true,
+        use_early_trend: true,
+        use_sniper_entry: true,
+    },
+    conservative: {
+        ema_period: 100,
+        ema_fast: 21,
+        ema_slow: 55,
+        ema_slope_min: 0.05,
+        bb_period: 20,
+        bb_deviation: 2.4,
+        rsi_period: 21,
+        rsi_buy_level: 40,
+        rsi_sell_level: 60,
+        adx_period: 18,
+        adx_level: 28,
+        adx_bars: 4,
+        adx_sideways: 20,
+        atr_period: 18,
+        use_trend_filter: true,
+        use_ema_ribbon: true,
+        use_dmi: true,
+        use_mkt_struct: true,
+        use_early_trend: false,
+        use_sniper_entry: true,
+    },
+};
+
+function validateLogicInputs(showMessage = true) {
+    const emaFast = Number(el('ema_fast')?.value || 0);
+    const emaSlow = Number(el('ema_slow')?.value || 0);
+    if (emaFast > 0 && emaSlow > 0 && emaFast >= emaSlow) {
+        if (showMessage) {
+            el('save-msg').textContent = 'Validasi gagal: EMA Fast harus lebih kecil dari EMA Slow.';
+            el('save-msg').className = 'small mt-2 text-danger';
+        }
+        return false;
+    }
+    return true;
+}
+
+function applyLogicPreset(name) {
+    const preset = LOGIC_PRESETS[name];
+    if (!preset) return;
+
+    Object.entries(preset).forEach(([id, value]) => {
+        if (!el(id)) return;
+        if (isCheckbox(id)) {
+            el(id).checked = Boolean(value);
+        } else {
+            el(id).value = value;
+        }
+    });
+
+    toggleDependentState();
+    markDirty();
+    el('save-msg').textContent = 'Preset ' + name.toUpperCase() + ' diterapkan. Klik Simpan untuk menyimpan.';
+    el('save-msg').className = 'small mt-2 text-info';
+}
+
+function el(id) {
+    const found = document.getElementById(id);
+    if (found) return found;
+
+    const aliases = {
+        'billing-float-chat-toggle': 'admin-chat-toggle',
+        'billing-float-chat-card': 'admin-chat-card',
+        'billing-float-chat-close': 'admin-chat-close',
+        'billing-float-chat-unread': 'admin-chat-unread',
+        'billing-float-chat-pending': 'admin-chat-pending',
+        'billing-float-chat-status': 'admin-chat-status',
+        'billing-float-chat-messages': 'admin-chat-messages',
+        'billing-float-chat-form': 'admin-chat-form',
+        'billing-float-chat-input': 'admin-chat-input',
+        'billing-float-chat-send': 'admin-chat-send',
+        'billing-admin-user-search': 'admin-chat-search',
+        'billing-admin-user-list': 'admin-chat-threads',
+        'billing-admin-thread-title': 'admin-chat-title',
+        'billing-admin-thread-subtitle': 'admin-chat-subtitle',
+        'billing-admin-clear-thread': 'admin-chat-clear-thread',
+        'billing-admin-pending-list': 'admin-chat-pending-list',
+    };
+
+    const aliasId = aliases[id];
+    return aliasId ? document.getElementById(aliasId) : null;
+}
+function currentAccount() { return el('account_id').value; }
+function saveSelectedAccount(accountId) {
+    const normalized = String(accountId || '').trim();
+    if (!normalized) return;
+    localStorage.setItem(DASHBOARD_ACCOUNT_STORAGE_KEY, normalized);
+    localStorage.setItem(DASHBOARD_ACCOUNT_SESSION_KEY, String(AUTH_SESSION_ID || ''));
+}
+function loadSelectedAccount() {
+    const sessionMarker = String(localStorage.getItem(DASHBOARD_ACCOUNT_SESSION_KEY) || '');
+    if (sessionMarker !== String(AUTH_SESSION_ID || '')) return '';
+    return String(localStorage.getItem(DASHBOARD_ACCOUNT_STORAGE_KEY) || '').trim();
+}
+function loadSelectedPairMap() {
+    const sessionMarker = String(localStorage.getItem(DASHBOARD_PAIR_SESSION_KEY) || '');
+    if (sessionMarker !== String(AUTH_SESSION_ID || '')) return {};
+    const raw = String(localStorage.getItem(DASHBOARD_PAIR_STORAGE_KEY) || '').trim();
+    if (!raw) return {};
+    try {
+        const parsed = JSON.parse(raw);
+        return (parsed && typeof parsed === 'object') ? parsed : {};
+    } catch (_error) {
+        return {};
+    }
+}
+function saveSelectedPair(accountId, pairSymbol) {
+    const id = String(accountId || '').trim();
+    if (!id) return;
+    const pair = normalizePairSymbol(pairSymbol);
+    const map = loadSelectedPairMap();
+    map[id] = pair;
+    localStorage.setItem(DASHBOARD_PAIR_STORAGE_KEY, JSON.stringify(map));
+    localStorage.setItem(DASHBOARD_PAIR_SESSION_KEY, String(AUTH_SESSION_ID || ''));
+}
+function restoreSelectedPairMap() {
+    const map = loadSelectedPairMap();
+    Object.keys(map).forEach((accountId) => {
+        const pair = normalizePairSymbol(map[accountId]);
+        if (!accountId || !pair) return;
+        SELECTED_PAIR_BY_ACCOUNT[String(accountId)] = pair;
+    });
+}
+function normalizePairSymbol(raw) {
+    const upper = String(raw || '').trim().toUpperCase();
+    const cleaned = upper.replace(/[^A-Z0-9_\/\.\-]/g, '');
+    return cleaned || 'XAUUSD';
+}
+function accountPairKey(accountId, pairSymbol) {
+    const id = String(accountId || '').trim();
+    const pair = normalizePairSymbol(pairSymbol);
+    return id + '::' + pair;
+}
+function ensureAccountPairRegistered(accountId, pairSymbol) {
+    const id = String(accountId || '').trim();
+    if (!id) return;
+    const pair = normalizePairSymbol(pairSymbol);
+    if (!ACCOUNT_PAIR_INDEX[id]) ACCOUNT_PAIR_INDEX[id] = [];
+    if (!ACCOUNT_PAIR_INDEX[id].includes(pair)) {
+        ACCOUNT_PAIR_INDEX[id].push(pair);
+        ACCOUNT_PAIR_INDEX[id].sort();
+    }
+    if (!SELECTED_PAIR_BY_ACCOUNT[id]) {
+        SELECTED_PAIR_BY_ACCOUNT[id] = pair;
+    }
+}
+function getPairsForAccount(accountId) {
+    const id = String(accountId || '').trim();
+    if (!id) return [];
+    const pairs = safeArray(ACCOUNT_PAIR_INDEX[id]).map((item) => normalizePairSymbol(item));
+    return pairs.length ? pairs : ['XAUUSD'];
+}
+function isStateFreshOnline(state) {
+    const heartbeatTs = Date.parse(String(state?.updated_at || ''));
+    const staleHeartbeat = Number.isFinite(heartbeatTs) ? (Date.now() - heartbeatTs > 45000) : true;
+    return Boolean(state?.is_online) && !staleHeartbeat;
+}
+function getConnectedPairsForAccount(accountId) {
+    const id = String(accountId || '').trim();
+    if (!id) return [];
+    const allPairs = getPairsForAccount(id);
+    return allPairs.filter((pair) => {
+        const state = getStateByAccountPair(id, pair) || {};
+        if (!isStateFreshOnline(state)) return false;
+        const reportedPair = normalizePairSymbol(state?.pair_symbol || state?.symbol || '');
+        return reportedPair === pair;
+    });
+}
+function currentPairSymbol() {
+    const accountId = String(currentAccount() || '').trim();
+    if (!accountId) return 'XAUUSD';
+    const pairs = getPairsForAccount(accountId);
+    const selected = normalizePairSymbol(SELECTED_PAIR_BY_ACCOUNT[accountId] || pairs[0] || 'XAUUSD');
+    if (!pairs.includes(selected)) {
+        SELECTED_PAIR_BY_ACCOUNT[accountId] = pairs[0] || 'XAUUSD';
+        return SELECTED_PAIR_BY_ACCOUNT[accountId];
+    }
+    SELECTED_PAIR_BY_ACCOUNT[accountId] = selected;
+    return selected;
+}
+function getStateByAccountPair(accountId, pairSymbol) {
+    const id = String(accountId || '').trim();
+    if (!id) return {};
+    const pair = normalizePairSymbol(pairSymbol);
+    const key = accountPairKey(id, pair);
+    return ACCOUNTS_BY_PAIR[key] || {};
+}
+function setStateByAccountPair(accountId, pairSymbol, patch) {
+    const id = String(accountId || '').trim();
+    if (!id) return {};
+    const pair = normalizePairSymbol(pairSymbol);
+    ensureAccountPairRegistered(id, pair);
+    const key = accountPairKey(id, pair);
+    const baseState = { ...DEFAULTS, pair_symbol: pair, ...(ACCOUNTS_BY_PAIR[key] || {}) };
+    const nextState = assignDefined(baseState, patch || {});
+    nextState.account_id = id;
+    nextState.pair_symbol = pair;
+    ACCOUNTS_BY_PAIR[key] = nextState;
+    if (normalizePairSymbol(SELECTED_PAIR_BY_ACCOUNT[id] || '') === pair) {
+        ACCOUNTS[id] = nextState;
+    }
+    return nextState;
+}
+function getActiveAccountState(accountId = currentAccount(), pairSymbol = currentPairSymbol()) {
+    const id = String(accountId || '').trim();
+    const pair = normalizePairSymbol(pairSymbol);
+    const key = accountPairKey(id, pair);
+    if (ACCOUNTS_BY_PAIR[key]) {
+        return ACCOUNTS_BY_PAIR[key];
+    }
+    return ACCOUNTS[id] || {};
+}
+function hydrateAccountPairState() {
+    Object.keys(ACCOUNTS_BY_PAIR).forEach((key) => delete ACCOUNTS_BY_PAIR[key]);
+    Object.keys(ACCOUNT_PAIR_INDEX).forEach((key) => delete ACCOUNT_PAIR_INDEX[key]);
+
+    safeArray(ACCOUNT_ROWS).forEach((row) => {
+        const accountId = String(row?.account_id || '').trim();
+        if (!accountId) return;
+        const pair = normalizePairSymbol(row?.pair_symbol || row?.symbol || 'XAUUSD');
+        setStateByAccountPair(accountId, pair, { ...row, account_id: accountId, pair_symbol: pair });
+    });
+
+    allAccountIdsSorted().forEach((accountId) => {
+        const selectedPair = normalizePairSymbol(SELECTED_PAIR_BY_ACCOUNT[accountId] || getPairsForAccount(accountId)[0] || 'XAUUSD');
+        SELECTED_PAIR_BY_ACCOUNT[accountId] = selectedPair;
+        ACCOUNTS[accountId] = getActiveAccountState(accountId, selectedPair);
+    });
+}
+function renderPairTabsForCurrentAccount() {
+    const target = el('pair-tabs-settings');
+    const note = el('pair-tabs-note');
+    if (!target) return;
+
+    const accountId = String(currentAccount() || '').trim();
+    if (!accountId) {
+        target.innerHTML = '<span class="small text-secondary">Belum ada account dipilih.</span>';
+        if (note) note.textContent = 'Pilih account dulu untuk melihat tab pair yang terhubung.';
+        return;
+    }
+
+    const pairs = getConnectedPairsForAccount(accountId);
+    if (!pairs.length) {
+        target.innerHTML = '<span class="small text-secondary">Belum ada EA pair yang aktif terhubung di account ini.</span>';
+        if (note) note.textContent = 'Pair Terhubung hanya menampilkan pair yang sedang online dari EA pada account aktif.';
+        return;
+    }
+
+    const activePairCandidate = normalizePairSymbol(SELECTED_PAIR_BY_ACCOUNT[accountId] || '');
+    const activePair = pairs.includes(activePairCandidate) ? activePairCandidate : pairs[0];
+    SELECTED_PAIR_BY_ACCOUNT[accountId] = activePair;
+    saveSelectedPair(accountId, activePair);
+    target.innerHTML = pairs.map((pair) => {
+        const activeClass = pair === activePair ? ' active' : '';
+        return '<button type="button" class="pair-tab-btn' + activeClass + '" data-pair-symbol="' + escapeHtml(pair) + '">' + escapeHtml(pair) + '</button>';
+    }).join('');
+
+    if (note) {
+        note.textContent = 'Account ' + accountId + ' terhubung ke ' + pairs.length + ' pair. Pair aktif: ' + activePair + '.';
+    }
+}
+function isCheckbox(id) { return CHECKBOX_FIELDS.includes(id); }
+
+function accountUserLabelById(userId) {
+    const id = Number(userId);
+    if (!Number.isFinite(id) || id <= 0) return '';
+    const user = safeArray(MANAGED_USERS).find((item) => Number(item?.id) === id);
+    if (!user) return '';
+    const username = String(user.username || '').trim();
+    const name = String(user.name || '').trim();
+    return username !== '' ? '@' + username : name;
+}
+
+async function loadAccountAliasesFromServer() {
+    if (!IS_ADMIN) {
+        ACCOUNT_ALIASES = {};
+        return;
+    }
+
+    try {
+        const response = await fetch(ROUTES.accountAliasesGet, {
+            headers: { 'Accept': 'application/json' },
+            credentials: 'same-origin',
+        });
+        const json = await response.json();
+        if (!response.ok || !json.success) {
+            throw new Error(String(json?.message || 'Gagal memuat alias account.'));
+        }
+        ACCOUNT_ALIASES = (json?.aliases && typeof json.aliases === 'object') ? json.aliases : {};
+        refreshAccountSelectOptions(currentAccount());
+        renderBulkWhitelistList();
+        updateBulkControlUi();
+    } catch (_error) {
+        ACCOUNT_ALIASES = (ACCOUNT_ALIASES && typeof ACCOUNT_ALIASES === 'object') ? ACCOUNT_ALIASES : {};
+    }
+}
+
+async function saveAccountAliasToServer(accountId, alias) {
+    const csrf = document.querySelector('meta[name="csrf-token"]')?.content || '';
+    const response = await fetch(ROUTES.accountAliasesUpdate, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-CSRF-TOKEN': csrf,
+        },
+        credentials: 'same-origin',
+        body: JSON.stringify({ account_id: accountId, alias }),
+    });
+    const json = await response.json();
+    if (!response.ok || !json.success) {
+        throw new Error(String(json?.message || 'Gagal menyimpan alias account.'));
+    }
+
+    ACCOUNT_ALIASES = (json?.aliases && typeof json.aliases === 'object') ? json.aliases : {};
+    return json;
+}
+
+function accountAliasById(accountId) {
+    if (!IS_ADMIN) return '';
+    const key = String(accountId || '').trim();
+    return String((ACCOUNT_ALIASES || {})[key] || '').trim();
+}
+
+function accountDisplayLabel(accountId, accountState = null) {
+    const id = String(accountId || '').trim();
+    if (!id) return '-';
+    if (!IS_ADMIN) return id;
+
+    const state = accountState && typeof accountState === 'object' ? accountState : (ACCOUNTS[id] || {});
+    const alias = accountAliasById(id);
+    const owner = accountUserLabelById(state?.user_id);
+    const extra = [];
+
+    if (alias) extra.push(alias);
+    if (owner) extra.push(owner);
+
+    return extra.length ? (id + ' - ' + extra.join(' | ')) : id;
+}
+
+function allAccountIdsSorted() {
+    return Object.keys(ACCOUNTS || {})
+        .map((item) => String(item || '').trim())
+        .filter(Boolean)
+        .sort();
+}
+
+function filteredAccountIds() {
+    const accountIds = allAccountIdsSorted();
+    const keyword = String(ACCOUNT_SEARCH_QUERY || '').trim().toLowerCase();
+    if (keyword === '') {
+        return accountIds;
+    }
+
+    return accountIds.filter((id) => {
+        const label = accountDisplayLabel(id, ACCOUNTS[id] || {}).toLowerCase();
+        return label.includes(keyword) || id.toLowerCase().includes(keyword);
+    });
+}
+
+function updateAccountPickerToggle() {
+    const toggle = el('account-picker-toggle');
+    if (!toggle) return;
+    const accountId = String(currentAccount() || '').trim();
+    const label = accountId ? accountDisplayLabel(accountId, ACCOUNTS[accountId] || {}) : 'Belum ada account terdaftar';
+    toggle.textContent = label;
+    toggle.title = label;
+}
+
+function renderAccountPickerOptions() {
+    const optionsEl = el('account-picker-options');
+    if (!optionsEl) return;
+
+    const accountIds = filteredAccountIds();
+    if (!accountIds.length) {
+        optionsEl.innerHTML = '<div class="small text-secondary px-2 py-1">Tidak ada account yang cocok.</div>';
+        return;
+    }
+
+    optionsEl.innerHTML = accountIds.map((id) => {
+        const label = accountDisplayLabel(id, ACCOUNTS[id] || {});
+        const isActive = id === String(currentAccount() || '').trim();
+        return '<button type="button" class="dropdown-item account-picker-item' + (isActive ? ' active' : '') + '" data-account-id="' + escapeHtml(id) + '">' + escapeHtml(label) + '</button>';
+    }).join('');
+}
+
+function refreshAccountSelectOptions(preferredAccountId = '') {
+    const select = el('account_id');
+    if (!select) return;
+
+    const requested = String(preferredAccountId || '').trim();
+    const previous = String(select.value || '').trim();
+    const accountIds = allAccountIdsSorted();
+
+    if (!accountIds.length) {
+        select.innerHTML = '<option value="">Belum ada account terdaftar</option>';
+        select.value = '';
+        updateAccountPickerToggle();
+        renderAccountPickerOptions();
+        return;
+    }
+
+    select.innerHTML = accountIds.map((id) => {
+        const label = accountDisplayLabel(id, ACCOUNTS[id] || {});
+        return '<option value="' + escapeHtml(id) + '">' + escapeHtml(label) + '</option>';
+    }).join('');
+
+    const persisted = loadSelectedAccount();
+    const target = requested || previous || persisted || accountIds[0];
+    select.value = accountIds.includes(target) ? target : accountIds[0];
+    saveSelectedAccount(select.value);
+    updateAccountPickerToggle();
+    renderAccountPickerOptions();
+}
+
+function setAccountAliasMessage(message, kind = 'secondary') {
+    const target = el('account-alias-msg');
+    if (!target) return;
+    target.textContent = message;
+    target.className = 'small text-' + kind;
+}
+
+function forceResetModalArtifacts() {
+    document.body.classList.remove('modal-open');
+    document.body.style.removeProperty('padding-right');
+    document.body.style.removeProperty('overflow');
+    document.querySelectorAll('.modal-backdrop').forEach((node) => node.remove());
+}
+
+function blurFocusedDescendant(containerEl) {
+    if (!(containerEl instanceof HTMLElement)) return;
+    const activeEl = document.activeElement;
+    if (activeEl instanceof HTMLElement && containerEl.contains(activeEl)) {
+        activeEl.blur();
+    }
+}
+
+function ensureModalAttachedToBody(modalId) {
+    const modalEl = el(modalId);
+    if (!modalEl) return null;
+    if (modalEl.parentElement !== document.body) {
+        document.body.appendChild(modalEl);
+    }
+    return modalEl;
+}
+
+function themeIconSvg(theme) {
+    if (theme === 'dark') {
+        return '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M12 4V2M12 22V20M4 12H2M22 12H20M6.34 6.34L4.93 4.93M19.07 19.07L17.66 17.66M17.66 6.34L19.07 4.93M4.93 19.07L6.34 17.66M16 12C16 14.2091 14.2091 16 12 16C9.79086 16 8 14.2091 8 12C8 9.79086 9.79086 8 12 8C14.2091 8 16 9.79086 16 12Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    }
+
+    return '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M20.354 15.354A9 9 0 0 1 8.646 3.646 9 9 0 1 0 20.354 15.354Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+}
+
+function syncAliasModalForCurrentAccount() {
+    if (!IS_ADMIN) return;
+    const accountId = String(currentAccount() || '').trim();
+    const aliasInput = el('alias_account_name');
+    const accountInput = el('alias_account_id');
+    if (accountInput) accountInput.value = accountId;
+    if (aliasInput) aliasInput.value = accountAliasById(accountId);
+    setAccountAliasMessage('Atur alias untuk account aktif.', 'secondary');
+}
+
+const _smoothCache = {};
+function setSmooth(id, text) {
+    const node = el(id);
+    if (!node) return;
+    const s = String(text ?? '');
+    if (_smoothCache[id] === s) return;
+    _smoothCache[id] = s;
+    node.textContent = s;
+}
+
+const _smoothNumberState = {};
+const _smoothNumberAnim = {};
+function setSmoothNumber(id, value, options = {}) {
+    const node = el(id);
+    if (!node) return;
+
+    const num = Number(value);
+    const digits = Number.isFinite(Number(options?.digits)) ? Math.max(0, Math.trunc(Number(options.digits))) : 0;
+    const suffix = String(options?.suffix ?? '');
+    const fallback = String(options?.fallback ?? '-');
+    const duration = Number.isFinite(Number(options?.durationMs)) ? Math.max(120, Math.trunc(Number(options.durationMs))) : 650;
+
+    if (!Number.isFinite(num)) {
+        if (_smoothNumberAnim[id]) {
+            cancelAnimationFrame(_smoothNumberAnim[id]);
+            _smoothNumberAnim[id] = null;
+        }
+        delete _smoothNumberState[id];
+        setSmooth(id, fallback);
+        return;
+    }
+
+    if (_smoothNumberAnim[id]) {
+        cancelAnimationFrame(_smoothNumberAnim[id]);
+        _smoothNumberAnim[id] = null;
+    }
+
+    const cached = Number(_smoothNumberState[id]);
+    const currentFromNode = Number(node.dataset.smoothValue);
+    const start = Number.isFinite(cached)
+        ? cached
+        : (Number.isFinite(currentFromNode) ? currentFromNode : num);
+
+    if (Math.abs(start - num) < Math.pow(10, -digits) / 2) {
+        _smoothNumberState[id] = num;
+        node.dataset.smoothValue = String(num);
+        setSmooth(id, num.toFixed(digits) + suffix);
+        return;
+    }
+
+    const startedAt = performance.now();
+    const step = (now) => {
+        const p = Math.min(1, (now - startedAt) / duration);
+        // Ease-out cubic: quick response, soft landing.
+        const eased = 1 - Math.pow(1 - p, 3);
+        const next = start + ((num - start) * eased);
+
+        _smoothNumberState[id] = next;
+        node.dataset.smoothValue = String(next);
+        setSmooth(id, next.toFixed(digits) + suffix);
+
+        if (p < 1) {
+            _smoothNumberAnim[id] = requestAnimationFrame(step);
+        } else {
+            _smoothNumberAnim[id] = null;
+            _smoothNumberState[id] = num;
+            node.dataset.smoothValue = String(num);
+            setSmooth(id, num.toFixed(digits) + suffix);
+        }
+    };
+
+    _smoothNumberAnim[id] = requestAnimationFrame(step);
+}
+
+function applyTheme(theme) {
+    const normalized = theme === 'dark' ? 'dark' : 'light';
+    document.body.setAttribute('data-theme', normalized);
+    document.documentElement.style.backgroundColor = normalized === 'dark' ? '#0e1a2f' : '#eef2f7';
+    const btn = el('theme-toggle');
+    if (btn) {
+        btn.innerHTML = themeIconSvg(normalized);
+        btn.title = normalized === 'dark' ? 'Switch ke Light Mode' : 'Switch ke Dark Mode';
+        btn.setAttribute('aria-label', btn.title);
+    }
+    localStorage.setItem('ea_dashboard_theme', normalized);
+    renderReport(el('save-msg')?.textContent || '');
+}
+
+function initTheme() {
+    const saved = localStorage.getItem('ea_dashboard_theme');
+    applyTheme(saved || 'light');
+}
+
+function setProfileMessage(message, kind = 'secondary') {
+    const target = el('profile-msg');
+    if (!target) return;
+    target.textContent = message;
+    target.className = 'small mt-2 text-' + kind;
+}
+
+function setUsersMessage(message, kind = 'secondary') {
+    const target = el('users-msg');
+    if (!target) return;
+    target.textContent = message;
+    target.className = 'small text-' + kind;
+}
+
+function setAccountMessage(message, kind = 'secondary') {
+    const target = el('account-msg');
+    if (!target) return;
+    target.textContent = message;
+    target.className = 'small mt-2 text-' + kind;
+}
+
+function defaultAccountMessage() {
+    if (IS_ADMIN) {
+        return 'Admin: bisa tambah account baru atau input account yang sudah dipakai user untuk ditautkan ke dashboard admin.';
+    }
+
+    return 'User: bisa tambah account milik sendiri yang belum terdaftar, atau ambil account yang sudah terdaftar.';
+}
+
+function syncDeleteAccountInput() {
+    const input = el('delete_account_id');
+    if (!input) return;
+    input.value = currentAccount() || '';
+}
+
+function setNewsSource(source, note = '') {
+    if (!el('news-source-badge')) return;
+    const stamp = new Date().toLocaleTimeString('id-ID');
+    const sourceLabel = String(source || 'LIVE').toUpperCase();
+    const sub = (note ? String(note).toUpperCase() : 'NO NOTE') + ' • ' + stamp;
+    el('news-source-badge').textContent = 'SOURCE ' + sourceLabel + '\n' + sub;
+}
+
+function toWibClock(isoString) {
+    if (!isoString) return null;
+    const date = new Date(isoString);
+    if (Number.isNaN(date.getTime())) return null;
+    return date.toLocaleTimeString('id-ID', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false,
+        timeZone: 'Asia/Jakarta',
+    });
+}
+
+function itemClock(item) {
+    return toWibClock(item?.event_at) || item?.event_clock || '--:--';
+}
+
+function toWibDayDate(isoString) {
+    if (!isoString) return '-';
+    const date = new Date(isoString);
+    if (Number.isNaN(date.getTime())) return '-';
+    return date.toLocaleDateString('id-ID', {
+        weekday: 'long',
+        day: '2-digit',
+        month: 'long',
+        year: 'numeric',
+        timeZone: 'Asia/Jakarta',
+    });
+}
+
+function itemDayDate(item) {
+    return toWibDayDate(item?.event_at);
+}
+
+function metricValue(value) {
+    const text = String(value ?? '').trim();
+    if (text === '' || text === '-') return 'Menunggu rilis';
+    if (text.toUpperCase() === 'N/A') return 'N/A';
+    return text;
+}
+
+const USERS_STATE = {
+    query: '',
+    page: 1,
+    pageSize: 6,
+};
+
+const REPORTS_STATE = {
+    page: 1,
+    lastPage: 1,
+    total: 0,
+    perPage: 10,
+    isLoading: false,
+    pendingRefresh: false,
+    pendingPage: null,
+    pendingPerPage: null,
+    manualPauseUntil: 0,
+    abortController: null,
+    lastSuccessfulData: null,
+};
+function roleBadge(role) {
+    const normalized = (role || 'user').toLowerCase();
+    if (normalized === 'admin') return 'danger';
+    if (normalized === 'manager') return 'warning';
+    return 'primary';
+}
+
+function userRowTemplate(user) {
+    return '<tr>' +
+        '<td>' + user.id + '</td>' +
+        '<td>' + (user.name || '') + '</td>' +
+        '<td>' + (user.username || '') + '</td>' +
+        '<td><span class="badge text-bg-' + roleBadge(user.role) + '">' + (user.role || 'user') + '</span></td>' +
+        '<td><button type="button" class="btn btn-sm btn-outline-primary" data-edit-user="' + user.id + '">Edit</button></td>' +
+        '</tr>';
+}
+
+function getFilteredUsers() {
+    const query = USERS_STATE.query.trim().toLowerCase();
+    if (!query) return [...MANAGED_USERS];
+
+    return MANAGED_USERS.filter((user) => {
+        const haystack = [user.name, user.username, user.email, user.role, String(user.id)]
+            .filter(Boolean)
+            .join(' ')
+            .toLowerCase();
+        return haystack.includes(query);
+    });
+}
+
+function renderUsersTable() {
+    if (!IS_ADMIN || !el('users-tbody')) return;
+
+    const filtered = getFilteredUsers();
+    const totalPages = Math.max(1, Math.ceil(filtered.length / USERS_STATE.pageSize));
+    if (USERS_STATE.page > totalPages) USERS_STATE.page = totalPages;
+
+    const start = (USERS_STATE.page - 1) * USERS_STATE.pageSize;
+    const rows = filtered.slice(start, start + USERS_STATE.pageSize);
+
+    if (rows.length === 0) {
+        el('users-tbody').innerHTML = '<tr><td colspan="5" class="text-secondary">Tidak ada user yang cocok.</td></tr>';
+    } else {
+        el('users-tbody').innerHTML = rows.map(userRowTemplate).join('');
+    }
+
+    if (el('users-page-info')) {
+        el('users-page-info').textContent = 'Page ' + USERS_STATE.page + '/' + totalPages;
+    }
+    if (el('users-count-chip')) {
+        el('users-count-chip').textContent = filtered.length + ' users';
+    }
+    if (el('users-prev')) el('users-prev').disabled = USERS_STATE.page <= 1;
+    if (el('users-next')) el('users-next').disabled = USERS_STATE.page >= totalPages;
+}
+
+function resetManageForm() {
+    if (!el('users-form')) return;
+    el('manage_user_id').value = '';
+    el('manage_name').value = '';
+    el('manage_username').value = '';
+    el('manage_email').value = '';
+    el('manage_role').value = 'user';
+    el('manage_password').value = '';
+}
+
+function fillManageForm(userId) {
+    const user = MANAGED_USERS.find((item) => Number(item.id) === Number(userId));
+    if (!user) return;
+
+    el('manage_user_id').value = user.id;
+    el('manage_name').value = user.name || '';
+    el('manage_username').value = user.username || '';
+    el('manage_email').value = user.email || '';
+    el('manage_role').value = user.role || 'user';
+    el('manage_password').value = '';
+    setUsersMessage('Mode edit user #' + user.id + '. Password boleh dikosongkan jika tidak diubah.', 'warning');
+}
+
+function normalizeWorkspaceTab(tabName) {
+    const normalized = String(tabName || '').toLowerCase();
+    return WORKSPACE_TABS.includes(normalized) ? normalized : DEFAULT_WORKSPACE_TAB;
+}
+
+function persistWorkspaceTab(tabName) {
+    try {
+        localStorage.setItem(DASHBOARD_TAB_STORAGE_KEY, normalizeWorkspaceTab(tabName));
+        localStorage.setItem(DASHBOARD_TAB_SESSION_KEY, String(AUTH_SESSION_ID || ''));
+    } catch (_e) {
+    }
+}
+
+function getInitialWorkspaceTab() {
+    try {
+        const sessionMarker = String(localStorage.getItem(DASHBOARD_TAB_SESSION_KEY) || '');
+        if (sessionMarker !== String(AUTH_SESSION_ID || '')) {
+            return DEFAULT_WORKSPACE_TAB;
+        }
+
+        return normalizeWorkspaceTab(localStorage.getItem(DASHBOARD_TAB_STORAGE_KEY));
+    } catch (_e) {
+        return DEFAULT_WORKSPACE_TAB;
+    }
+}
+
+function switchWorkspaceTab(tabName, options = {}) {
+    const activeTab = normalizeWorkspaceTab(tabName);
+    const shouldPersist = options.persist !== false;
+
+    WORKSPACE_TABS.forEach((name) => {
+        el('workspace-pane-' + name)?.classList.toggle('is-active', name === activeTab);
+    });
+
+    document.querySelectorAll('#workspace-tabs [data-workspace-tab]').forEach((button) => {
+        button.classList.toggle('active', button.getAttribute('data-workspace-tab') === activeTab);
+    });
+
+    if (shouldPersist) {
+        persistWorkspaceTab(activeTab);
+    }
+}
+
+function formatNumber(value, digits = 2) {
+    const num = Number(value ?? 0);
+    if (!Number.isFinite(num)) return '0';
+    return num.toFixed(digits);
+}
+
+function formatNumberOrDash(value, digits = 2) {
+    if (value === null || value === undefined || value === '') return '-';
+    const num = Number(value);
+    if (!Number.isFinite(num)) return '-';
+    return num.toFixed(digits);
+}
+
+function analysisBiasClass(bias) {
+    const value = String(bias || 'NEUTRAL').toUpperCase();
+    if (value === 'BULLISH') return 'is-bull';
+    if (value === 'BEARISH') return 'is-bear';
+    return 'is-neutral';
+}
+
+function analysisBiasLabel(bias) {
+    const value = String(bias || 'NEUTRAL').toUpperCase();
+    if (value === 'BULLISH') return 'BULLISH';
+    if (value === 'BEARISH') return 'BEARISH';
+    return 'NEUTRAL';
+}
+
+function normalizeCurrencyCode(value) {
+    const code = String(value ?? '').trim().toUpperCase();
+    return code || 'USD';
+}
+
+function formatMoneyByCurrency(value, currency) {
+    if (value === null || value === undefined || value === '') return '-';
+    const num = Number(value);
+    if (!Number.isFinite(num)) return '-';
+    const code = normalizeCurrencyCode(currency);
+    if (code === 'IDR') {
+        return 'Rp' + new Intl.NumberFormat('id-ID', { maximumFractionDigits: 0 }).format(num);
+    }
+    if (code === 'USD') {
+        return '$' + new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(num);
+    }
+    return code + ' ' + new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(num);
+}
+
+function accountCurrencyFor(state) {
+    return normalizeCurrencyCode(state?.account_currency || state?.currency || 'USD');
+}
+
+function boolText(value) {
+    return value ? 'ON' : 'OFF';
+}
+
+function safeArray(value) {
+    return Array.isArray(value) ? value : [];
+}
+
+function firstFiniteNumber(...values) {
+    for (const value of values) {
+        const num = Number(value);
+        if (Number.isFinite(num)) return num;
+    }
+    return 0;
+}
+
+function parseSnapshotTimestamp(value) {
+    if (!value) return NaN;
+    const asNumber = Number(value);
+    if (Number.isFinite(asNumber) && asNumber > 0) return asNumber;
+    const parsed = Date.parse(String(value));
+    return Number.isFinite(parsed) ? parsed : NaN;
+}
+
+function isMeaningfulAnalysisValue(key, value) {
+    if (value === undefined || value === null) return false;
+    if (typeof value !== 'string') return true;
+
+    const text = value.trim();
+    if (!text) return false;
+
+    if (key === 'reason_summary' || key === 'captured_at' || key === 'server_time' || key === 'strategy_name') {
+        return true;
+    }
+
+    const normalized = text.toUpperCase();
+    return !['-', 'N/A', 'NA', 'NONE', 'NULL', 'UNKNOWN'].includes(normalized);
+}
+
+function mergeAnalysisSnapshots(previousAnalysis, incomingAnalysis) {
+    const prev = (previousAnalysis && typeof previousAnalysis === 'object') ? previousAnalysis : {};
+    const incoming = (incomingAnalysis && typeof incomingAnalysis === 'object') ? incomingAnalysis : {};
+    const next = { ...prev };
+
+    const prevTs = parseSnapshotTimestamp(prev.captured_at);
+    const incomingTs = parseSnapshotTimestamp(incoming.captured_at);
+    const incomingIsOlder = Number.isFinite(prevTs) && Number.isFinite(incomingTs) && incomingTs < prevTs;
+    if (incomingIsOlder) {
+        return next;
+    }
+
+    Object.entries(incoming).forEach(([analysisKey, analysisValue]) => {
+        if (analysisKey === 'sessions' && analysisValue && typeof analysisValue === 'object') {
+            const prevSessions = (next.sessions && typeof next.sessions === 'object') ? next.sessions : {};
+            const nextSessions = { ...prevSessions };
+            Object.entries(analysisValue).forEach(([sessionKey, sessionValue]) => {
+                if (sessionValue !== undefined && sessionValue !== null && sessionValue !== '') {
+                    nextSessions[sessionKey] = sessionValue;
+                }
+            });
+            next.sessions = nextSessions;
+            return;
+        }
+
+        if (analysisKey === 'mtf_bias' && analysisValue && typeof analysisValue === 'object') {
+            const prevMtf = (next.mtf_bias && typeof next.mtf_bias === 'object') ? next.mtf_bias : {};
+            next.mtf_bias = { ...prevMtf, ...analysisValue };
+            return;
+        }
+
+        if (isMeaningfulAnalysisValue(analysisKey, analysisValue)) {
+            next[analysisKey] = analysisValue;
+        }
+    });
+
+    ['dxy_status', 'micro_market_status', 'learning_status'].forEach((key) => {
+        if (!isMeaningfulAnalysisValue(key, next[key]) && isMeaningfulAnalysisValue(key, prev[key])) {
+            next[key] = prev[key];
+        }
+    });
+
+    return next;
+}
+
+function assignDefined(target, source) {
+    Object.entries(source || {}).forEach(([key, value]) => {
+        if (key === 'analysis' && value && typeof value === 'object') {
+            const prevAnalysis = (target && target.analysis && typeof target.analysis === 'object') ? target.analysis : {};
+            target.analysis = mergeAnalysisSnapshots(prevAnalysis, value);
+            return;
+        }
+
+        if (value !== undefined && value !== null) {
+            target[key] = value;
+        }
+    });
+    return target;
+}
+
+function formatTime(value) {
+    if (!value) return '-';
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return String(value);
+    return date.toLocaleString('id-ID');
+}
+
+function escapeHtml(value) {
+    return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+function syncTableBody(target, rows, emptyHtml, buildRow) {
+    if (!target) return;
+    const items = safeArray(rows);
+    if (items.length === 0) {
+        if (target.dataset.emptyState !== '1' || target.innerHTML !== emptyHtml) {
+            target.dataset.emptyState = '1';
+            target.innerHTML = emptyHtml;
+        }
+        return;
+    }
+
+    const nextRows = items.map((row, index) => buildRow(row, index));
+    const existingRows = Array.from(target.querySelectorAll('tr[data-row-key]'));
+    const sameShape = existingRows.length === nextRows.length
+        && existingRows.every((row, index) => row.dataset.rowKey === nextRows[index].key);
+
+    target.dataset.emptyState = '0';
+    if (sameShape) {
+        nextRows.forEach((nextRow, index) => {
+            if (existingRows[index].outerHTML !== nextRow.html) {
+                existingRows[index].outerHTML = nextRow.html;
+            }
+        });
+        return;
+    }
+
+    const template = document.createElement('template');
+    template.innerHTML = nextRows.map((row) => row.html).join('');
+    target.replaceChildren(...Array.from(template.content.childNodes));
+}
+
+function buildOpenPositionRow(row) {
+    const key = String(row.ticket ?? row.order ?? row.position ?? row.symbol ?? Math.random());
+    const ticket = String(row.ticket ?? row.order ?? row.position ?? '').trim();
+    const actionLocked = MONITOR_ACTIONS_LOCKED;
+    const disabledAttr = actionLocked ? ' disabled aria-disabled="true"' : '';
+    const closeButtonHtml = ticket
+        ? '<button type="button" class="btn btn-sm btn-outline-danger mon-close-position-btn" data-close-ticket="' + escapeHtml(ticket) + '" title="Close ticket ' + escapeHtml(ticket) + '"' + disabledAttr + '>X</button>'
+        : '<span class="text-secondary">-</span>';
+    const pnl = Number(row.floating ?? (Number(row.profit ?? 0) + Number(row.swap ?? 0)));
+    const pnlClass = pnl >= 0 ? 'text-success' : 'text-danger';
+    return {
+        key,
+        html: '<tr data-row-key="' + escapeHtml(key) + '">' +
+            '<td>' + escapeHtml(row.ticket ?? row.order ?? '-') + '</td>' +
+            '<td>' + escapeHtml(row.type ?? '-') + '</td>' +
+            '<td>' + escapeHtml(row.symbol ?? '-') + '</td>' +
+            '<td>' + escapeHtml(formatNumber(row.lot ?? row.volume ?? 0, 2)) + '</td>' +
+            '<td>' + escapeHtml(formatNumber(row.open_price ?? row.price_open ?? 0, 3)) + '</td>' +
+            '<td>' + escapeHtml(formatNumber(row.sl ?? 0, 3)) + '</td>' +
+            '<td>' + escapeHtml(formatNumber(row.tp ?? 0, 3)) + '</td>' +
+            '<td class="' + pnlClass + '">' + escapeHtml(formatNumber(pnl, 2)) + '</td>' +
+            '<td>' + escapeHtml(formatTime(row.open_time ?? row.time)) + '</td>' +
+            '<td>' + closeButtonHtml + '</td>' +
+            '</tr>',
+    };
+}
+
+function buildPendingOrderRow(row) {
+    const key = String(row.ticket ?? row.order ?? row.position ?? row.symbol ?? Math.random());
+    return {
+        key,
+        html: '<tr data-row-key="' + escapeHtml(key) + '">' +
+            '<td>' + escapeHtml(row.ticket ?? row.order ?? '-') + '</td>' +
+            '<td>' + escapeHtml(row.type ?? '-') + '</td>' +
+            '<td>' + escapeHtml(row.symbol ?? '-') + '</td>' +
+            '<td>' + escapeHtml(formatNumber(row.lot ?? row.volume ?? 0, 2)) + '</td>' +
+            '<td>' + escapeHtml(formatNumber(row.price ?? row.open_price ?? 0, 3)) + '</td>' +
+            '<td>' + escapeHtml(formatNumber(row.sl ?? 0, 3)) + '</td>' +
+            '<td>' + escapeHtml(formatNumber(row.tp ?? 0, 3)) + '</td>' +
+            '<td>' + escapeHtml(formatTime(row.time ?? row.open_time)) + '</td>' +
+            '</tr>',
+    };
+}
+
+function buildHistoryRow(row) {
+    const key = String(row.ticket ?? row.order ?? row.position ?? row.close_time ?? row.open_time ?? Math.random());
+    const profit = Number(row.profit ?? 0);
+    const profitClass = profit >= 0 ? 'text-success' : 'text-danger';
+    return {
+        key,
+        html: '<tr data-row-key="' + escapeHtml(key) + '">' +
+            '<td>' + escapeHtml(row.ticket ?? '-') + '</td>' +
+            '<td>' + escapeHtml(row.symbol ?? '-') + '</td>' +
+            '<td>' + escapeHtml(row.type ?? '-') + '</td>' +
+            '<td>' + escapeHtml(formatNumber(row.lot ?? 0, 2)) + '</td>' +
+            '<td>' + escapeHtml(formatNumber(row.open_price ?? 0, 3)) + '</td>' +
+            '<td>' + escapeHtml(formatNumber(row.close_price ?? 0, 3)) + '</td>' +
+            '<td class="' + profitClass + '">' + escapeHtml(formatNumber(profit, 2)) + '</td>' +
+            '<td>' + escapeHtml(formatNumber(row.swap ?? 0, 2)) + '</td>' +
+            '<td>' + escapeHtml(formatNumber(row.commission ?? 0, 2)) + '</td>' +
+            '<td>' + escapeHtml(formatTime(row.close_time ?? row.open_time)) + '</td>' +
+            '</tr>',
+    };
+}
+
+function renderOpenPositionsTable(rows) {
+    const target = el('mon-open-positions-body');
+    if (!target) return;
+    syncTableBody(
+        target,
+        rows,
+        '<tr><td colspan="10" class="text-secondary">Belum ada data open positions.</td></tr>',
+        buildOpenPositionRow,
+    );
+}
+
+function setMonitoringActionMessage(message, tone = 'secondary') {
+    const target = el('monitor-action-msg');
+    if (!target) return;
+    const safeTone = ['secondary', 'success', 'warning', 'danger', 'info'].includes(String(tone)) ? tone : 'secondary';
+    target.className = 'small text-' + safeTone;
+    target.textContent = String(message || '');
+}
+
+function setCloseTicketButtonsDisabled(ticket, disabled) {
+    const ticketKey = String(ticket || '').trim();
+    if (!ticketKey) return;
+    document.querySelectorAll('.mon-close-position-btn[data-close-ticket]').forEach((btn) => {
+        if (!(btn instanceof HTMLButtonElement)) return;
+        if (String(btn.dataset.closeTicket || '').trim() !== ticketKey) return;
+        btn.disabled = Boolean(disabled);
+    });
+}
+
+async function triggerCloseAllPositions() {
+    const accountId = currentAccount();
+    const pairSymbol = currentPairSymbol();
+    if (!accountId) {
+        setMonitoringActionMessage('Pilih account terlebih dahulu.', 'warning');
+        return;
+    }
+    if (MONITOR_ACTIONS_LOCKED) {
+        setMonitoringActionMessage('Lisensi expired. Action close dikunci.', 'danger');
+        return;
+    }
+
+    if (!window.confirm('Close ALL positions untuk account ' + accountId + '?')) {
+        return;
+    }
+
+    const btn = el('btn-close-all-positions');
+    const csrf = document.querySelector('meta[name="csrf-token"]')?.content || '';
+    const originalText = btn ? btn.textContent : 'Close All Positions';
+
+    if (btn) {
+        btn.disabled = true;
+        btn.textContent = 'Closing...';
+    }
+    setMonitoringActionMessage('Mengirim sinyal close all positions...', 'info');
+
+    try {
+        const response = await fetch(ROUTES.positionsCloseAll, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': csrf,
+            },
+            body: JSON.stringify({
+                account_id: accountId,
+                pair_symbol: pairSymbol,
+                reason: 'Manual close all from dashboard',
+            }),
+        });
+        const json = await response.json();
+        if (!response.ok || !json.success) {
+            throw new Error(String(json?.message || 'Gagal mengirim close all positions.'));
+        }
+
+        setMonitoringActionMessage(String(json.message || 'Sinyal close all dikirim.'), 'success');
+        await refreshMonitoringOnly();
+        restartDashboardLiveStream();
+    } catch (error) {
+        setMonitoringActionMessage('Close all gagal: ' + String(error?.message || 'unknown error'), 'danger');
+    } finally {
+        if (btn) {
+            btn.disabled = false;
+            btn.textContent = originalText;
+        }
+    }
+}
+
+async function triggerCloseSinglePosition(ticket) {
+    const accountId = currentAccount();
+    const pairSymbol = currentPairSymbol();
+    const ticketKey = String(ticket || '').trim();
+    if (!accountId || !ticketKey) {
+        return;
+    }
+    if (MONITOR_ACTIONS_LOCKED) {
+        setMonitoringActionMessage('Lisensi expired. Action close ticket dikunci.', 'danger');
+        return;
+    }
+
+    if (!window.confirm('Close posisi ticket ' + ticketKey + ' untuk account ' + accountId + '?')) {
+        return;
+    }
+
+    const csrf = document.querySelector('meta[name="csrf-token"]')?.content || '';
+    setCloseTicketButtonsDisabled(ticketKey, true);
+    setMonitoringActionMessage('Mengirim sinyal close ticket ' + ticketKey + '...', 'info');
+
+    try {
+        const response = await fetch(ROUTES.positionsCloseOne, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': csrf,
+            },
+            body: JSON.stringify({
+                account_id: accountId,
+                pair_symbol: pairSymbol,
+                ticket: ticketKey,
+                reason: 'Manual close ticket from dashboard',
+            }),
+        });
+        const json = await response.json();
+        if (!response.ok || !json.success) {
+            throw new Error(String(json?.message || 'Gagal close ticket.'));
+        }
+
+        setMonitoringActionMessage(String(json.message || ('Sinyal close ticket ' + ticketKey + ' dikirim.')), 'success');
+        await refreshMonitoringOnly();
+        restartDashboardLiveStream();
+    } catch (error) {
+        setMonitoringActionMessage('Close ticket gagal: ' + String(error?.message || 'unknown error'), 'danger');
+    } finally {
+        setCloseTicketButtonsDisabled(ticketKey, false);
+    }
+}
+
+function renderPendingOrdersTable(rows) {
+    const target = el('mon-pending-orders-body');
+    if (!target) return;
+    syncTableBody(
+        target,
+        rows,
+        '<tr><td colspan="8" class="text-secondary">Belum ada data pending orders.</td></tr>',
+        buildPendingOrderRow,
+    );
+}
+
+function renderHistoryTable(rows) {
+    const target = el('rep-history-body');
+    if (!target) return;
+    const items = safeArray(rows);
+    if (items.length === 0) {
+        if (REPORTS_STATE.isLoading) {
+            target.innerHTML = '<tr><td colspan="10" class="text-secondary text-center" style="padding: 2rem 0;"><small>Loading trade history...</small></td></tr>';
+        } else {
+            target.innerHTML = '<tr><td colspan="10" class="text-secondary">Belum ada trade history.</td></tr>';
+        }
+        return;
+    }
+
+    REPORTS_STATE.lastSuccessfulData = items;
+    syncTableBody(target, items, '', buildHistoryRow);
+}
+
+function renderHistoryPagination() {
+    if (el('rep-history-page-info')) {
+        el('rep-history-page-info').textContent = 'Page ' + REPORTS_STATE.page + '/' + REPORTS_STATE.lastPage + ' • ' + REPORTS_STATE.total + ' rows';
+    }
+    if (el('rep-history-limit')) {
+        const selectedLimitRaw = REPORTS_STATE.pendingPerPage ?? REPORTS_STATE.perPage ?? 10;
+        const selected = String(Math.max(5, Number(selectedLimitRaw)));
+        if (el('rep-history-limit').value !== selected) {
+            el('rep-history-limit').value = selected;
+        }
+    }
+    if (el('rep-history-prev')) el('rep-history-prev').disabled = REPORTS_STATE.page <= 1;
+    if (el('rep-history-next')) el('rep-history-next').disabled = REPORTS_STATE.page >= REPORTS_STATE.lastPage;
+}
+
+function renderCalcDebug() {
+    const targetWrap = el('calc-debug-wrap');
+    const targetOutput = el('calc-debug-output');
+    if (!targetWrap || !targetOutput) return;
+
+    if (!CALC_DEBUG) {
+        targetWrap.style.display = 'none';
+        return;
+    }
+
+    const accountId = currentAccount();
+    const state = { ...DEFAULTS, ...(getActiveAccountState(accountId, currentPairSymbol()) || {}) };
+    const payload = {
+        account_id: accountId || '-',
+        pair_symbol: currentPairSymbol(),
+        monitoring: state.monitoring_calc_debug || null,
+        report: state.report_calc_debug || null,
+    };
+
+    targetWrap.style.display = 'block';
+    targetOutput.textContent = JSON.stringify(payload, null, 2);
+}
+
+let _positionsJson = '';
+let _pendingJson = '';
+let MONITOR_ACTIONS_LOCKED = false;
+function renderSignalReasonTimeline() {
+    const accountId = currentAccount();
+    const signalScopeKey = accountPairKey(accountId, currentPairSymbol());
+    const target = el('signal-reason-timeline');
+    if (!target) return;
+    
+    const history = SIGNAL_REASON_HISTORY[signalScopeKey] || [];
+    if (history.length === 0) {
+        target.innerHTML = '<div class="text-secondary small p-3 text-center">No signal history yet. Waiting for first signal...</div>';
+        return;
+    }
+    
+    const displayItems = history.slice(0, 10); // Show only last 10
+    target.innerHTML = displayItems.map((item, idx) => {
+        const time = new Date(item.timestamp);
+        const timeStr = time.toLocaleTimeString('id-ID');
+        const biasClass = item.bias === 'BULL' ? 'is-bull' : (item.bias === 'BEAR' ? 'is-bear' : 'is-neutral');
+        const detailList = Array.isArray(item?.meta?.reason_details) ? item.meta.reason_details : [];
+        const evidence = detailList.length > 0 ? detailList.slice(0, 2).join(' ') : buildSignalReasonEvidence(item.meta);
+        return `<div class="signal-reason-item ${biasClass}">
+            <span class="signal-reason-time">● ${timeStr}</span>
+            <span class="signal-reason-text"><strong>${item.bias}</strong> - ${item.reason}</span>
+            ${evidence ? `<span class="signal-reason-subtext">${evidence}</span>` : ''}
+            <span class="signal-reason-power">Power: ${formatNumber(item.power, 2)}%</span>
+        </div>`;
+    }).join('');
+}
+
+function getEligibleBulkAccounts() {
+    if (!BULK_CONTROL_ENABLED) {
+        return [];
+    }
+
+    const whitelist = safeArray(BULK_CONTROL_WHITELIST).map((item) => String(item || '').trim()).filter(Boolean);
+    if (whitelist.length === 0) {
+        return [];
+    }
+
+    // Do not block bulk action by local cache availability.
+    // Server side access checks remain the source of truth.
+    return whitelist;
+}
+
+function updateBulkControlUi() {
+    const hintEl = el('bot-bulk-hint');
+    const startAllBtn = el('btn-bot-start-all');
+    const stopAllBtn = el('btn-bot-stop-all');
+    const whitelist = safeArray(BULK_CONTROL_WHITELIST).map((item) => String(item || '').trim()).filter(Boolean);
+    const eligible = getEligibleBulkAccounts();
+    const accountId = currentAccount();
+    const licenseActive = Boolean((LICENSE_SNAPSHOTS[accountId] || {}).license_active);
+    const licenseLocked = LICENSE_ENFORCEMENT_ENABLED && !licenseActive;
+
+    if (hintEl) {
+        if (!BULK_CONTROL_ENABLED) {
+            hintEl.textContent = 'Whitelist bulk control sedang dinonaktifkan oleh admin.';
+        } else if (whitelist.length === 0) {
+            hintEl.textContent = 'Whitelist bulk control belum diset di server.';
+        } else {
+            hintEl.textContent = 'Whitelist bulk control: ' + eligible.length + '/' + whitelist.length + ' account siap.';
+        }
+    }
+
+    const canRun = !licenseLocked && BULK_CONTROL_ENABLED && whitelist.length > 0 && eligible.length > 0;
+    if (startAllBtn) startAllBtn.disabled = !canRun;
+    if (stopAllBtn) stopAllBtn.disabled = !canRun;
+}
+
+function parseBulkWhitelistText(raw) {
+    return String(raw || '')
+        .split(/[\n,]/)
+        .map((item) => item.trim())
+        .filter(Boolean)
+        .filter((value, index, arr) => arr.indexOf(value) === index);
+}
+
+    let BULK_AUTOSAVE_TIMER = null;
+
+function normalizeAccountId(raw) {
+    return String(raw || '').trim().replace(/\s+/g, '');
+}
+
+function normalizeBulkWhitelist(values) {
+    return safeArray(values)
+        .map((item) => normalizeAccountId(item))
+        .filter(Boolean)
+        .filter((value, index, arr) => arr.indexOf(value) === index);
+}
+
+function setBulkModalMessage(message, type = 'secondary') {
+    const msgEl = el('bulk-whitelist-modal-msg');
+    if (!msgEl) return;
+    msgEl.textContent = message;
+    msgEl.className = 'small mt-2 text-' + type;
+}
+
+function renderBulkWhitelistList() {
+    const listEl = el('bulk-whitelist-list');
+    if (!listEl) return;
+
+    const whitelist = normalizeBulkWhitelist(BULK_CONTROL_WHITELIST);
+    BULK_CONTROL_WHITELIST = whitelist;
+
+    if (!whitelist.length) {
+        listEl.innerHTML = '<span class="small text-secondary">Belum ada account di whitelist.</span>';
+    } else {
+        listEl.innerHTML = whitelist.map((accountId) => (
+            '<span class="badge text-bg-light border d-inline-flex align-items-center gap-2">'
+            + '<span title="' + escapeHtml(accountDisplayLabel(accountId)) + '">' + escapeHtml(accountDisplayLabel(accountId)) + '</span>'
+            + '<button type="button" class="btn btn-sm btn-link p-0 text-danger" data-bulk-remove="' + escapeHtml(accountId) + '">x</button>'
+            + '</span>'
+        )).join('');
+    }
+
+    const selectEl = el('bulk-account-select');
+    if (selectEl) {
+        const accountIds = Object.keys(ACCOUNTS || {}).map((item) => normalizeAccountId(item)).filter(Boolean).sort();
+        selectEl.innerHTML = '<option value="">-- Pilih account --</option>' + accountIds.map((id) => '<option value="' + escapeHtml(id) + '">' + escapeHtml(accountDisplayLabel(id)) + '</option>').join('');
+    }
+
+}
+
+function scheduleBulkWhitelistAutosave(reason = '') {
+    if (!IS_ADMIN) return;
+    if (BULK_AUTOSAVE_TIMER) {
+        clearTimeout(BULK_AUTOSAVE_TIMER);
+        BULK_AUTOSAVE_TIMER = null;
+    }
+
+    BULK_AUTOSAVE_TIMER = setTimeout(() => {
+        BULK_AUTOSAVE_TIMER = null;
+        saveBulkWhitelistSettings({ silent: true, reason });
+    }, 260);
+}
+
+function addAccountToWhitelist(raw) {
+    const accountId = normalizeAccountId(raw);
+    if (!accountId) {
+        setBulkModalMessage('Account ID tidak boleh kosong.', 'warning');
+        return;
+    }
+
+    const whitelist = normalizeBulkWhitelist(BULK_CONTROL_WHITELIST);
+    if (whitelist.includes(accountId)) {
+        setBulkModalMessage('Account ' + accountId + ' sudah ada di whitelist.', 'warning');
+        return;
+    }
+
+    whitelist.push(accountId);
+    BULK_CONTROL_WHITELIST = whitelist;
+    renderBulkWhitelistList();
+    updateBulkControlUi();
+    setBulkModalMessage('Account ' + accountId + ' ditambahkan. Menyimpan otomatis...', 'success');
+    scheduleBulkWhitelistAutosave('add');
+}
+
+function removeAccountFromWhitelist(accountId) {
+    const normalized = normalizeAccountId(accountId);
+    BULK_CONTROL_WHITELIST = normalizeBulkWhitelist(BULK_CONTROL_WHITELIST).filter((item) => item !== normalized);
+    renderBulkWhitelistList();
+    updateBulkControlUi();
+    setBulkModalMessage('Account ' + normalized + ' dihapus. Menyimpan otomatis...', 'secondary');
+    scheduleBulkWhitelistAutosave('remove');
+}
+
+function updateBulkSettingsForm(message, type = 'secondary') {
+    const msgEl = el('bulk-whitelist-save-msg');
+    if (!msgEl) return;
+    msgEl.textContent = message;
+    msgEl.className = 'small mt-2 text-' + type;
+}
+
+async function loadBulkWhitelistSettings() {
+    if (!IS_ADMIN) {
+        return;
+    }
+
+    try {
+        const response = await fetch(ROUTES.botWhitelistGet, {
+            headers: { 'Accept': 'application/json' },
+            credentials: 'same-origin',
+        });
+        const json = await response.json();
+        if (!response.ok || !json.success) {
+            throw new Error(String(json?.message || 'Gagal memuat pengaturan whitelist.'));
+        }
+
+        BULK_CONTROL_ENABLED = Boolean(json.enabled);
+        BULK_CONTROL_WHITELIST = normalizeBulkWhitelist(json.whitelist);
+
+        const enabledInput = el('bulk-enabled-input');
+        if (enabledInput) enabledInput.checked = BULK_CONTROL_ENABLED;
+
+        renderBulkWhitelistList();
+
+        updateBulkSettingsForm('Pengaturan whitelist berhasil dimuat.', 'success');
+        updateBulkControlUi();
+    } catch (error) {
+        updateBulkSettingsForm('Gagal memuat pengaturan whitelist: ' + String(error?.message || 'unknown error'), 'danger');
+    }
+}
+
+async function saveBulkWhitelistSettings(options = {}) {
+    if (!IS_ADMIN) {
+        return;
+    }
+
+    const silent = Boolean(options?.silent);
+    const enabledInput = el('bulk-enabled-input');
+    const csrf = document.querySelector('meta[name="csrf-token"]')?.content || '';
+
+    const enabled = Boolean(enabledInput?.checked);
+    const whitelist = normalizeBulkWhitelist(BULK_CONTROL_WHITELIST);
+
+    if (!silent) {
+        updateBulkSettingsForm('Menyimpan pengaturan whitelist...', 'secondary');
+    }
+
+    try {
+        const response = await fetch(ROUTES.botWhitelistUpdate, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': csrf,
+            },
+            credentials: 'same-origin',
+            body: JSON.stringify({
+                enabled,
+                whitelist_text: whitelist.join(', '),
+            }),
+        });
+        const json = await response.json();
+        if (!response.ok || !json.success) {
+            throw new Error(String(json?.message || 'Gagal menyimpan pengaturan whitelist.'));
+        }
+
+        BULK_CONTROL_ENABLED = Boolean(json.enabled);
+        BULK_CONTROL_WHITELIST = normalizeBulkWhitelist(json.whitelist);
+
+        if (enabledInput) enabledInput.checked = BULK_CONTROL_ENABLED;
+
+        renderBulkWhitelistList();
+
+        if (!silent) {
+            updateBulkSettingsForm(String(json.message || 'Pengaturan whitelist berhasil disimpan.'), 'success');
+        } else {
+            updateBulkSettingsForm('Perubahan whitelist tersimpan otomatis.', 'success');
+        }
+        updateBulkControlUi();
+    } catch (error) {
+        updateBulkSettingsForm('Gagal menyimpan pengaturan whitelist: ' + String(error?.message || 'unknown error'), 'danger');
+    }
+}
+
+function renderMonitoring() {
+    const accountId = currentAccount();
+    const pairSymbol = currentPairSymbol();
+    const accountState = getActiveAccountState(accountId, pairSymbol);
+    const licenseState = LICENSE_SNAPSHOTS[accountId] || {};
+    const state = { ...DEFAULTS, ...accountState, ...licenseState };
+    const currency = accountCurrencyFor(state);
+    const heartbeatTs = Date.parse(String(state.updated_at || ''));
+    const staleHeartbeat = Number.isFinite(heartbeatTs) ? (Date.now() - heartbeatTs > 45000) : true;
+    const isOnlineFresh = Boolean(state.is_online) && !staleHeartbeat;
+    const guardStatus = String(state.guard_status ?? state.live_guard_status ?? 'N/A').toUpperCase();
+    const licenseActive = Boolean(state.license_active);
+    const licenseLocked = LICENSE_ENFORCEMENT_ENABLED && !licenseActive;
+    const settingsLockedByLicense = Boolean(accountId) && !licenseActive;
+    const statusText = !isOnlineFresh
+        ? 'OFFLINE'
+        : (licenseLocked
+            ? 'LICENSE EXPIRED'
+            : (guardStatus === 'LIVE'
+            ? 'ONLINE'
+            : (guardStatus === 'DD_STOP' ? 'DD STOP' : 'PAUSED')));
+
+    setSmooth('monitor-account-chip', 'Account: ' + (accountId || '-') + ' • Pair: ' + (pairSymbol || '-'));
+    setSmooth('monitor-license-enforcement-chip', 'License Enforcement: ' + (LICENSE_ENFORCEMENT_ENABLED ? 'ON' : 'OFF'));
+    const topbarLicenseCard = el('topbar-license-card');
+    if (!accountId) {
+        syncLiveLicenseCountdown(accountId, state, false);
+        setSmooth('topbar-license-status', 'Belum dipilih');
+        setSmooth('topbar-license-remaining', 'Sisa: --:--:--');
+        topbarLicenseCard?.setAttribute('data-license-state', 'inactive');
+    } else if (licenseActive) {
+        syncLiveLicenseCountdown(accountId, state, true);
+        setSmooth('topbar-license-status', 'Aktif');
+        topbarLicenseCard?.setAttribute('data-license-state', 'active');
+        if (Boolean(state.license_is_perpetual)) {
+            setSmooth('topbar-license-remaining', 'Countdown: Permanent');
+            setSmooth('mon-license', 'Permanent');
+        } else {
+            renderLiveLicenseCountdownTick();
+        }
+    } else {
+        syncLiveLicenseCountdown(accountId, state, false);
+        setSmooth('topbar-license-status', 'Habis');
+        setSmooth('topbar-license-remaining', 'Countdown: 00d 00h 00m 00s');
+        topbarLicenseCard?.setAttribute('data-license-state', 'expired');
+    }
+    setSmooth('mon-status', statusText);
+    setSmooth('mon-floating', formatMoneyByCurrency(state.global_floating ?? state.live_floating_pnl ?? 0, currency));
+    setSmooth('mon-layers', String(state.current_layers ?? state.live_open_layers ?? 0));
+    setSmooth('mon-lot', formatNumber(state.current_accumulative_lot ?? state.live_accumulative_lot ?? 0, 2));
+    setSmooth('mon-balance', formatMoneyByCurrency(state.balance, currency));
+    setSmooth('mon-equity', formatMoneyByCurrency(state.equity, currency));
+    const liveDailyProfit = firstFiniteNumber(
+        state.report_daily_profit,
+        state.daily_profit,
+        state.today_pnl,
+        state.profit_today,
+        state.realized_profit_today,
+    );
+    setSmooth('mon-daily-profit', formatMoneyByCurrency(liveDailyProfit, currency));
+    setSmooth('mon-winrate', formatNumber(state.win_rate_percent ?? 0, 2) + '%');
+    setSmooth('mon-realized-profit', formatMoneyByCurrency(state.realized_profit ?? 0, currency));
+    setSmooth('mon-drawdown', formatNumber(state.drawdown_pct ?? 0, 2) + '%');
+
+    setSmooth('mon-strategy', strategyName(state.active_strategy ?? 0));
+    setSmooth('mon-timeframe', 'M' + String(state.timeframe_logic ?? 1));
+    setSmooth('mon-guard', guardStatus);
+    if (!licenseActive) {
+        setSmooth('mon-license', LICENSE_ENFORCEMENT_ENABLED ? 'Expired' : 'Not enforced');
+    }
+    setSmooth('mon-dd-debounce', String(Math.max(1, Math.trunc(Number(state.dd_breach_hits_required ?? DEFAULTS.dd_breach_hits_required ?? 15)))));
+    setSmooth('mon-base-lot', formatNumber(state.base_lot ?? 0.01, 2));
+
+    // Update bot toggle button based on guard_status
+    const btnToggle = el('btn-bot-toggle');
+    if (btnToggle) {
+        btnToggle.disabled = !accountId || licenseLocked;
+        const isLive = guardStatus === 'LIVE';
+        if (isLive) {
+            btnToggle.className = 'btn btn-danger bot-toggle-btn';
+            const iconEl = el('btn-bot-icon');
+            const labelEl = el('btn-bot-label');
+            if (iconEl) iconEl.textContent = '||';
+            if (labelEl) labelEl.textContent = 'Stop Bot';
+        } else {
+            btnToggle.className = 'btn btn-success bot-toggle-btn';
+            const iconEl = el('btn-bot-icon');
+            const labelEl = el('btn-bot-label');
+            if (iconEl) iconEl.textContent = '>';
+            if (labelEl) labelEl.textContent = 'Start Bot';
+        }
+    }
+
+    // Handle DD status styling. Keep button clickable whenever an account is selected.
+    const btnResetDd = el('btn-bot-reset-dd');
+    if (btnResetDd) {
+        const isDdStop = guardStatus === 'DD_STOP';
+        btnResetDd.disabled = !accountId || licenseLocked;
+        btnResetDd.style.display = 'inline-block';
+        btnResetDd.title = isDdStop
+            ? 'Reset Max Drawdown sekarang untuk mengaktifkan Start Bot lagi'
+            : 'Klik untuk force reset guard ke LIVE';
+        if (isDdStop) {
+            btnResetDd.classList.remove('btn-outline-warning');
+            btnResetDd.classList.add('btn-warning');
+        } else {
+            btnResetDd.classList.remove('btn-warning');
+            btnResetDd.classList.add('btn-outline-warning');
+        }
+    }
+
+    const closeAllBtn = el('btn-close-all-positions');
+    if (closeAllBtn) {
+        closeAllBtn.disabled = !accountId || licenseLocked;
+    }
+    const lockChanged = MONITOR_ACTIONS_LOCKED !== licenseLocked;
+    MONITOR_ACTIONS_LOCKED = licenseLocked;
+
+    const startAllBtn = el('btn-bot-start-all');
+    if (startAllBtn) startAllBtn.disabled = !accountId || licenseLocked || startAllBtn.disabled;
+    const stopAllBtn = el('btn-bot-stop-all');
+    if (stopAllBtn) stopAllBtn.disabled = !accountId || licenseLocked || stopAllBtn.disabled;
+
+    applyLicenseFormLock(settingsLockedByLicense);
+
+    updateBulkControlUi();
+
+    setSmooth('mon-mirror', boolText(Boolean(state.use_mirror_trap || state.mirror_active)));
+    setSmooth('mon-pending-distance', String(state.mirror_pending_distance_points ?? 0));
+    setSmooth('mon-pending-multi', formatNumber(state.mirror_multiplier ?? 0, 2));
+    setSmooth('mon-mode', Number(state.grid_mode ?? 0) === 0 ? 'Fix Points' : 'ATR');
+
+    setSmooth('mon-session-sydney', boolText(Boolean(state.use_sydney_session)));
+    setSmooth('mon-session-asia', boolText(Boolean(state.use_asia_session)));
+    setSmooth('mon-session-europe', boolText(Boolean(state.use_europe_session)));
+    setSmooth('mon-session-us', boolText(Boolean(state.use_us_session)));
+    setSmooth('mon-stealth', boolText(Boolean(state.use_stealth_mode)));
+
+    const incomingOpenPositions = safeArray(state.open_positions);
+    const cachedOpenPositions = safeArray(accountState._last_open_positions_rows);
+    const shouldHoldPreviousOpenRows = incomingOpenPositions.length === 0
+        && Number(state.current_layers ?? state.live_open_layers ?? 0) > 0
+        && cachedOpenPositions.length > 0;
+    const openRows = shouldHoldPreviousOpenRows ? cachedOpenPositions : incomingOpenPositions;
+    if (incomingOpenPositions.length > 0) {
+        accountState._last_open_positions_rows = incomingOpenPositions;
+    } else if (Number(state.current_layers ?? state.live_open_layers ?? 0) === 0) {
+        accountState._last_open_positions_rows = [];
+    }
+    setStateByAccountPair(accountId, pairSymbol, accountState);
+
+    if (licenseLocked) {
+        const monitorMsg = el('monitor-action-msg');
+        if (monitorMsg) {
+            monitorMsg.textContent = 'Lisensi expired. Bot dan action kritikal dikunci sampai diperpanjang.';
+            monitorMsg.className = 'small text-danger';
+        }
+    } else {
+        const monitorMsg = el('monitor-action-msg');
+        if (monitorMsg && String(monitorMsg.textContent || '').toLowerCase().includes('lisensi expired')) {
+            monitorMsg.textContent = 'Gunakan tombol close untuk menutup semua posisi atau posisi per layer.';
+            monitorMsg.className = 'small text-secondary mb-2';
+        }
+    }
+
+    const newPosJson = JSON.stringify(openRows || []);
+    if (newPosJson !== _positionsJson || lockChanged) {
+        _positionsJson = newPosJson;
+        renderOpenPositionsTable(openRows || []);
+    }
+    const newPendJson = JSON.stringify(state.pending_orders || []);
+    if (newPendJson !== _pendingJson) {
+        _pendingJson = newPendJson;
+        renderPendingOrdersTable(state.pending_orders || []);
+    }
+
+    renderCalcDebug();
+    renderAnalysis();
+}
+
+function renderAnalysis() {
+    const accountId = currentAccount();
+    const pairSymbol = currentPairSymbol();
+    const state = { ...DEFAULTS, ...(getActiveAccountState(accountId, pairSymbol) || {}) };
+    const analysis = state.analysis || {};
+
+    const bias = analysisBiasLabel(analysis.bias || analysis.stable_bias || analysis.signal_bias || 'NEUTRAL');
+    const biasClass = analysisBiasClass(bias);
+    const power = Number(analysis.power_pct ?? analysis.signal_power_pct ?? 0);
+    const confidence = Number(analysis.confidence_pct ?? analysis.stability_pct ?? analysis.vote_power_pct ?? 0);
+
+    setSmooth('analysis-account-chip', 'Account: ' + (accountId || '-') + ' • Pair: ' + (pairSymbol || '-'));
+    setSmooth('analysis-bias', bias);
+    setSmoothNumber('analysis-score-buy', Number(analysis.score_buy ?? 0), { digits: 0, fallback: '0', durationMs: 700 });
+    setSmoothNumber('analysis-score-sell', Number(analysis.score_sell ?? 0), { digits: 0, fallback: '0', durationMs: 700 });
+    setSmoothNumber('analysis-votes-bull', Number(analysis.bull_votes ?? 0), { digits: 0, fallback: '0', durationMs: 700 });
+    setSmoothNumber('analysis-votes-bear', Number(analysis.bear_votes ?? 0), { digits: 0, fallback: '0', durationMs: 700 });
+
+    setSmoothNumber('analysis-adx', analysis.adx, { digits: 2, fallback: '-', durationMs: 700 });
+    const dxyStatusRaw = String(analysis.dxy_status ?? '').trim();
+    const microStatusRaw = String(analysis.micro_market_status ?? '').trim();
+    const learningStatusRaw = String(analysis.learning_status ?? '').trim();
+    const isPlaceholderText = (value) => {
+        const normalized = String(value || '').trim().toUpperCase();
+        return !normalized || ['-', 'N/A', 'NA', 'NONE', 'NULL', 'UNKNOWN'].includes(normalized);
+    };
+
+    const accountState = getActiveAccountState(accountId, pairSymbol) || {};
+    if (!isPlaceholderText(dxyStatusRaw)) accountState._last_dxy_status = dxyStatusRaw;
+    if (!isPlaceholderText(microStatusRaw)) accountState._last_micro_status = microStatusRaw;
+    if (!isPlaceholderText(learningStatusRaw)) accountState._last_learning_status = learningStatusRaw;
+    setStateByAccountPair(accountId, pairSymbol, accountState);
+
+    const dxyStable = !isPlaceholderText(dxyStatusRaw)
+        ? dxyStatusRaw
+        : String(accountState._last_dxy_status || 'NO DATA');
+    const microStable = !isPlaceholderText(microStatusRaw)
+        ? microStatusRaw
+        : String(accountState._last_micro_status || 'NO DATA');
+    const learningStable = !isPlaceholderText(learningStatusRaw)
+        ? learningStatusRaw
+        : String(accountState._last_learning_status || 'NO DATA');
+
+    setSmooth('analysis-dxy', dxyStable);
+    setSmooth('analysis-micro', microStable);
+    setSmooth('analysis-learning', learningStable);
+    setSmooth('analysis-wait', String(Math.max(0, Number(analysis.signal_wait_seconds ?? 0))) + 's');
+    setSmooth('analysis-queue', String(Math.max(0, Math.trunc(Number(analysis.api_queue_depth ?? 0)))));
+
+    setSmooth('analysis-guard-commanded', String(analysis.guard_status_commanded ?? state.guard_status ?? '-'));
+    setSmooth('analysis-guard-live', String(analysis.guard_status_live ?? state.live_guard_status ?? state.guard_status ?? '-'));
+    setSmooth('analysis-dd-debounce', String(Math.max(1, Math.trunc(Number(analysis.dd_breach_hits_required ?? state.dd_breach_hits_required ?? DEFAULTS.dd_breach_hits_required ?? 15)))));
+    const guardLiveText = String(analysis.guard_status_live ?? state.live_guard_status ?? state.guard_status ?? '').toUpperCase();
+    const newsBlockedActive = Boolean(analysis.news_blocked) || guardLiveText.includes('PAUSED_NEWS');
+    const remotePausedActive = Boolean(analysis.remote_paused) || guardLiveText.includes('PAUSED_REMOTE');
+    setSmooth('analysis-news', boolText(newsBlockedActive));
+    setSmooth('analysis-remote', boolText(remotePausedActive));
+    setSmooth('analysis-strategy', strategyName(analysis.active_strategy ?? state.active_strategy ?? 0));
+    setSmooth('analysis-timeframe', 'M' + String(analysis.timeframe_logic ?? state.timeframe_logic ?? 1));
+
+    setSmoothNumber('analysis-spread', analysis.spread_points, { digits: 2, fallback: '-', durationMs: 700 });
+    setSmoothNumber('analysis-atr', analysis.atr_points, { digits: 2, fallback: '-', durationMs: 700 });
+    setSmoothNumber('analysis-spread-ratio', analysis.spread_atr_ratio, { digits: 3, fallback: '-', durationMs: 700 });
+    setSmooth('analysis-spread-expensive', boolText(Boolean(analysis.spread_is_expensive)));
+    setSmoothNumber('analysis-support', analysis.support_level, { digits: 3, fallback: '-', durationMs: 700 });
+    setSmoothNumber('analysis-resistance', analysis.resistance_level, { digits: 3, fallback: '-', durationMs: 700 });
+
+    setSmooth('analysis-session-sydney', boolText(Boolean(analysis?.sessions?.use_sydney_session ?? state.use_sydney_session)));
+    setSmooth('analysis-session-asia', boolText(Boolean(analysis?.sessions?.use_asia_session ?? state.use_asia_session)));
+    setSmooth('analysis-session-europe', boolText(Boolean(analysis?.sessions?.use_europe_session ?? state.use_europe_session)));
+    setSmooth('analysis-session-us', boolText(Boolean(analysis?.sessions?.use_us_session ?? state.use_us_session)));
+    setSmooth('analysis-server-time', String(analysis.server_time ?? '-'));
+    setSmooth('analysis-age', Number.isFinite(Number(analysis.age_seconds)) ? String(Math.max(0, Math.trunc(Number(analysis.age_seconds)))) + 's' : '-');
+
+    const mtf = (analysis.mtf_bias && typeof analysis.mtf_bias === 'object') ? analysis.mtf_bias : {};
+    const mtfSummary = (mtf.summary && typeof mtf.summary === 'object') ? mtf.summary : {};
+    const strictFinite = (value) => {
+        if (value === null || value === undefined || value === '') return null;
+        const num = Number(value);
+        return Number.isFinite(num) ? num : null;
+    };
+    const mtfNodeLabel = (node) => {
+        if (!node || typeof node !== 'object') return '-';
+        const biasText = analysisBiasLabel(String(node.bias || 'NEUTRAL'));
+        const scoreNum = strictFinite(node.score);
+        const adxNum = strictFinite(node.adx);
+        const rsiNum = strictFinite(node.rsi);
+        const scoreText = scoreNum !== null ? (formatNumber(scoreNum, 2) + '%') : '-';
+        const adxText = adxNum !== null ? formatNumber(adxNum, 1) : '-';
+        const rsiText = rsiNum !== null ? formatNumber(rsiNum, 1) : '-';
+        return biasText + ' | score ' + scoreText + ' | ADX ' + adxText + ' | RSI ' + rsiText;
+    };
+
+    setSmooth('analysis-mtf-m1', mtfNodeLabel(mtf.m1));
+    setSmooth('analysis-mtf-m5', mtfNodeLabel(mtf.m5));
+    setSmooth('analysis-mtf-m15', mtfNodeLabel(mtf.m15));
+    setSmooth('analysis-mtf-h1', mtfNodeLabel(mtf.h1));
+    setSmooth('analysis-mtf-summary-bias', analysisBiasLabel(String(mtfSummary.bias || analysis.mtf_summary_bias || 'NEUTRAL')));
+    setSmooth('analysis-mtf-summary-score', Number.isFinite(Number(mtfSummary.score ?? analysis.mtf_summary_score))
+        ? (formatNumber(Number(mtfSummary.score ?? analysis.mtf_summary_score), 2) + '%')
+        : '-');
+
+    const reasonSummary = String(analysis.reason_summary || mtfSummary.reason || buildSignalReasonNarrative(analysis, bias, power));
+    const reasonDetails = Array.isArray(analysis.reason_details) ? analysis.reason_details : [];
+    setSmooth('analysis-reason-summary', reasonSummary);
+    setSmooth(
+        'analysis-reason-details',
+        reasonDetails.length
+            ? reasonDetails.map((item) => '- ' + String(item)).join(' | ')
+            : (String(mtfSummary.reason || '-') || '-')
+    );
+
+    const biasChip = el('analysis-bias-chip');
+    if (biasChip) {
+        biasChip.className = 'analysis-chip ' + biasClass;
+        biasChip.textContent = 'POWER ' + formatNumber(power, 2) + '%';
+    }
+
+    const confChip = el('analysis-confidence-chip');
+    if (confChip) {
+        confChip.className = 'analysis-chip ' + biasClass;
+        confChip.textContent = 'CONF ' + formatNumber(confidence, 2) + '%';
+    }
+
+    const updateChip = el('analysis-last-update');
+    if (updateChip) {
+        updateChip.className = 'analysis-chip ' + biasClass;
+        updateChip.textContent = analysis.captured_at ? ('UPDATED ' + formatTime(analysis.captured_at)) : 'WAITING SIGNAL';
+    }
+
+    // Record signal reason only when signature changes (or after cooldown)
+    const currentBias = bias;
+    const score = Number(analysis.score_buy ?? 0);
+    const scoreSell = Number(analysis.score_sell ?? 0);
+    const bullVotes = Number(analysis.bull_votes ?? 0);
+    const bearVotes = Number(analysis.bear_votes ?? 0);
+    const adx = Number(analysis.adx ?? 0);
+    const signalSignature = [
+        currentBias,
+        Math.round(power / 5) * 5,
+        Math.round(confidence / 5) * 5,
+        Math.trunc(score),
+        Math.trunc(scoreSell),
+        Math.trunc(bullVotes),
+        Math.trunc(bearVotes),
+        Math.round(adx),
+        Boolean(analysis.spread_is_expensive) ? 1 : 0,
+        newsBlockedActive ? 1 : 0,
+        remotePausedActive ? 1 : 0,
+    ].join('|');
+    const lastSignature = String(accountState?._lastRecordedSignalSignature || '');
+    const lastRecordedAt = Number(accountState?._lastRecordedSignalAt || 0);
+    const prevBias = String(accountState?._lastRecordedBias || '');
+    const prevPower = Number(accountState?._lastRecordedPower ?? 0);
+    const prevNewsBlocked = Boolean(accountState?._lastRecordedNewsBlocked ?? false);
+    const prevRemotePaused = Boolean(accountState?._lastRecordedRemotePaused ?? false);
+    const majorShift = (prevBias !== '' && prevBias !== currentBias && Math.abs(power - prevPower) >= 8)
+        || (Math.abs(power - prevPower) >= 15)
+        || (newsBlockedActive !== prevNewsBlocked)
+        || (remotePausedActive !== prevRemotePaused);
+    const cooldownMs = currentBias === 'NEUTRAL' ? 180000 : 120000;
+    const shouldRecord = lastSignature === '' || majorShift || (Date.now() - lastRecordedAt) >= cooldownMs;
+
+    if (shouldRecord) {
+        const reason = String(analysis.reason_summary || buildSignalReasonNarrative(analysis, currentBias, power));
+        recordSignalReason(accountId, currentBias, power, reason, {
+            score_buy: score,
+            score_sell: scoreSell,
+            bull_votes: bullVotes,
+            bear_votes: bearVotes,
+            adx,
+            power,
+            bias: currentBias,
+            reason_details: Array.isArray(analysis.reason_details) ? analysis.reason_details : [],
+        });
+        setStateByAccountPair(accountId, pairSymbol, {
+            ...(getActiveAccountState(accountId, pairSymbol) || {}),
+            _lastRecordedBias: currentBias,
+            _lastRecordedPower: power,
+            _lastRecordedNewsBlocked: newsBlockedActive,
+            _lastRecordedRemotePaused: remotePausedActive,
+            _lastRecordedSignalSignature: signalSignature,
+            _lastRecordedSignalAt: Date.now(),
+        });
+    }
+
+    renderSignalReasonTimeline();
+}
+
+function renderReport(lastSave = '') {
+    const accountId = currentAccount();
+    const pairSymbol = currentPairSymbol();
+    const state = { ...DEFAULTS, ...(getActiveAccountState(accountId, pairSymbol) || {}) };
+    const currency = accountCurrencyFor(state);
+
+    if (el('rep-account-id')) el('rep-account-id').textContent = accountId || '-';
+    if (el('rep-strategy')) el('rep-strategy').textContent = strategyName(state.active_strategy ?? 0);
+    if (el('rep-news-severity')) el('rep-news-severity').textContent = String(state.news_filter_severity ?? 'HIGH');
+    if (el('rep-snr')) el('rep-snr').textContent = boolText(Boolean(state.filter_snr_activation));
+    if (el('rep-last-save')) el('rep-last-save').textContent = lastSave || 'Belum ada aksi simpan.';
+    if (el('rep-before-news')) el('rep-before-news').textContent = String(state.news_pause_before_minutes ?? 0);
+    if (el('rep-after-news')) el('rep-after-news').textContent = String(state.news_pause_after_minutes ?? 0);
+    if (el('rep-widget-time')) el('rep-widget-time').textContent = new Date().toLocaleTimeString('id-ID');
+    if (el('rep-news-count')) el('rep-news-count').textContent = String(NEWS_ITEMS.length);
+    if (el('rep-theme')) el('rep-theme').textContent = (document.body.getAttribute('data-theme') || 'light') === 'dark' ? 'Dark' : 'Light';
+    if (el('rep-winrate')) el('rep-winrate').textContent = formatNumber(state.win_rate_percent ?? 0, 2) + '%';
+    if (el('rep-wl')) el('rep-wl').textContent = String(state.wins ?? 0) + '/' + String(state.losses ?? 0);
+    if (el('rep-profit-daily')) el('rep-profit-daily').textContent = formatMoneyByCurrency(state.daily_profit ?? 0, currency);
+    if (el('rep-profit-weekly')) el('rep-profit-weekly').textContent = formatMoneyByCurrency(state.weekly_profit ?? 0, currency);
+    if (el('rep-profit-monthly')) el('rep-profit-monthly').textContent = formatMoneyByCurrency(state.monthly_profit ?? 0, currency);
+    if (el('rep-profit-realized')) el('rep-profit-realized').textContent = formatMoneyByCurrency(state.realized_profit ?? 0, currency);
+    if (el('rep-reset-at')) el('rep-reset-at').textContent = state.wr_reset_at ? formatTime(state.wr_reset_at) : 'Belum pernah';
+    renderHistoryTable(state.history || []);
+    renderHistoryPagination();
+    renderCalcDebug();
+    renderAnalysis();
+}
+
+let _monitoringInflight = false;
+let _monitoringAbortController = null;
+
+async function refreshMonitoringOnly() {
+    const accountId = currentAccount();
+    if (!accountId) return;
+    const pairSymbol = currentPairSymbol();
+
+    if (_monitoringInflight) return;
+
+    _monitoringInflight = true;
+    const controller = new AbortController();
+    _monitoringAbortController = controller;
+    const csrf = document.querySelector('meta[name="csrf-token"]')?.content || '';
+
+    try {
+        const url = ROUTES.monitoringLive
+            + '?account_id=' + encodeURIComponent(accountId)
+            + '&pair_symbol=' + encodeURIComponent(pairSymbol)
+            + (CALC_DEBUG ? '&calc_debug=1' : '')
+            + '&_ts=' + Date.now();
+        const res = await fetch(url, {
+            method: 'GET',
+            cache: 'no-store',
+            signal: controller.signal,
+            headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': csrf, 'Cache-Control': 'no-cache' },
+        });
+        const json = await res.json();
+        if (res.ok && json.success) {
+            const REPORT_FIELDS = ['daily_profit','weekly_profit','monthly_profit',
+                                   'realized_profit','win_rate_percent','wins','losses',
+                                   'drawdown_pct','history'];
+            REPORT_FIELDS.forEach(k => delete json[k]);
+            setStateByAccountPair(accountId, pairSymbol, json);
+            DASHBOARD_LAST_MONITORING_SYNC_AT = Date.now();
+            if (CALC_DEBUG) {
+                setStateByAccountPair(accountId, pairSymbol, { monitoring_calc_debug: json?.calc_debug || null });
+            }
+            renderMonitoring();
+        }
+    } catch (_e) {
+    } finally {
+        if (_monitoringAbortController === controller) {
+            _monitoringAbortController = null;
+            _monitoringInflight = false;
+        }
+    }
+}
+
+async function refreshConnectedPairsRealtime() {
+    const accountId = String(currentAccount() || '').trim();
+    if (!accountId) return;
+
+    const now = Date.now();
+    if ((now - Number(DASHBOARD_LAST_PAIR_DISCOVERY_AT || 0)) < 700) return;
+    DASHBOARD_LAST_PAIR_DISCOVERY_AT = now;
+
+    const activePair = normalizePairSymbol(currentPairSymbol());
+    const knownPairs = getPairsForAccount(accountId).filter((pair) => pair !== activePair);
+    if (!knownPairs.length) {
+        renderPairTabsForCurrentAccount();
+        return;
+    }
+
+    const csrf = document.querySelector('meta[name="csrf-token"]')?.content || '';
+    let hasAnyUpdate = false;
+
+    await Promise.all(knownPairs.map(async (pairSymbol) => {
+        const inflightKey = accountPairKey(accountId, pairSymbol);
+        if (DASHBOARD_PAIR_DISCOVERY_INFLIGHT[inflightKey]) return;
+
+        DASHBOARD_PAIR_DISCOVERY_INFLIGHT[inflightKey] = true;
+        try {
+            const url = ROUTES.monitoringLive
+                + '?account_id=' + encodeURIComponent(accountId)
+                + '&pair_symbol=' + encodeURIComponent(pairSymbol)
+                + '&_ts=' + Date.now();
+
+            const response = await fetch(url, {
+                method: 'GET',
+                cache: 'no-store',
+                headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': csrf, 'Cache-Control': 'no-cache' },
+            });
+            const json = await response.json();
+            if (!response.ok || !json.success) return;
+
+            const prevState = getStateByAccountPair(accountId, pairSymbol) || {};
+            setStateByAccountPair(accountId, pairSymbol, json);
+
+            const prevOnline = isStateFreshOnline(prevState);
+            const nextOnline = isStateFreshOnline(getStateByAccountPair(accountId, pairSymbol) || {});
+            const prevUpdated = String(prevState.updated_at || '');
+            const nextUpdated = String((json && json.updated_at) || '');
+            if (prevOnline !== nextOnline || (nextUpdated && nextUpdated !== prevUpdated)) {
+                hasAnyUpdate = true;
+            }
+        } catch (_error) {
+        } finally {
+            delete DASHBOARD_PAIR_DISCOVERY_INFLIGHT[inflightKey];
+        }
+    }));
+
+    if (hasAnyUpdate) {
+        renderPairTabsForCurrentAccount();
+    }
+}
+
+async function refreshReportOnly(options = {}) {
+    const source = String(options.source || 'manual');
+    const accountId = currentAccount();
+    if (!accountId) return;
+    const pairSymbol = currentPairSymbol();
+
+    if (REPORTS_STATE.isLoading) {
+        REPORTS_STATE.pendingRefresh = true;
+        return;
+    }
+
+    const controller = new AbortController();
+    const timeoutHandle = setTimeout(() => {
+        try {
+            controller.abort();
+        } catch (_e) {
+        }
+    }, 8000);
+    REPORTS_STATE.isLoading = true;
+
+    const csrf = document.querySelector('meta[name="csrf-token"]')?.content || '';
+    try {
+        const selectedLimitRaw = REPORTS_STATE.pendingPerPage
+            ?? el('rep-history-limit')?.value
+            ?? REPORTS_STATE.perPage
+            ?? 10;
+        const limit = Math.max(5, Number(selectedLimitRaw));
+        const requestedPageRaw = Number(REPORTS_STATE.pendingPage ?? REPORTS_STATE.page);
+        const requestedPage = Number.isFinite(requestedPageRaw) ? Math.max(1, requestedPageRaw) : 1;
+
+        REPORTS_STATE.pendingPerPage = null;
+        REPORTS_STATE.pendingPage = null;
+
+        const url = ROUTES.reportsLive
+            + '?account_id=' + encodeURIComponent(accountId)
+            + '&pair_symbol=' + encodeURIComponent(pairSymbol)
+            + '&limit=' + encodeURIComponent(String(limit))
+            + '&page=' + encodeURIComponent(String(requestedPage))
+            + (CALC_DEBUG ? '&calc_debug=1' : '')
+            + '&_ts=' + Date.now();
+        const res = await fetch(url, {
+            method: 'GET',
+            cache: 'no-store',
+            headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': csrf, 'Cache-Control': 'no-cache' },
+            signal: controller.signal,
+        });
+        const json = await res.json();
+        if (res.ok && json.success) {
+            REPORTS_STATE.page     = Number(json?.history_meta?.current_page ?? 1);
+            REPORTS_STATE.lastPage = Number(json?.history_meta?.last_page ?? 1);
+            REPORTS_STATE.total    = Number(json?.history_meta?.total ?? 0);
+            REPORTS_STATE.perPage  = Number(json?.history_meta?.per_page ?? limit);
+            setStateByAccountPair(accountId, pairSymbol, {
+                history: safeArray(json.history),
+                wins: Number(json?.wr?.wins ?? 0),
+                losses: Number(json?.wr?.losses ?? 0),
+                win_rate_percent: Number(json?.wr?.win_rate_percent ?? 0),
+                wr_reset_at: json?.wr?.reset_at || null,
+                realized_profit: Number(json?.profit?.realized ?? 0),
+                daily_profit: Number(json?.profit?.daily ?? 0),
+                weekly_profit: Number(json?.profit?.weekly ?? 0),
+                monthly_profit: Number(json?.profit?.monthly ?? 0),
+                report_daily_profit: Number(json?.profit?.daily ?? 0),
+                report_weekly_profit: Number(json?.profit?.weekly ?? 0),
+                report_monthly_profit: Number(json?.profit?.monthly ?? 0),
+                report_realized_profit: Number(json?.profit?.realized ?? 0),
+                analysis: json?.analysis || (getStateByAccountPair(accountId, pairSymbol)?.analysis || null),
+            });
+            DASHBOARD_LAST_REPORT_SYNC_AT = Date.now();
+            if (CALC_DEBUG) {
+                setStateByAccountPair(accountId, pairSymbol, { report_calc_debug: json?.calc_debug || null });
+            }
+            renderReport(el('save-msg')?.textContent || '');
+            renderMonitoring();
+        } else {
+            DASHBOARD_LAST_REPORT_SYNC_AT = Date.now();
+            const failMessage = String(json?.message || 'Report live gagal dimuat.');
+            renderReport(failMessage);
+        }
+    } catch (_e) {
+        DASHBOARD_LAST_REPORT_SYNC_AT = Date.now();
+        const failMessage = source === 'manual'
+            ? 'Report timeout/gagal. Cek koneksi atau account mapping.'
+            : (el('save-msg')?.textContent || '');
+        renderReport(failMessage);
+    } finally {
+        clearTimeout(timeoutHandle);
+        REPORTS_STATE.isLoading = false;
+
+        if (REPORTS_STATE.pendingRefresh) {
+            REPORTS_STATE.pendingRefresh = false;
+            refreshReportOnly({ source: 'queued' });
+        }
+    }
+}
+
+async function refreshLiveTelemetry(force = false) {
+    await refreshMonitoringOnly();
+    await refreshReportOnly();
+}
+
+async function resetWrBaseline() {
+    const accountId = currentAccount();
+    if (!accountId) return;
+    const pairSymbol = currentPairSymbol();
+    const csrf = document.querySelector('meta[name="csrf-token"]')?.content || '';
+
+    try {
+        const res = await fetch(ROUTES.reportsResetWr, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': csrf,
+            },
+            body: JSON.stringify({ account_id: accountId, pair_symbol: pairSymbol }),
+        });
+
+        const json = await res.json();
+        if (!res.ok || !json.success) {
+            return;
+        }
+
+        await refreshLiveTelemetry(true);
+    } catch (_error) {
+    }
+}
+
+function strategyName(strategy) {
+    if (Number(strategy) === 0) return 'GRID SPAM';
+    if (Number(strategy) === 1) return 'ZERO GAP';
+    if (Number(strategy) === 2) return 'PURE MARTINGALE';
+    return 'UNKNOWN';
+}
+
+function applyLicenseFormLock(locked) {
+    const licenseBannerHtml = (title, copy) => {
+        return '<div class="license-warning-banner">'
+            + '<div class="license-warning-copy">'
+            + '<div class="license-warning-title">' + escapeHtml(title) + '</div>'
+            + '<div class="license-warning-text">' + escapeHtml(copy) + '</div>'
+            + '</div>'
+            + '<a class="license-warning-action" href="' + escapeHtml(ROUTES.licenseRenew || '#') + '">' + escapeHtml(IS_ADMIN ? 'Kelola Lisensi' : 'Perbarui ke Billing') + '</a>'
+            + '</div>';
+    };
+
+    const paneConfigs = [
+        { id: 'workspace-pane-settings', visualLock: true },
+        { id: 'workspace-pane-logic', visualLock: true },
+        { id: 'workspace-pane-monitoring', visualLock: false },
+        { id: 'workspace-pane-analysis', visualLock: false },
+        { id: 'workspace-pane-reports', visualLock: false },
+    ];
+
+    paneConfigs.forEach(({ id: paneId, visualLock }) => {
+        const pane = el(paneId);
+        if (!pane) return;
+
+        pane.classList.toggle('pane-license-locked', Boolean(locked) && Boolean(visualLock));
+        pane.setAttribute('aria-disabled', locked ? 'true' : 'false');
+
+        pane.querySelectorAll('input, select, textarea, button').forEach((control) => {
+            if (!(control instanceof HTMLInputElement || control instanceof HTMLSelectElement || control instanceof HTMLTextAreaElement || control instanceof HTMLButtonElement)) {
+                return;
+            }
+
+            if (locked) {
+                if (!control.dataset.licensePrevDisabled) {
+                    control.dataset.licensePrevDisabled = control.disabled ? '1' : '0';
+                }
+                control.disabled = true;
+            } else if (control.dataset.licensePrevDisabled) {
+                control.disabled = control.dataset.licensePrevDisabled === '1';
+                delete control.dataset.licensePrevDisabled;
+            }
+        });
+    });
+
+    const saveMsg = el('save-msg');
+    if (saveMsg) {
+        if (locked) {
+            saveMsg.textContent = 'Lisensi account tidak aktif. Form Settings dikunci sampai lisensi aktif kembali.';
+            saveMsg.className = 'small mt-2 text-danger';
+        } else {
+            saveMsg.textContent = 'Belum ada perubahan tersimpan.';
+            saveMsg.className = 'small mt-2 text-secondary';
+        }
+    }
+
+    const saveLogicMsg = el('save-msg-logic');
+    if (saveLogicMsg) {
+        if (locked) {
+            saveLogicMsg.textContent = 'Lisensi account tidak aktif. Form Logic dikunci sampai lisensi aktif kembali.';
+            saveLogicMsg.className = 'small text-danger';
+        } else {
+            saveLogicMsg.textContent = 'Klik untuk menyimpan perubahan logic di panel ini.';
+            saveLogicMsg.className = 'small text-secondary';
+        }
+    }
+
+    const settingsLockMsg = el('license-lock-msg-settings');
+    if (settingsLockMsg) {
+        settingsLockMsg.innerHTML = locked
+            ? licenseBannerHtml(
+                'Lisensi account sudah habis',
+                'Tab Settings dikunci sampai lisensi diperpanjang. Klik tombol di samping untuk langsung membuka halaman pembaruan lisensi.'
+            )
+            : '';
+    }
+
+    const logicLockMsg = el('license-lock-msg-logic');
+    if (logicLockMsg) {
+        logicLockMsg.innerHTML = locked
+            ? licenseBannerHtml(
+                'Lisensi account sudah habis',
+                'Tab Logic dikunci sampai lisensi aktif kembali. Perbarui lisensi agar pengaturan logic bisa dipakai lagi.'
+            )
+            : '';
+    }
+
+    const monitorLockMsg = el('license-lock-msg-monitor');
+    if (monitorLockMsg) {
+        monitorLockMsg.innerHTML = locked
+            ? licenseBannerHtml(
+                'Lisensi account sudah habis',
+                'Aksi Monitoring yang mengubah state bot diproteksi. Perbarui lisensi agar Start, Stop, dan kontrol aktif kembali.'
+            )
+            : '';
+        monitorLockMsg.className = locked ? 'mt-3' : 'small text-secondary mt-1';
+    }
+
+    const analysisLockMsg = el('license-lock-msg-analysis');
+    if (analysisLockMsg) {
+        analysisLockMsg.innerHTML = locked
+            ? licenseBannerHtml(
+                'Lisensi account sudah habis',
+                'Analysis hanya tampil read-only selama lisensi tidak aktif. Perbarui lisensi untuk mengaktifkan kembali seluruh fitur terkait.'
+            )
+            : '';
+        analysisLockMsg.className = locked ? 'mt-3' : 'small text-secondary mt-1';
+    }
+
+    const reportsLockMsg = el('license-lock-msg-reports');
+    if (reportsLockMsg) {
+        reportsLockMsg.innerHTML = locked
+            ? licenseBannerHtml(
+                'Lisensi account sudah habis',
+                'Kontrol refresh dan reset report dikunci sampai lisensi aktif kembali. Gunakan tombol berikut untuk memperbarui lisensi dengan cepat.'
+            )
+            : '';
+        reportsLockMsg.className = locked ? 'mt-3' : 'small text-secondary mt-1';
+    }
+}
+
+function toggleStrategyPanels() {
+    const strategy = Number(el('active_strategy').value || 0);
+    el('panel-grid').classList.toggle('is-hidden', strategy !== 0);
+    el('panel-zero-gap').classList.toggle('is-hidden', strategy !== 1);
+    el('panel-martingale').classList.toggle('is-hidden', strategy !== 2);
+}
+
+function toggleWorkspaceThemeCard() {
+    const theme = (document.body.getAttribute('data-theme') || 'light') === 'dark' ? 'dark' : 'light';
+    document.querySelectorAll('.switch-tile, .meta-card, .settings-card, .report-card').forEach((node) => {
+        node.classList.toggle('logic-accent-card', theme === 'dark');
+    });
+}
+
+function syncGridLotScalingInputsFromCore() {
+    if (el('grid_mart_type') && el('mart_type')) {
+        el('grid_mart_type').value = String(el('mart_type').value || '0');
+    }
+    if (el('grid_mart_addition') && el('mart_addition')) {
+        el('grid_mart_addition').value = String(el('mart_addition').value || '0');
+    }
+    if (el('grid_mart_multiplier') && el('mart_multiplier')) {
+        el('grid_mart_multiplier').value = String(el('mart_multiplier').value || '1');
+    }
+}
+
+function syncCoreLotScalingInputsFromGrid() {
+    if (el('mart_type') && el('grid_mart_type')) {
+        el('mart_type').value = String(el('grid_mart_type').value || '0');
+    }
+    if (el('mart_addition') && el('grid_mart_addition')) {
+        el('mart_addition').value = String(el('grid_mart_addition').value || '0');
+    }
+    if (el('mart_multiplier') && el('grid_mart_multiplier')) {
+        el('mart_multiplier').value = String(el('grid_mart_multiplier').value || '1');
+    }
+}
+
+function toggleGridLotScalingMode() {
+    const mode = Number(el('grid_mart_type')?.value || el('mart_type')?.value || 0);
+    const isAddition = mode === 0;
+    if (el('grid-mart-addition-wrap')) {
+        el('grid-mart-addition-wrap').classList.toggle('disabled-block', !isAddition);
+    }
+    if (el('grid-mart-multiplier-wrap')) {
+        el('grid-mart-multiplier-wrap').classList.toggle('disabled-block', isAddition);
+    }
+    if (el('grid_mart_addition')) {
+        el('grid_mart_addition').disabled = !isAddition;
+    }
+    if (el('grid_mart_multiplier')) {
+        el('grid_mart_multiplier').disabled = isAddition;
+    }
+}
+
+function toggleDependentState() {
+    const basketEnabled = el('grid_use_basket_tp_percent').checked;
+    el('grid-basket-field-wrap').classList.toggle('disabled-block', !basketEnabled);
+    el('grid_basket_tp_percent').disabled = !basketEnabled;
+
+    if (el('grid_tp_mode')) {
+        el('grid_tp_mode').disabled = !basketEnabled;
+    }
+
+    const tierMode = Number(el('grid_tp_mode')?.value || 0) === 1;
+    const tierEditable = basketEnabled && tierMode;
+    el('grid-tier-wrap').classList.toggle('disabled-block', !basketEnabled);
+    ['grid_tier1_tp_percent', 'grid_tier2_tp_percent', 'grid_tier3_tp_percent', 'grid_tier4_tp_percent'].forEach((id) => {
+        if (el(id)) el(id).disabled = !tierEditable;
+    });
+
+    ['sydney', 'asia', 'europe', 'us'].forEach((key) => {
+        const enabled = el('use_' + key + '_session').checked;
+        document.querySelectorAll('.session-box[data-session="' + key + '"] .session-time-wrap').forEach((wrap) => {
+            wrap.classList.toggle('disabled-block', !enabled);
+        });
+        ['start_wib', 'end_wib'].forEach((suffix) => {
+            const input = el(key + '_' + suffix);
+            input.disabled = !enabled;
+        });
+    });
+
+    toggleGridLotScalingMode();
+}
+
+function loadAccountForm(accountId) {
+    const account = getActiveAccountState(accountId, currentPairSymbol()) || {};
+    const state = { ...DEFAULTS, ...account };
+
+    FIELD_IDS.forEach((id) => {
+        if (!el(id)) return;
+        if (isCheckbox(id)) {
+            el(id).checked = Boolean(state[id]);
+        } else {
+            el(id).value = state[id] ?? DEFAULTS[id] ?? '';
+        }
+    });
+
+    if (el('use_mirror_trap_mart')) {
+        el('use_mirror_trap_mart').checked = Boolean(state.use_mirror_trap);
+    }
+
+    syncGridLotScalingInputsFromCore();
+
+    toggleStrategyPanels();
+    toggleDependentState();
+    toggleWorkspaceThemeCard();
+    markClean();
+    renderMonitoring();
+    renderAnalysis();
+    renderReport(el('save-msg')?.textContent || '');
+    refreshLiveTelemetry(true);
+}
+
+function buildPayload() {
+    syncCoreLotScalingInputsFromGrid();
+
+    const payload = { account_id: currentAccount(), pair_symbol: currentPairSymbol() };
+
+    FIELD_IDS.forEach((id) => {
+        if (!el(id)) return;
+        payload[id] = isCheckbox(id) ? el(id).checked : el(id).value;
+    });
+
+    // Protective override logic: Only override fields NOT already in FIELD_IDS to avoid double-set
+    // Kombo field untuk Mirror Trap strategy
+    if (!FIELD_IDS.includes('mirror_active')) {
+        payload.use_mirror_trap = el('use_mirror_trap').checked || el('use_mirror_trap_mart').checked;
+        payload.mirror_active = payload.use_mirror_trap;
+    }
+
+    // Re-confirm use_pending_guard bila overridden oleh mirror_trap logic
+    if (payload.use_mirror_trap) {
+        payload.use_pending_guard = true; // Mirror trap strategy always needs pending guard
+    } else {
+        // Otherwise use explicit use_pending_guard checkbox
+        payload.use_pending_guard = el('use_pending_guard')?.checked ?? false;
+    }
+
+    return payload;
+}
+
+function markDirty() {
+    el('save-msg').textContent = 'Perubahan terdeteksi. Simpan untuk menerapkan konfigurasi baru.';
+    el('save-msg').className = 'small mt-2 text-warning';
+}
+
+function markClean(message = 'Pengaturan sudah sinkron dengan data terakhir account ini.') {
+    el('save-msg').textContent = message;
+    el('save-msg').className = 'small mt-2 text-secondary';
+}
+
+async function saveSetting() {
+    if (!currentAccount()) return;
+
+    const accountId = currentAccount();
+    const licenseState = LICENSE_SNAPSHOTS[accountId] || {};
+    if (!Boolean(licenseState.license_active)) {
+        const lockMessage = 'Lisensi account tidak aktif. Simpan pengaturan diblokir.';
+        if (el('save-msg')) {
+            el('save-msg').textContent = lockMessage;
+            el('save-msg').className = 'small mt-2 text-danger';
+        }
+        if (el('save-msg-logic')) {
+            el('save-msg-logic').textContent = lockMessage;
+            el('save-msg-logic').className = 'small text-danger';
+        }
+        return;
+    }
+
+    if (!validateLogicInputs(true)) return;
+
+    const payload = buildPayload();
+    el('btn-save').disabled = true;
+    el('btn-save').textContent = 'Menyimpan...';
+
+    try {
+        const response = await fetch('{{ route('dashboard.settings.update') }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        });
+
+        const json = await response.json();
+        if (!response.ok || !json.success) {
+            throw new Error(json.message || 'Gagal menyimpan pengaturan.');
+        }
+
+        setStateByAccountPair(accountId, currentPairSymbol(), { ...payload, ...(json.data || {}) });
+        markClean(json.message || 'Setting updated successfully.');
+        renderMonitoring();
+        renderReport(json.message || 'Setting updated successfully.');
+    } catch (error) {
+        el('save-msg').textContent = error.message || 'Terjadi kesalahan saat menyimpan.';
+        el('save-msg').className = 'small mt-2 text-danger';
+        renderReport(error.message || 'Terjadi kesalahan saat menyimpan.');
+    } finally {
+        el('btn-save').disabled = false;
+        el('btn-save').textContent = 'Simpan Pengaturan Dashboard';
+    }
+}
+
+async function saveProfile(event) {
+    event.preventDefault();
+    if (!el('profile-form')) return;
+
+    const payload = {
+        name: el('profile_name').value.trim(),
+        username: el('profile_username').value.trim(),
+        email: el('profile_email').value.trim(),
+        current_password: el('profile_current_password').value,
+        new_password: el('profile_new_password').value,
+        new_password_confirmation: el('profile_new_password_confirmation').value,
+    };
+
+    const btn = el('btn-profile-save');
+    btn.disabled = true;
+    btn.textContent = 'Menyimpan...';
+
+    try {
+        const response = await fetch(ROUTES.profileUpdate, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        });
+
+        const json = await response.json();
+        if (!response.ok || !json.success) {
+            throw new Error(json.message || 'Gagal menyimpan profile.');
+        }
+
+        setProfileMessage(json.message || 'Profile berhasil diperbarui.', 'success');
+        el('profile_current_password').value = '';
+        el('profile_new_password').value = '';
+        el('profile_new_password_confirmation').value = '';
+    } catch (error) {
+        setProfileMessage(error.message || 'Terjadi kesalahan saat menyimpan profile.', 'danger');
+    } finally {
+        btn.disabled = false;
+        btn.textContent = 'Simpan Profile';
+    }
+}
+
+async function saveAccount(event) {
+    event.preventDefault();
+    if (!el('account-form')) return;
+
+    const payload = {
+        account_id: el('new_account_id').value.trim(),
+        pair_symbol: el('new_pair_symbol').value.trim().toUpperCase() || 'XAUUSD',
+        base_lot: el('new_base_lot').value,
+    };
+
+    if (!payload.account_id) {
+        setAccountMessage('Account ID wajib diisi.', 'danger');
+        return;
+    }
+
+    const btn = el('btn-account-save');
+    btn.disabled = true;
+    btn.textContent = 'Menambahkan...';
+
+    try {
+        const response = await fetch(ROUTES.accountStore, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
+            },
+            body: JSON.stringify(payload)
+        });
+
+        const json = await response.json();
+        if (!response.ok || !json.success) {
+            throw new Error(json.message || 'Gagal menambah account.');
+        }
+
+        const accountData = json.data || payload;
+        const createdPair = normalizePairSymbol(accountData?.pair_symbol || payload.pair_symbol || 'XAUUSD');
+        ensureAccountPairRegistered(payload.account_id, createdPair);
+        setStateByAccountPair(payload.account_id, createdPair, { ...DEFAULTS, ...accountData, pair_symbol: createdPair });
+        SELECTED_PAIR_BY_ACCOUNT[payload.account_id] = createdPair;
+
+        refreshAccountSelectOptions(payload.account_id);
+        renderPairTabsForCurrentAccount();
+        loadAccountForm(payload.account_id);
+
+        setAccountMessage(json.message || 'Account berhasil ditambahkan.', 'success');
+        el('new_account_id').value = '';
+
+        const modalEl = el('account-modal');
+        const modal = modalEl ? bootstrap.Modal.getInstance(modalEl) : null;
+        if (modal) modal.hide();
+    } catch (error) {
+        setAccountMessage(error.message || 'Terjadi kesalahan saat menambah account.', 'danger');
+    } finally {
+        btn.disabled = false;
+        btn.textContent = 'Tambah Account';
+    }
+}
+
+async function deleteAccount() {
+    const accountId = (el('delete_account_id')?.value || currentAccount() || '').trim();
+    if (!accountId) {
+        setAccountMessage('Pilih atau isi Account ID yang ingin dihapus.', 'danger');
+        return;
+    }
+
+    if (!window.confirm('Yakin ingin menghapus account MT5 ' + accountId + '?')) {
+        return;
+    }
+
+    const btn = el('btn-account-delete');
+    const previousLabel = btn ? btn.textContent : 'Hapus Account';
+    if (btn) {
+        btn.disabled = true;
+        btn.textContent = 'Menghapus...';
+    }
+
+    try {
+        const response = await fetch(ROUTES.accountDelete, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
+            },
+            body: JSON.stringify({ account_id: accountId })
+        });
+
+        const json = await response.json();
+        if (!response.ok || !json.success) {
+            throw new Error(json.message || 'Gagal menghapus account.');
+        }
+
+        delete ACCOUNTS[accountId];
+        Object.keys(ACCOUNTS_BY_PAIR).forEach((key) => {
+            if (key.startsWith(accountId + '::')) {
+                delete ACCOUNTS_BY_PAIR[key];
+            }
+        });
+        delete ACCOUNT_PAIR_INDEX[accountId];
+        delete SELECTED_PAIR_BY_ACCOUNT[accountId];
+
+        refreshAccountSelectOptions();
+        renderPairTabsForCurrentAccount();
+        const nextAccount = currentAccount();
+        if (nextAccount) {
+            loadAccountForm(nextAccount);
+        } else {
+            renderMonitoring();
+            renderAnalysis();
+            renderReport('Belum ada account aktif. Tambahkan account MT5 baru.');
+        }
+
+        syncDeleteAccountInput();
+        setAccountMessage(json.message || 'Account berhasil dihapus.', 'success');
+    } catch (error) {
+        setAccountMessage(error.message || 'Terjadi kesalahan saat menghapus account.', 'danger');
+    } finally {
+        if (btn) {
+            btn.disabled = false;
+            btn.textContent = previousLabel;
+        }
+    }
+}
+
+async function saveManagedUser(event) {
+    event.preventDefault();
+    if (!IS_ADMIN || !el('users-form')) return;
+
+    const editId = el('manage_user_id').value;
+    const payload = {
+        name: el('manage_name').value.trim(),
+        username: el('manage_username').value.trim(),
+        email: el('manage_email').value.trim(),
+        role: el('manage_role').value,
+        password: el('manage_password').value,
+    };
+
+    if (!editId && !payload.password) {
+        setUsersMessage('Password wajib diisi saat membuat user baru.', 'danger');
+        return;
+    }
+
+    const btn = el('btn-user-save');
+    btn.disabled = true;
+    btn.textContent = 'Menyimpan...';
+
+    try {
+        const response = await fetch(editId ? (ROUTES.userUpdateBase + '/' + editId) : ROUTES.userStore, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        });
+
+        const json = await response.json();
+        if (!response.ok || !json.success) {
+            throw new Error(json.message || 'Gagal menyimpan user.');
+        }
+
+        const user = json.user || null;
+        if (user) {
+            const index = MANAGED_USERS.findIndex((item) => Number(item.id) === Number(user.id));
+            if (index >= 0) {
+                MANAGED_USERS[index] = { ...MANAGED_USERS[index], ...user };
+            } else {
+                MANAGED_USERS.push(user);
+            }
+            renderUsersTable();
+        }
+
+        resetManageForm();
+        setUsersMessage(json.message || 'User berhasil disimpan.', 'success');
+    } catch (error) {
+        setUsersMessage(error.message || 'Terjadi kesalahan saat menyimpan user.', 'danger');
+    } finally {
+        btn.disabled = false;
+        btn.textContent = 'Simpan User';
+    }
+}
+
+function parseNewsDate(item) {
+    if (item?.event_at) {
+        const parsed = new Date(item.event_at);
+        if (!Number.isNaN(parsed.getTime())) return parsed;
+    }
+
+    if (!item?.event_clock || !String(item.event_clock).includes(':')) {
+        return null;
+    }
+
+    const now = new Date();
+    const [hours, minutes] = String(item.event_clock).split(':').map((part) => Number(part));
+    if (!Number.isFinite(hours) || !Number.isFinite(minutes)) {
+        return null;
+    }
+
+    const candidate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hours, minutes, 0, 0);
+    if (candidate.getTime() < now.getTime()) {
+        candidate.setDate(candidate.getDate() + 1);
+    }
+    return candidate;
+}
+
+let lastNewsCloseTime = 0;
+
+async function checkNewsApproaching(newsItem, distanceMs) {
+    if (!currentAccount()) return;
+    
+    const enableCloseOnNews = el('close_all_on_news')?.checked;
+    if (!enableCloseOnNews) return;
+
+    const pauseBeforeMinutes = parseInt(el('news_pause_before_minutes')?.value || 0);
+    if (!pauseBeforeMinutes || pauseBeforeMinutes <= 0) return;
+
+    const pauseWindowMs = pauseBeforeMinutes * 60 * 1000;
+    const now = Date.now();
+
+    // Only trigger if news is approaching (within pause window) and not already triggered recently
+    if (distanceMs > 0 && distanceMs <= pauseWindowMs && (now - lastNewsCloseTime) > 60000) {
+        lastNewsCloseTime = now;
+        
+        // Send close all positions command
+        try {
+            const response = await fetch('/api/v1/ea/close-all-positions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({
+                    account_id: currentAccount(),
+                    reason: 'News event approaching: ' + (newsItem?.title || 'Economic Event')
+                })
+            });
+
+            const json = await response.json();
+            if (response.ok && json.success) {
+                console.log('✅ Close all positions triggered:', json.message);
+                renderMonitoring();
+            }
+        } catch (error) {
+            console.error('❌ Error closing positions:', error);
+        }
+    }
+}
+
+function getNextNewsItem() {
+    const now = Date.now();
+    const normalized = NEWS_ITEMS
+        .map((item) => ({ ...item, eventDate: parseNewsDate(item) }))
+        .filter((item) => item.eventDate && item.eventDate.getTime() >= now)
+        .sort((a, b) => a.eventDate.getTime() - b.eventDate.getTime());
+
+    return normalized[0] || null;
+}
+
+function pad(num) {
+    return String(num).padStart(2, '0');
+}
+
+function formatCountdown(ms) {
+    if (ms <= 0) return '00:00:00';
+    const totalSeconds = Math.floor(ms / 1000);
+    const hh = Math.floor(totalSeconds / 3600);
+    const mm = Math.floor((totalSeconds % 3600) / 60);
+    const ss = totalSeconds % 60;
+    return pad(hh) + ':' + pad(mm) + ':' + pad(ss);
+}
+
+function formatLicenseCountdown(seconds) {
+    const total = Math.max(0, Math.trunc(Number(seconds) || 0));
+    const days = Math.floor(total / 86400);
+    const hours = Math.floor((total % 86400) / 3600);
+    const minutes = Math.floor((total % 3600) / 60);
+    const secs = total % 60;
+    return `${days}d ${pad(hours)}h ${pad(minutes)}m ${pad(secs)}s`;
+}
+
+function estimateLiveLicenseSeconds() {
+    if (!LIVE_LICENSE_COUNTDOWN.active || LIVE_LICENSE_COUNTDOWN.perpetual) {
+        return 0;
+    }
+
+    const elapsed = Math.max(0, Math.floor((Date.now() - Number(LIVE_LICENSE_COUNTDOWN.anchorMs || 0)) / 1000));
+    return Math.max(0, Number(LIVE_LICENSE_COUNTDOWN.anchorSeconds || 0) - elapsed);
+}
+
+function syncLiveLicenseCountdown(accountId, state, licenseActive) {
+    if (!accountId || !licenseActive) {
+        LIVE_LICENSE_COUNTDOWN.accountId = '';
+        LIVE_LICENSE_COUNTDOWN.active = false;
+        LIVE_LICENSE_COUNTDOWN.perpetual = false;
+        LIVE_LICENSE_COUNTDOWN.anchorSeconds = 0;
+        LIVE_LICENSE_COUNTDOWN.anchorMs = 0;
+        LIVE_LICENSE_COUNTDOWN.lastRenderedSeconds = null;
+        return;
+    }
+
+    LIVE_LICENSE_COUNTDOWN.accountId = String(accountId);
+    LIVE_LICENSE_COUNTDOWN.active = true;
+    LIVE_LICENSE_COUNTDOWN.perpetual = Boolean(state?.license_is_perpetual);
+
+    if (LIVE_LICENSE_COUNTDOWN.perpetual) {
+        LIVE_LICENSE_COUNTDOWN.anchorSeconds = 0;
+        LIVE_LICENSE_COUNTDOWN.anchorMs = Date.now();
+        LIVE_LICENSE_COUNTDOWN.lastRenderedSeconds = null;
+        return;
+    }
+
+    const reportedSeconds = Math.max(0, Math.trunc(Number(state?.license_remaining_seconds) || 0));
+    const hasAnchor = Number(LIVE_LICENSE_COUNTDOWN.anchorMs || 0) > 0;
+
+    if (!hasAnchor) {
+        LIVE_LICENSE_COUNTDOWN.anchorSeconds = reportedSeconds;
+        LIVE_LICENSE_COUNTDOWN.anchorMs = Date.now();
+        LIVE_LICENSE_COUNTDOWN.lastRenderedSeconds = reportedSeconds;
+        return;
+    }
+
+    const estimatedSeconds = estimateLiveLicenseSeconds();
+    const drift = reportedSeconds - estimatedSeconds;
+    const shouldResyncDown = drift <= -2;
+    const shouldResyncUp = drift >= 3600;
+
+    if (shouldResyncDown || shouldResyncUp) {
+        LIVE_LICENSE_COUNTDOWN.anchorSeconds = reportedSeconds;
+        LIVE_LICENSE_COUNTDOWN.anchorMs = Date.now();
+        LIVE_LICENSE_COUNTDOWN.lastRenderedSeconds = reportedSeconds;
+    }
+}
+
+function renderLiveLicenseCountdownTick() {
+    const accountId = String(currentAccount() || '');
+    if (accountId === '' || !LIVE_LICENSE_COUNTDOWN.active || LIVE_LICENSE_COUNTDOWN.accountId !== accountId) {
+        return;
+    }
+
+    if (LIVE_LICENSE_COUNTDOWN.perpetual) {
+        setSmooth('topbar-license-remaining', 'Countdown: Permanent');
+        setSmooth('mon-license', 'Permanent');
+        return;
+    }
+
+    let seconds = estimateLiveLicenseSeconds();
+    if (Number.isFinite(LIVE_LICENSE_COUNTDOWN.lastRenderedSeconds)) {
+        seconds = Math.min(seconds, Number(LIVE_LICENSE_COUNTDOWN.lastRenderedSeconds));
+    }
+    LIVE_LICENSE_COUNTDOWN.lastRenderedSeconds = seconds;
+    const remainingText = formatLicenseCountdown(seconds);
+    setSmooth('topbar-license-remaining', 'Countdown: ' + remainingText);
+    setSmooth('mon-license', remainingText);
+}
+
+function renderNewsList() {
+    if (!el('news-list')) return;
+
+    if (!Array.isArray(NEWS_ITEMS) || NEWS_ITEMS.length === 0) {
+        el('news-list').innerHTML = '<div class="news-item text-secondary small">Belum ada data berita ekonomi hari ini.</div>';
+        setNewsSource('EMPTY');
+        return;
+    }
+
+    const visibleItems = NEWS_ITEMS.slice(0, 7);
+
+    el('news-list').innerHTML = visibleItems.map((item, idx) => {
+        let dataHtml = '';
+        if (item?.actual !== undefined && item?.actual !== null) {
+            dataHtml += '<div class="news-data-item">' +
+                '<div class="news-metric-label news-metric-label-actual">Actual</div>' +
+                '<div class="news-metric-value">' + escapeHtml(metricValue(item.actual)) + '</div>' +
+                '</div>';
+        }
+        if (item?.forecast) {
+            dataHtml += '<div class="news-data-item">' +
+                '<div class="news-metric-label news-metric-label-forecast">Forecast</div>' +
+                '<div class="news-metric-value">' + escapeHtml(metricValue(item.forecast)) + '</div>' +
+                '</div>';
+        }
+        if (item?.previous !== undefined && item?.previous !== null) {
+            dataHtml += '<div class="news-data-item">' +
+                '<div class="news-metric-label news-metric-label-previous">Previous</div>' +
+                '<div class="news-metric-value">' + escapeHtml(metricValue(item.previous)) + '</div>' +
+                '</div>';
+        }
+        const nextClass = idx === 0 ? ' news-item-next' : '';
+        return '<div class="news-item' + nextClass + ' py-2">' +
+            '<div class="fw-semibold text-body mb-2">' + escapeHtml(item.title || 'USD Event') + '</div>' +
+            '<div class="small text-secondary mb-3">' + escapeHtml(itemDayDate(item)) + ' | ' + escapeHtml(itemClock(item)) + ' WIB</div>' +
+            '<div class="d-flex flex-wrap gap-3">' + dataHtml + '</div>' +
+            '</div>';
+    }).join('');
+}
+
+function normalizeNewsHistoryItem(item) {
+    const eventDate = parseNewsDate(item);
+    return {
+        title: item?.title || 'USD Event',
+        impact: String(item?.impact || 'MEDIUM').toUpperCase(),
+        event_at: item?.event_at || (eventDate ? eventDate.toISOString() : null),
+        event_clock: item?.event_clock || (eventDate ? eventDate.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Jakarta' }) : '--:--'),
+        actual: metricValue(item?.actual),
+        forecast: metricValue(item?.forecast),
+        previous: metricValue(item?.previous),
+        ai_analysis: item?.ai_analysis || 'Data history event USD yang sudah lewat.',
+        ai_verdict: item?.ai_verdict || 'GOLD NEUTRAL',
+        eventDate,
+    };
+}
+
+function newsHistoryKey(item) {
+    return [
+        String(item?.title || '').trim().toLowerCase(),
+        String(item?.event_at || '').trim(),
+        String(item?.event_clock || '').trim(),
+        String(item?.impact || '').trim().toUpperCase(),
+    ].join('|');
+}
+
+function setNewsHistoryItems(items, merge = true) {
+    const normalizedIncoming = safeArray(items)
+        .map((item) => normalizeNewsHistoryItem(item))
+        .filter((item) => item.eventDate && !Number.isNaN(item.eventDate.getTime()));
+
+    const normalizedExisting = merge
+        ? safeArray(NEWS_HISTORY_ITEMS)
+            .map((item) => normalizeNewsHistoryItem(item))
+            .filter((item) => item.eventDate && !Number.isNaN(item.eventDate.getTime()))
+        : [];
+
+    const combined = normalizedIncoming.concat(normalizedExisting)
+        .sort((a, b) => b.eventDate.getTime() - a.eventDate.getTime());
+
+    const deduped = [];
+    const seen = new Set();
+    for (const row of combined) {
+        const key = newsHistoryKey(row);
+        if (!key || seen.has(key)) {
+            continue;
+        }
+        seen.add(key);
+        deduped.push(row);
+        if (deduped.length >= NEWS_HISTORY_MAX_ITEMS) {
+            break;
+        }
+    }
+
+    NEWS_HISTORY_ITEMS = deduped;
+}
+
+function archivePassedNewsItems() {
+    if (!Array.isArray(NEWS_ITEMS) || NEWS_ITEMS.length === 0) {
+        return;
+    }
+
+    const now = Date.now();
+    const normalized = NEWS_ITEMS
+        .map((item) => ({ ...item, eventDate: parseNewsDate(item) }));
+
+    const resolved = normalized
+        .filter((item) => item.eventDate && !Number.isNaN(item.eventDate.getTime()));
+
+    const passed = resolved.filter((item) => item.eventDate.getTime() < now);
+    if (passed.length > 0) {
+        setNewsHistoryItems(passed, true);
+    }
+
+    const upcomingResolved = resolved
+        .filter((item) => item.eventDate.getTime() >= now)
+        .sort((a, b) => a.eventDate.getTime() - b.eventDate.getTime());
+
+    const unresolved = normalized.filter((item) => !item.eventDate || Number.isNaN(item.eventDate.getTime()));
+    NEWS_ITEMS = upcomingResolved.concat(unresolved).slice(0, 7);
+}
+
+function renderNewsHistoryList() {
+    if (!el('news-history-list')) return;
+
+    const items = safeArray(NEWS_HISTORY_ITEMS);
+    if (!items.length) {
+        el('news-history-list').innerHTML = '<div class="small text-secondary">Belum ada riwayat news yang sudah lewat.</div>';
+        return;
+    }
+
+    el('news-history-list').innerHTML = items.map((item) => {
+        const impact = String(item?.impact || 'MEDIUM').toUpperCase();
+        return '<div class="news-item news-history-card py-2">'
+            + '<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-1">'
+            + '<div class="fw-semibold text-body">' + escapeHtml(item.title || 'USD Event') + '</div>'
+            + '<span class="news-impact-badge">' + escapeHtml(impact) + '</span>'
+            + '</div>'
+            + '<div class="small text-secondary mb-3">' + escapeHtml(itemDayDate(item)) + ' | ' + escapeHtml(itemClock(item)) + ' WIB</div>'
+            + '<div class="d-flex flex-wrap gap-3 mb-2">'
+            + '<div class="news-data-item"><div class="news-metric-label news-metric-label-actual">Actual</div><div class="news-metric-value">' + escapeHtml(metricValue(item.actual)) + '</div></div>'
+            + '<div class="news-data-item"><div class="news-metric-label news-metric-label-forecast">Forecast</div><div class="news-metric-value">' + escapeHtml(metricValue(item.forecast)) + '</div></div>'
+            + '<div class="news-data-item"><div class="news-metric-label news-metric-label-previous">Previous</div><div class="news-metric-value">' + escapeHtml(metricValue(item.previous)) + '</div></div>'
+            + '</div>'
+            + '<div class="news-history-note">' + escapeHtml(item.ai_analysis || '-') + '</div>'
+            + '</div>';
+    }).join('');
+}
+
+function normalizeCalendarApiEvents(events) {
+    if (!Array.isArray(events)) {
+        return [];
+    }
+
+    return events
+        .map((item) => {
+            const timestamp = Number(item?.time || 0);
+            if (!Number.isFinite(timestamp) || timestamp <= 0) {
+                return null;
+            }
+
+            const eventDate = new Date(timestamp * 1000);
+            if (Number.isNaN(eventDate.getTime())) {
+                return null;
+            }
+
+            return {
+                title: item?.event || item?.event_name || 'USD Event',
+                impact: item?.importance || item?.impact || 'MEDIUM',
+                event_at: eventDate.toISOString(),
+                event_clock: eventDate.toLocaleTimeString('id-ID', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: false,
+                    timeZone: 'Asia/Jakarta',
+                }),
+                actual: item?.actual ?? 'Menunggu rilis',
+                forecast: item?.forecast ?? 'Menunggu rilis',
+                previous: item?.previous ?? 'Menunggu rilis',
+                ai_analysis: item?.ai_analysis || 'Event upcoming dari calendar API.',
+                ai_verdict: item?.ai_verdict || 'GOLD NEUTRAL',
+                eventDate,
+            };
+        })
+        .filter((item) => item && item.eventDate && item.eventDate.getTime() >= Date.now())
+        .sort((a, b) => a.eventDate.getTime() - b.eventDate.getTime())
+        .slice(0, 7);
+}
+
+function restoreInitialNewsItems() {
+    const normalized = safeArray(INITIAL_NEWS_ITEMS)
+        .map((item) => ({ ...item, eventDate: parseNewsDate(item) }))
+        .filter((item) => item.eventDate && item.eventDate.getTime() >= Date.now())
+        .sort((a, b) => a.eventDate.getTime() - b.eventDate.getTime())
+        .slice(0, 7);
+
+    if (normalized.length <= 0) {
+        return false;
+    }
+
+    NEWS_ITEMS = normalized;
+    NEWS_IS_LIVE = false;
+    renderNewsList();
+    setNewsSource('LIVE', String(NEWS_ITEMS.length) + ' events | rendered payload');
+    return true;
+}
+
+async function fetchEconomicCalendarApiFallback() {
+    try {
+        const response = await fetch(ROUTES.newsCalendarApi, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+            },
+        });
+
+        const json = await response.json();
+        if (!response.ok || !json.success) {
+            return false;
+        }
+
+        const normalized = normalizeCalendarApiEvents(json.events || []);
+        if (normalized.length <= 0) {
+            return false;
+        }
+
+        NEWS_ITEMS = normalized;
+        NEWS_IS_LIVE = true;
+        renderNewsList();
+        setNewsSource('LIVE', String(NEWS_ITEMS.length) + ' upcoming | ' + NEWS_PROVIDER_LABEL + '-API');
+        return true;
+    } catch (_error) {
+        return false;
+    }
+}
+
+async function fetchLiveNewsFallback(force = false) {
+    const now = Date.now();
+    if (!force && now - NEWS_LAST_FETCH_MS < 180000) {
+        return;
+    }
+
+    NEWS_LAST_FETCH_MS = now;
+    try {
+        const endpoint = force ? (ROUTES.newsLive + '?force=1') : ROUTES.newsLive;
+        const response = await fetch(endpoint, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+            },
+        });
+
+        const json = await response.json();
+        if (!response.ok || !json.success || !Array.isArray(json.data)) {
+            if (restoreInitialNewsItems()) {
+                return;
+            }
+            setNewsSource('LIVE', json?.message || 'request failed');
+            return;
+        }
+
+        if (Array.isArray(json.history_recent)) {
+            setNewsHistoryItems(json.history_recent, true);
+            renderNewsHistoryList();
+        }
+
+        if (json.data.length > 0) {
+            const normalized = json.data
+                .map((item) => ({ ...item, eventDate: parseNewsDate(item) }))
+                .filter((item) => item.eventDate);
+            normalized.sort((a, b) => a.eventDate.getTime() - b.eventDate.getTime());
+            NEWS_ITEMS = normalized.length > 0 ? normalized.slice(0, 7) : json.data.slice(0, 7);
+            NEWS_IS_LIVE = true;
+            renderNewsList();
+            const provider = json.provider ? String(json.provider).replace('https://', '').replace('http://', '') : 'LIVE';
+            const cacheTag = json.cached ? 'cached' : 'fresh';
+            setNewsSource('LIVE', String(NEWS_ITEMS.length) + ' events | ' + cacheTag + ' | ' + provider);
+            return;
+        }
+
+        const apiRecovered = await fetchEconomicCalendarApiFallback();
+        if (apiRecovered) {
+            return;
+        }
+
+        if (restoreInitialNewsItems()) {
+            return;
+        }
+
+        NEWS_ITEMS = [];
+        NEWS_IS_LIVE = false;
+        renderNewsList();
+        const provider = json.provider ? String(json.provider).replace('https://', '').replace('http://', '') : 'LIVE';
+        setNewsSource('LIVE', '0 upcoming | ' + provider);
+    } catch (_error) {
+        const apiRecovered = await fetchEconomicCalendarApiFallback();
+        if (apiRecovered) {
+            return;
+        }
+        if (restoreInitialNewsItems()) {
+            return;
+        }
+        setNewsSource('LIVE', 'network error');
+    }
+}
+
+function updateNewsWidget() {
+    archivePassedNewsItems();
+
+    const nextItem = getNextNewsItem();
+    if (!nextItem) {
+        el('next-news-countdown').textContent = '00:00:00';
+        el('next-news-meta').textContent = 'Belum ada jadwal event berikutnya.';
+        const shouldForceRetry = (Date.now() - NEWS_LAST_FETCH_MS) > 15000;
+        fetchLiveNewsFallback(shouldForceRetry);
+    } else {
+        const distance = nextItem.eventDate.getTime() - Date.now();
+        el('next-news-countdown').textContent = formatCountdown(distance);
+        el('next-news-meta').textContent = itemDayDate(nextItem) + ' | ' + itemClock(nextItem) + ' WIB | ' + (nextItem.impact || '-') + ' | ' + (nextItem.title || 'Event ekonomi');
+        
+        // Check if news is approaching and close_all_on_news is enabled
+        checkNewsApproaching(nextItem, distance);
+    }
+
+    const verdictSource = nextItem || NEWS_ITEMS[0] || null;
+    el('ai-verdict-label').textContent = verdictSource?.ai_verdict || 'N/A';
+    el('ai-verdict-copy').textContent = verdictSource?.ai_analysis || 'Belum ada analisis AI yang bisa dijadikan ringkasan arah emas hari ini.';
+
+    if (el('rep-widget-time')) {
+        el('rep-widget-time').textContent = new Date().toLocaleTimeString('id-ID');
+    }
+
+    if (nextItem && !NEWS_IS_LIVE) {
+        setNewsSource('LIVE', String(NEWS_ITEMS.length) + ' events');
+    }
+}
+
+el('account_id')?.addEventListener('change', (event) => {
+    const accountId = String(event.target.value || '').trim();
+    saveSelectedAccount(accountId);
+    const availablePairs = getConnectedPairsForAccount(accountId);
+    if (availablePairs.length > 0 && !availablePairs.includes(normalizePairSymbol(SELECTED_PAIR_BY_ACCOUNT[accountId] || ''))) {
+        SELECTED_PAIR_BY_ACCOUNT[accountId] = availablePairs[0];
+        saveSelectedPair(accountId, availablePairs[0]);
+    }
+    renderPairTabsForCurrentAccount();
+    loadAccountForm(event.target.value);
+    updateAccountPickerToggle();
+    syncDeleteAccountInput();
+    syncAliasModalForCurrentAccount();
+    restartDashboardLiveStream();
+    refreshConnectedPairsRealtime();
+});
+el('active_strategy')?.addEventListener('change', () => {
+    toggleStrategyPanels();
+    markDirty();
+});
+
+['grid_use_basket_tp_percent', 'grid_tp_mode', 'use_sydney_session', 'use_asia_session', 'use_europe_session', 'use_us_session'].forEach((id) => {
+    el(id)?.addEventListener('change', () => {
+        toggleDependentState();
+        markDirty();
+    });
+});
+
+['grid_mart_type', 'grid_mart_addition', 'grid_mart_multiplier'].forEach((id) => {
+    el(id)?.addEventListener('input', () => {
+        syncCoreLotScalingInputsFromGrid();
+        toggleGridLotScalingMode();
+        markDirty();
+    });
+    el(id)?.addEventListener('change', () => {
+        syncCoreLotScalingInputsFromGrid();
+        toggleGridLotScalingMode();
+        markDirty();
+    });
+});
+
+['mart_type', 'mart_addition', 'mart_multiplier'].forEach((id) => {
+    el(id)?.addEventListener('change', () => {
+        syncGridLotScalingInputsFromCore();
+        toggleGridLotScalingMode();
+    });
+});
+
+el('use_mirror_trap')?.addEventListener('change', () => {
+    el('use_mirror_trap_mart').checked = el('use_mirror_trap').checked;
+    markDirty();
+});
+el('use_mirror_trap_mart')?.addEventListener('change', () => {
+    el('use_mirror_trap').checked = el('use_mirror_trap_mart').checked;
+    markDirty();
+});
+
+FIELD_IDS.forEach((id) => {
+    el(id)?.addEventListener('input', markDirty);
+    el(id)?.addEventListener('change', markDirty);
+});
+
+['ema_fast', 'ema_slow'].forEach((id) => {
+    el(id)?.addEventListener('input', () => validateLogicInputs(false));
+});
+
+el('logic-preset-default')?.addEventListener('click', () => applyLogicPreset('default'));
+el('logic-preset-scalper')?.addEventListener('click', () => applyLogicPreset('scalper'));
+el('logic-preset-medium')?.addEventListener('click', () => applyLogicPreset('medium'));
+el('logic-preset-conservative')?.addEventListener('click', () => applyLogicPreset('conservative'));
+
+el('btn-save')?.addEventListener('click', saveSetting);
+el('btn-save-logic')?.addEventListener('click', saveSetting);
+
+el('btn-bot-toggle')?.addEventListener('click', async () => {
+    const accountId = currentAccount();
+    if (!accountId) return;
+    const pairSymbol = currentPairSymbol();
+    const state = getActiveAccountState(accountId, pairSymbol) || {};
+    const licenseState = LICENSE_SNAPSHOTS[accountId] || {};
+    if (LICENSE_ENFORCEMENT_ENABLED && !Boolean(licenseState.license_active)) {
+        alert('Lisensi account tidak aktif. Start/Stop bot diblokir.');
+        return;
+    }
+    const isLive = String(state.guard_status ?? '') === 'LIVE';
+    const action = isLive ? 'stop' : 'start';
+    const btn = el('btn-bot-toggle');
+    const iconEl = el('btn-bot-icon');
+    const labelEl = el('btn-bot-label');
+    const origIcon = iconEl ? iconEl.textContent : '';
+    const origLabel = labelEl ? labelEl.textContent : '';
+    btn.disabled = true;
+    if (iconEl) iconEl.textContent = '...';
+    if (labelEl) labelEl.textContent = action === 'start' ? 'Starting...' : 'Stopping...';
+    try {
+        const res = await fetch(ROUTES.botToggle, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                'Accept': 'application/json',
+            },
+            body: JSON.stringify({ account_id: accountId, pair_symbol: pairSymbol, action }),
+        });
+        const json = await res.json();
+        if (json.success) {
+            setStateByAccountPair(accountId, pairSymbol, { guard_status: json.guard_status });
+            const msg = json.guard_status === 'LIVE' ? '✅ Bot diaktifkan.' : '⏹ Bot dihentikan.';
+            const saveMsgEl = el('save-msg');
+            if (saveMsgEl) {
+                saveMsgEl.className = 'small mt-2 ' + (json.guard_status === 'LIVE' ? 'text-success' : 'text-danger');
+                saveMsgEl.textContent = msg;
+            }
+            renderMonitoring();
+            restartDashboardLiveStream();
+        } else {
+            alert('Gagal: ' + (json.message ?? 'Unknown error'));
+        }
+    } catch (e) {
+        alert('Network error: ' + e.message);
+    } finally {
+        if (iconEl) iconEl.textContent = origIcon;
+        if (labelEl) labelEl.textContent = origLabel;
+        btn.disabled = false;
+        renderMonitoring();
+    }
+});
+
+async function triggerBulkBotToggle(action) {
+    const startAllBtn = el('btn-bot-start-all');
+    const stopAllBtn = el('btn-bot-stop-all');
+    const saveMsgEl = el('save-msg');
+    const csrf = document.querySelector('meta[name="csrf-token"]')?.content || '';
+    const eligible = getEligibleBulkAccounts();
+
+    if (!BULK_CONTROL_ENABLED) {
+        if (saveMsgEl) {
+            saveMsgEl.textContent = 'Start All/Stop All sedang dinonaktifkan oleh admin.';
+            saveMsgEl.className = 'small mt-2 text-warning';
+        }
+        return;
+    }
+
+    if (!eligible.length) {
+        if (saveMsgEl) {
+            saveMsgEl.textContent = 'Tidak ada account whitelist yang tersedia untuk aksi bulk.';
+            saveMsgEl.className = 'small mt-2 text-warning';
+        }
+        return;
+    }
+
+    const actionLabel = action === 'start' ? 'Start All' : 'Stop All';
+    const confirmMessage = action === 'stop'
+        ? ('Stop All + Force Close ALL posisi untuk ' + eligible.length + ' account whitelist?')
+        : ('Start All serentak (sinkron) untuk ' + eligible.length + ' account whitelist?');
+    if (!window.confirm(confirmMessage)) {
+        return;
+    }
+
+    const originalStartText = startAllBtn ? startAllBtn.textContent : 'Start All';
+    const originalStopText = stopAllBtn ? stopAllBtn.textContent : 'Stop All';
+
+    if (startAllBtn) startAllBtn.disabled = true;
+    if (stopAllBtn) stopAllBtn.disabled = true;
+    if (action === 'start' && startAllBtn) startAllBtn.textContent = 'Starting...';
+    if (action === 'stop' && stopAllBtn) stopAllBtn.textContent = 'Stopping + Closing...';
+
+    try {
+        const response = await fetch(ROUTES.botBulkToggle, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': csrf,
+            },
+            body: JSON.stringify({ action }),
+        });
+        const json = await response.json();
+
+        if (!response.ok || !json.success) {
+            throw new Error(String(json?.message || 'Aksi bulk gagal diproses.'));
+        }
+
+        const updatedAccounts = safeArray(json.updated_accounts).map((item) => String(item || '').trim()).filter(Boolean);
+        const nextGuardStatus = String(json.guard_status || (action === 'start' ? 'LIVE' : 'PAUSED'));
+
+        updatedAccounts.forEach((accountId) => {
+            const pairs = getPairsForAccount(accountId);
+            pairs.forEach((pairSymbol) => {
+                setStateByAccountPair(accountId, pairSymbol, {
+                    guard_status: nextGuardStatus,
+                    live_guard_status: nextGuardStatus,
+                });
+            });
+        });
+
+        if (saveMsgEl) {
+            const forceClosedCount = safeArray(json.force_closed_accounts).length;
+            const syncCount = safeArray(json.start_sync_accounts).length;
+            const syncAt = json.start_sync_at ? (' | Sync at: ' + formatTime(json.start_sync_at)) : '';
+            const extraText = action === 'stop'
+                ? (' | Force close queued: ' + forceClosedCount + ' account')
+                : (' | Sync queued: ' + syncCount + ' account' + syncAt);
+            saveMsgEl.textContent = String(json.message || (actionLabel + ' berhasil.')) + ' (' + updatedAccounts.length + ' account)' + extraText;
+            saveMsgEl.className = 'small mt-2 text-success';
+        }
+
+        renderMonitoring();
+        restartDashboardLiveStream();
+    } catch (error) {
+        if (saveMsgEl) {
+            saveMsgEl.textContent = 'Aksi bulk gagal: ' + String(error?.message || 'unknown error');
+            saveMsgEl.className = 'small mt-2 text-danger';
+        }
+    } finally {
+        if (startAllBtn) {
+            startAllBtn.disabled = false;
+            startAllBtn.textContent = originalStartText;
+        }
+        if (stopAllBtn) {
+            stopAllBtn.disabled = false;
+            stopAllBtn.textContent = originalStopText;
+        }
+        updateBulkControlUi();
+    }
+}
+
+el('btn-bot-start-all')?.addEventListener('click', () => {
+    triggerBulkBotToggle('start');
+});
+
+el('btn-bot-stop-all')?.addEventListener('click', () => {
+    triggerBulkBotToggle('stop');
+});
+
+el('btn-close-all-positions')?.addEventListener('click', () => {
+    triggerCloseAllPositions();
+});
+
+el('mon-open-positions-body')?.addEventListener('click', (event) => {
+    const target = event.target instanceof HTMLElement
+        ? event.target.closest('.mon-close-position-btn[data-close-ticket]')
+        : null;
+    if (!(target instanceof HTMLElement)) return;
+    const ticket = String(target.getAttribute('data-close-ticket') || '').trim();
+    if (!ticket) return;
+    event.preventDefault();
+    triggerCloseSinglePosition(ticket);
+});
+
+el('bulk-whitelist-manage-btn')?.addEventListener('click', () => {
+    const modalEl = ensureModalAttachedToBody('bulkWhitelistModal');
+    if (!modalEl) return;
+    forceResetModalArtifacts();
+    const modal = bootstrap.Modal.getOrCreateInstance(modalEl, {
+        backdrop: true,
+        keyboard: true,
+    });
+    modal.show();
+});
+
+el('bulk-account-add-btn')?.addEventListener('click', () => {
+    const inputEl = el('bulk-account-input');
+    const selectEl = el('bulk-account-select');
+    const typed = normalizeAccountId(inputEl?.value || '');
+    const selected = normalizeAccountId(selectEl?.value || '');
+    const value = typed || selected;
+    addAccountToWhitelist(value);
+    if (inputEl) inputEl.value = '';
+    if (selectEl) selectEl.value = '';
+});
+
+el('bulk-account-input')?.addEventListener('keydown', (event) => {
+    if (event.key !== 'Enter') return;
+    event.preventDefault();
+    const inputEl = el('bulk-account-input');
+    addAccountToWhitelist(inputEl?.value || '');
+    if (inputEl) inputEl.value = '';
+});
+
+el('bulk-account-clear-btn')?.addEventListener('click', () => {
+    BULK_CONTROL_WHITELIST = [];
+    renderBulkWhitelistList();
+    updateBulkControlUi();
+    setBulkModalMessage('Whitelist dibersihkan. Menyimpan otomatis...', 'warning');
+    scheduleBulkWhitelistAutosave('clear');
+});
+
+el('bulk-enabled-input')?.addEventListener('change', () => {
+    updateBulkControlUi();
+    updateBulkSettingsForm('Perubahan switch terdeteksi. Menyimpan otomatis...', 'secondary');
+    scheduleBulkWhitelistAutosave('toggle');
+});
+
+el('bulk-whitelist-list')?.addEventListener('click', (event) => {
+    const target = event.target;
+    if (!(target instanceof HTMLElement)) return;
+    const accountId = target.getAttribute('data-bulk-remove');
+    if (!accountId) return;
+    removeAccountFromWhitelist(accountId);
+});
+
+el('bulkWhitelistModal')?.addEventListener('shown.bs.modal', () => {
+    renderBulkWhitelistList();
+    setBulkModalMessage('Kelola daftar account. Perubahan disimpan otomatis.', 'secondary');
+    el('bulk-account-input')?.focus();
+});
+
+el('bulkWhitelistModal')?.addEventListener('hide.bs.modal', (event) => {
+    blurFocusedDescendant(event.currentTarget);
+});
+
+el('bulkWhitelistModal')?.addEventListener('hidden.bs.modal', () => {
+    forceResetModalArtifacts();
+    el('bulk-whitelist-manage-btn')?.focus();
+});
+
+document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+        stopDashboardFallbackPolling();
+        return;
+    }
+    const now = Date.now();
+    if ((now - Number(DASHBOARD_LAST_MONITORING_SYNC_AT || 0)) > 1800) {
+        refreshMonitoringOnly();
+    }
+    if ((now - Number(DASHBOARD_LAST_REPORT_SYNC_AT || 0)) > 3500) {
+        refreshReportOnly({ source: 'visibility' });
+    }
+    startDashboardLiveStream();
+});
+
+el('btn-bot-reset-dd')?.addEventListener('click', async () => {
+    const accountId = currentAccount();
+    if (!accountId) return;
+    const pairSymbol = currentPairSymbol();
+
+    const btn = el('btn-bot-reset-dd');
+    const saveMsgEl = el('save-msg');
+    const csrf = document.querySelector('meta[name="csrf-token"]')?.content || '';
+    const origText = btn ? btn.textContent : '↻ Reset DD';
+
+    if (btn) {
+        btn.disabled = true;
+        btn.textContent = 'Resetting...';
+    }
+
+    try {
+        const res = await fetch(ROUTES.botResetDd, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': csrf,
+            },
+            body: JSON.stringify({ account_id: accountId, pair_symbol: pairSymbol }),
+        });
+        const json = await res.json();
+
+        if (res.ok && json.success) {
+            setStateByAccountPair(accountId, pairSymbol, { guard_status: String(json.guard_status || 'LIVE') });
+            if (saveMsgEl) {
+                saveMsgEl.textContent = String(json.message || 'Max Drawdown reset berhasil. Bot bisa di-start lagi.');
+                saveMsgEl.className = 'small mt-2 text-success';
+            }
+            renderMonitoring();
+            await refreshLiveTelemetry(true);
+            restartDashboardLiveStream();
+        } else if (saveMsgEl) {
+            saveMsgEl.textContent = 'Reset DD gagal: ' + String(json?.message || 'Unknown error');
+            saveMsgEl.className = 'small mt-2 text-danger';
+        }
+    } catch (_error) {
+        if (saveMsgEl) {
+            saveMsgEl.textContent = 'Network error saat reset DD.';
+            saveMsgEl.className = 'small mt-2 text-danger';
+        }
+    } finally {
+        if (btn) {
+            btn.disabled = false;
+            btn.textContent = origText;
+        }
+    }
+});
+
+el('theme-toggle')?.addEventListener('click', () => {
+    const current = document.body.getAttribute('data-theme') || 'light';
+    applyTheme(current === 'dark' ? 'light' : 'dark');
+    toggleWorkspaceThemeCard();
+});
+
+el('account-alias-form')?.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    if (!IS_ADMIN) return;
+
+    const accountId = String(el('alias_account_id')?.value || '').trim();
+    const alias = String(el('alias_account_name')?.value || '').trim();
+    if (!accountId) {
+        setAccountAliasMessage('Account belum dipilih.', 'danger');
+        return;
+    }
+
+    const saveBtn = el('btn-alias-save');
+    if (saveBtn) {
+        saveBtn.disabled = true;
+        saveBtn.textContent = 'Menyimpan...';
+    }
+
+    try {
+        const json = await saveAccountAliasToServer(accountId, alias);
+        refreshAccountSelectOptions(accountId);
+        renderBulkWhitelistList();
+        updateBulkControlUi();
+        setAccountAliasMessage(String(json?.message || 'Alias account berhasil disimpan.'), 'success');
+    } catch (error) {
+        setAccountAliasMessage(String(error?.message || 'Gagal menyimpan alias.'), 'danger');
+    } finally {
+        if (saveBtn) {
+            saveBtn.disabled = false;
+            saveBtn.textContent = 'Simpan Alias';
+        }
+    }
+});
+
+el('btn-alias-clear')?.addEventListener('click', async () => {
+    if (!IS_ADMIN) return;
+    const accountId = String(el('alias_account_id')?.value || '').trim();
+    if (!accountId) {
+        setAccountAliasMessage('Account belum dipilih.', 'danger');
+        return;
+    }
+
+    const clearBtn = el('btn-alias-clear');
+    if (clearBtn) {
+        clearBtn.disabled = true;
+        clearBtn.textContent = 'Menghapus...';
+    }
+
+    try {
+        const json = await saveAccountAliasToServer(accountId, '');
+        if (el('alias_account_name')) {
+            el('alias_account_name').value = '';
+        }
+
+        refreshAccountSelectOptions(accountId);
+        renderBulkWhitelistList();
+        updateBulkControlUi();
+        setAccountAliasMessage(String(json?.message || 'Alias account dihapus.'), 'warning');
+    } catch (error) {
+        setAccountAliasMessage(String(error?.message || 'Gagal menghapus alias.'), 'danger');
+    } finally {
+        if (clearBtn) {
+            clearBtn.disabled = false;
+            clearBtn.textContent = 'Hapus Alias';
+        }
+    }
+});
+
+el('account-alias-modal')?.addEventListener('shown.bs.modal', () => {
+    syncAliasModalForCurrentAccount();
+    el('alias_account_name')?.focus();
+});
+
+el('account-search')?.addEventListener('input', (event) => {
+    ACCOUNT_SEARCH_QUERY = String(event.target?.value || '').trim();
+    renderAccountPickerOptions();
+});
+
+el('pair-tabs-settings')?.addEventListener('click', (event) => {
+    const target = event.target instanceof HTMLElement ? event.target.closest('.pair-tab-btn[data-pair-symbol]') : null;
+    if (!(target instanceof HTMLElement)) return;
+
+    const accountId = String(currentAccount() || '').trim();
+    if (!accountId) return;
+
+    const pairSymbol = normalizePairSymbol(target.getAttribute('data-pair-symbol') || 'XAUUSD');
+    if (!getConnectedPairsForAccount(accountId).includes(pairSymbol)) return;
+
+    SELECTED_PAIR_BY_ACCOUNT[accountId] = pairSymbol;
+    saveSelectedPair(accountId, pairSymbol);
+    ACCOUNTS[accountId] = getActiveAccountState(accountId, pairSymbol);
+    renderPairTabsForCurrentAccount();
+    loadAccountForm(accountId);
+    restartDashboardLiveStream();
+});
+
+el('account-picker-options')?.addEventListener('click', (event) => {
+    const target = event.target;
+    if (!(target instanceof HTMLElement)) return;
+    const accountId = String(target.getAttribute('data-account-id') || '').trim();
+    if (!accountId) return;
+
+    const select = el('account_id');
+    if (!select) return;
+    select.value = accountId;
+    select.dispatchEvent(new Event('change', { bubbles: true }));
+
+    const toggle = el('account-picker-toggle');
+    if (toggle) {
+        const dropdown = bootstrap.Dropdown.getOrCreateInstance(toggle);
+        dropdown.hide();
+    }
+});
+
+el('account-picker-toggle')?.addEventListener('show.bs.dropdown', () => {
+    renderAccountPickerOptions();
+    setTimeout(() => {
+        el('account-search')?.focus();
+    }, 0);
+});
+
+el('btn-open-account-modal')?.addEventListener('click', () => {
+    const pickerToggle = el('account-picker-toggle');
+    if (pickerToggle) {
+        const pickerDropdown = bootstrap.Dropdown.getOrCreateInstance(pickerToggle);
+        pickerDropdown.hide();
+    }
+
+    const modalEl = el('account-modal');
+    if (!modalEl) return;
+    const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+    modal.show();
+});
+
+el('profile-form')?.addEventListener('submit', saveProfile);
+el('account-form')?.addEventListener('submit', saveAccount);
+el('btn-account-delete')?.addEventListener('click', deleteAccount);
+
+el('account-modal')?.addEventListener('show.bs.modal', () => {
+    syncDeleteAccountInput();
+    setAccountMessage(defaultAccountMessage(), 'secondary');
+});
+
+el('users-form')?.addEventListener('submit', saveManagedUser);
+el('btn-user-reset')?.addEventListener('click', () => {
+    resetManageForm();
+    setUsersMessage('Form direset ke mode create.', 'secondary');
+});
+
+el('btn-refresh-news')?.addEventListener('click', () => {
+    fetchLiveNewsFallback(true);
+});
+
+el('btn-news-history')?.addEventListener('click', () => {
+    renderNewsHistoryList();
+});
+
+if (el('newsHistoryModalLabel')) {
+    el('newsHistoryModalLabel').textContent = 'Riwayat News Terakhir (' + NEWS_PROVIDER_LABEL + ')';
+}
+
+el('rep-refresh-btn')?.addEventListener('click', () => {
+    refreshLiveTelemetry(true);
+});
+
+el('rep-reset-wr-btn')?.addEventListener('click', async () => {
+    const accountId = currentAccount();
+    if (!accountId) return;
+    const pairSymbol = currentPairSymbol();
+
+    if (!window.confirm('Hard reset profit untuk account ' + accountId + '? History profit account ini akan dikosongkan.')) {
+        return;
+    }
+
+    const btn = el('rep-reset-wr-btn');
+    const csrf = document.querySelector('meta[name="csrf-token"]')?.content || '';
+    const originalText = btn ? btn.textContent : 'Hard Reset Profit';
+
+    if (btn) {
+        btn.disabled = true;
+        btn.textContent = 'Hard Reset...';
+    }
+
+    try {
+        const res = await fetch(ROUTES.reportsResetWr, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': csrf,
+            },
+            body: JSON.stringify({ account_id: accountId, pair_symbol: pairSymbol }),
+        });
+        const json = await res.json();
+
+        if (res.ok && json.success) {
+            setStateByAccountPair(accountId, pairSymbol, {
+                history: [],
+                wins: 0,
+                losses: 0,
+                win_rate_percent: 0,
+                wr_reset_at: json.reset_at || new Date().toISOString(),
+                realized_profit: 0,
+                daily_profit: 0,
+                weekly_profit: 0,
+                monthly_profit: 0,
+                report_daily_profit: 0,
+                report_weekly_profit: 0,
+                report_monthly_profit: 0,
+                report_realized_profit: 0,
+            });
+            REPORTS_STATE.page = 1;
+            REPORTS_STATE.pendingPage = 1;
+            REPORTS_STATE.pendingPerPage = null;
+            REPORTS_STATE.lastSuccessfulData = [];
+            renderReport(el('save-msg')?.textContent || '');
+            renderMonitoring();
+            await refreshReportOnly({ priority: true, source: 'manual' });
+            restartDashboardLiveStream();
+        }
+    } catch (_error) {
+    } finally {
+        if (btn) {
+            btn.disabled = false;
+            btn.textContent = originalText;
+        }
+    }
+});
+
+el('rep-history-limit')?.addEventListener('change', () => {
+    REPORTS_STATE.pendingPerPage = Math.max(5, Number(el('rep-history-limit')?.value || REPORTS_STATE.perPage || 10));
+    REPORTS_STATE.page = 1;
+    REPORTS_STATE.pendingPage = 1;
+    refreshReportOnly({ priority: true, source: 'manual' });
+    restartDashboardLiveStream();
+});
+
+el('rep-history-prev')?.addEventListener('click', () => {
+    if (REPORTS_STATE.page <= 1) return;
+    REPORTS_STATE.page -= 1;
+    REPORTS_STATE.pendingPage = REPORTS_STATE.page;
+    refreshReportOnly({ priority: true, source: 'manual' });
+    restartDashboardLiveStream();
+});
+
+el('rep-history-next')?.addEventListener('click', () => {
+    if (REPORTS_STATE.page >= REPORTS_STATE.lastPage) return;
+    REPORTS_STATE.page += 1;
+    REPORTS_STATE.pendingPage = REPORTS_STATE.page;
+    refreshReportOnly({ priority: true, source: 'manual' });
+    restartDashboardLiveStream();
+});
+
+el('users-search')?.addEventListener('input', (event) => {
+    USERS_STATE.query = String(event.target.value || '');
+    USERS_STATE.page = 1;
+    renderUsersTable();
+});
+
+el('users-prev')?.addEventListener('click', () => {
+    USERS_STATE.page = Math.max(1, USERS_STATE.page - 1);
+    renderUsersTable();
+});
+
+el('users-next')?.addEventListener('click', () => {
+    USERS_STATE.page += 1;
+    renderUsersTable();
+});
+
+document.querySelectorAll('#workspace-tabs [data-workspace-tab]').forEach((button) => {
+    button.addEventListener('click', () => {
+        switchWorkspaceTab(button.getAttribute('data-workspace-tab') || 'settings');
+    });
+});
+
+el('users-tbody')?.addEventListener('click', (event) => {
+    const target = event.target;
+    if (!(target instanceof HTMLElement)) return;
+    const userId = target.getAttribute('data-edit-user');
+    if (!userId) return;
+    fillManageForm(userId);
+});
+
+hydrateAccountPairState();
+restoreSelectedPairMap();
+const initialSavedAccountId = loadSelectedAccount();
+if (initialSavedAccountId) {
+    const accountSelect = el('account_id');
+    if (accountSelect) {
+        const optionExists = safeArray(Array.from(accountSelect.options || [])).some((option) => String(option?.value || '').trim() === initialSavedAccountId);
+        if (optionExists) {
+            accountSelect.value = initialSavedAccountId;
+        }
+    }
+}
+if (el('account_id')?.value) {
+    renderPairTabsForCurrentAccount();
+    loadAccountForm(el('account_id').value);
+}
+syncDeleteAccountInput();
+
+if (el('profile_name')) {
+    el('profile_name').value = CURRENT_USER.name || '';
+    el('profile_username').value = CURRENT_USER.username || '';
+    el('profile_email').value = CURRENT_USER.email || '';
+}
+
+initTheme();
+ensureModalAttachedToBody('bulkWhitelistModal');
+ensureModalAttachedToBody('account-alias-modal');
+ensureModalAttachedToBody('account-modal');
+ensureModalAttachedToBody('profile-modal');
+ensureModalAttachedToBody('users-modal');
+refreshAccountSelectOptions(currentAccount());
+renderPairTabsForCurrentAccount();
+switchWorkspaceTab(getInitialWorkspaceTab());
+renderUsersTable();
+renderMonitoring();
+renderAnalysis();
+renderReport(el('save-msg')?.textContent || '');
+renderNewsList();
+fetchLiveNewsFallback();
+if (IS_ADMIN) {
+    syncAliasModalForCurrentAccount();
+    loadAccountAliasesFromServer();
+    loadBulkWhitelistSettings();
+}
+refreshLiveTelemetry(true);
+startDashboardLiveStream();
+refreshConnectedPairsRealtime();
+
+const BILLING_FLOAT_CHAT = {
+    isOpen: false,
+    messages: [],
+    unreadCount: 0,
+    pendingCount: 0,
+    adminThreads: [],
+    selectedUserId: 0,
+    pendingBillings: [],
+    adminFilterQuery: '',
+    threadClearedManually: false,
+    shouldForceScrollBottom: false,
+    timer: null,
+};
+
+function clearBillingFloatAdminSelection(statusMessage = 'Thread ditutup. Pilih user untuk membuka chat.') {
+    BILLING_FLOAT_CHAT.selectedUserId = 0;
+    BILLING_FLOAT_CHAT.messages = [];
+    BILLING_FLOAT_CHAT.pendingBillings = [];
+    BILLING_FLOAT_CHAT.threadClearedManually = true;
+    renderBillingFloatAdminNotifications();
+    const statusEl = el('billing-float-chat-status');
+    if (statusEl) {
+        statusEl.textContent = statusMessage;
+    }
+}
+
+function escapeBillingFloatChatHtml(value) {
+    return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+
+function buildBillingAdminUserInitials(userName, userEmail, userId) {
+    const source = String(userName || '').trim() || String(userEmail || '').trim() || ('U' + String(userId || ''));
+    const words = source.split(/\s+/).filter(Boolean);
+    if (words.length >= 2) {
+        return (words[0][0] + words[1][0]).toUpperCase();
+    }
+
+    const compact = source.replace(/[^a-zA-Z0-9]/g, '');
+    if (compact.length >= 2) {
+        return compact.slice(0, 2).toUpperCase();
+    }
+
+    return source.slice(0, 2).toUpperCase();
+}
+
+function buildBillingAdminAvatarUrl(thread) {
+    const direct = String(
+        thread?.avatar_url
+        || thread?.user_avatar_url
+        || thread?.user_avatar
+        || thread?.profile_photo_url
+        || ''
+    ).trim();
+    if (direct !== '') {
+        return direct;
+    }
+
+    const seed = encodeURIComponent(String(thread?.user_email || thread?.user_name || thread?.user_id || 'user'));
+    return 'https://api.dicebear.com/9.x/personas/svg?seed=' + seed;
+}
+
+function buildBillingAdminFallbackAvatarUrl(thread, initials) {
+    const seed = String(thread?.user_email || thread?.user_name || thread?.user_id || 'user');
+    let hash = 0;
+    for (let i = 0; i < seed.length; i += 1) {
+        hash = ((hash << 5) - hash + seed.charCodeAt(i)) | 0;
+    }
+
+    const hueA = Math.abs(hash) % 360;
+    const hueB = (hueA + 36) % 360;
+    const safeInitials = escapeBillingFloatChatHtml(initials || 'U');
+    const svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96">'
+        + '<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">'
+        + '<stop offset="0" stop-color="hsl(' + String(hueA) + ',72%,56%)"/>'
+        + '<stop offset="1" stop-color="hsl(' + String(hueB) + ',72%,40%)"/>'
+        + '</linearGradient></defs>'
+        + '<rect width="96" height="96" rx="48" fill="url(#g)"/>'
+        + '<text x="48" y="56" text-anchor="middle" font-size="28" font-family="Segoe UI, Arial" font-weight="700" fill="rgba(255,255,255,0.95)">' + safeInitials + '</text>'
+        + '</svg>';
+    return 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg);
+}
+
+function bindBillingAdminAvatarFallbacks(scope) {
+    const root = scope instanceof HTMLElement ? scope : document;
+    root.querySelectorAll('img[data-avatar-fallback]').forEach((imageEl) => {
+        if (!(imageEl instanceof HTMLImageElement)) return;
+        if (imageEl.dataset.avatarBound === '1') return;
+        imageEl.dataset.avatarBound = '1';
+        imageEl.addEventListener('error', () => {
+            const fallback = String(imageEl.getAttribute('data-avatar-fallback') || '');
+            if (fallback !== '' && imageEl.src !== fallback) {
+                imageEl.src = fallback;
+            }
+        });
+    });
+}
+
+function renderBillingFloatChatMessages(forceScrollBottom = false) {
+    const target = el('billing-float-chat-messages');
+    if (!target) return;
+
+    const previousBottomDistance = Math.max(0, target.scrollHeight - target.scrollTop - target.clientHeight);
+    const shouldScrollToBottom = forceScrollBottom
+        || BILLING_FLOAT_CHAT.shouldForceScrollBottom
+        || previousBottomDistance <= 72;
+    BILLING_FLOAT_CHAT.shouldForceScrollBottom = false;
+
+    if (!Array.isArray(BILLING_FLOAT_CHAT.messages) || BILLING_FLOAT_CHAT.messages.length === 0) {
+        target.innerHTML = '<div class="billing-float-chat-empty">Belum ada pesan. Kirim chat untuk follow up billing.</div>';
+        return;
+    }
+
+    target.innerHTML = BILLING_FLOAT_CHAT.messages.map((message) => {
+        const isSelf = !Boolean(message.sender_is_admin);
+        const text = String(message?.message ?? '').trim();
+        const sender = String(message?.sender_name ?? 'User');
+        const label = String(message?.created_label ?? '-');
+        return '<div class="billing-float-chat-row' + (isSelf ? ' is-self' : '') + '">'
+            + '<div class="billing-float-chat-bubble">'
+            + '<div class="billing-float-chat-meta">' + escapeBillingFloatChatHtml(sender) + ' • ' + escapeBillingFloatChatHtml(label) + '</div>'
+            + '<div class="billing-float-chat-text">' + escapeBillingFloatChatHtml(text !== '' ? text : '-') + '</div>'
+            + '</div>'
+            + '</div>';
+    }).join('');
+    if (shouldScrollToBottom) {
+        target.scrollTop = target.scrollHeight;
+    } else {
+        target.scrollTop = Math.max(0, target.scrollHeight - target.clientHeight - previousBottomDistance);
+    }
+}
+
+function renderBillingFloatChatUnreadBadge() {
+    const unreadBadge = el('billing-float-chat-unread');
+    const pendingBadge = el('billing-float-chat-pending');
+
+    if (unreadBadge instanceof HTMLElement) {
+        const unreadCount = Math.max(0, Number(BILLING_FLOAT_CHAT.unreadCount || 0));
+        if (unreadCount <= 0 || BILLING_FLOAT_CHAT.isOpen) {
+            unreadBadge.classList.add('is-hidden');
+            unreadBadge.textContent = '0';
+        } else {
+            unreadBadge.classList.remove('is-hidden');
+            unreadBadge.textContent = unreadCount > 99 ? '99+' : String(unreadCount);
+        }
+    }
+
+    if (pendingBadge instanceof HTMLElement) {
+        const pendingCount = Math.max(0, Number(BILLING_FLOAT_CHAT.pendingCount || 0));
+        if (!IS_ADMIN || pendingCount <= 0 || BILLING_FLOAT_CHAT.isOpen) {
+            pendingBadge.classList.add('is-hidden');
+            pendingBadge.textContent = '0';
+        } else {
+            pendingBadge.classList.remove('is-hidden');
+            pendingBadge.textContent = pendingCount > 99 ? '99+' : String(pendingCount);
+        }
+    }
+}
+
+function renderBillingFloatAdminNotifications() {
+    const target = el('billing-float-chat-messages');
+    const userListEl = el('billing-admin-user-list');
+    const pendingListEl = el('billing-admin-pending-list');
+    const titleEl = el('billing-admin-thread-title');
+    const subtitleEl = el('billing-admin-thread-subtitle');
+    const sendBtn = el('billing-float-chat-send');
+    const inputEl = el('billing-float-chat-input');
+    const clearThreadBtn = el('billing-admin-clear-thread');
+    const statusEl = el('billing-float-chat-status');
+    if (!target) return;
+
+    const unreadTotal = Math.max(0, Number(BILLING_FLOAT_CHAT.unreadCount || 0));
+    const pendingTotal = Math.max(0, Number(BILLING_FLOAT_CHAT.pendingCount || 0));
+
+    if (statusEl) {
+        statusEl.textContent = 'Unread chat: ' + String(unreadTotal) + ' • Pending billing: ' + String(pendingTotal);
+    }
+
+    const allThreads = Array.isArray(BILLING_FLOAT_CHAT.adminThreads) ? BILLING_FLOAT_CHAT.adminThreads : [];
+    const filter = String(BILLING_FLOAT_CHAT.adminFilterQuery || '').trim().toLowerCase();
+    const filteredThreads = filter === ''
+        ? allThreads
+        : allThreads.filter((thread) => {
+            const haystack = [thread.user_name, thread.user_email, thread.latest_message]
+                .map((item) => String(item || '').toLowerCase())
+                .join(' ');
+            return haystack.includes(filter);
+        });
+
+    if (BILLING_FLOAT_CHAT.selectedUserId <= 0 && filteredThreads.length > 0 && !BILLING_FLOAT_CHAT.threadClearedManually) {
+        BILLING_FLOAT_CHAT.selectedUserId = Number(filteredThreads[0].user_id || 0);
+    }
+
+    if (userListEl) {
+        if (filteredThreads.length === 0) {
+            userListEl.innerHTML = '<div class="billing-float-chat-empty">Tidak ada user yang cocok.</div>';
+        } else {
+            userListEl.innerHTML = filteredThreads.map((thread) => {
+                const userId = Number(thread.user_id || 0);
+                const isActive = userId === Number(BILLING_FLOAT_CHAT.selectedUserId || 0);
+                const initials = buildBillingAdminUserInitials(thread.user_name, thread.user_email, userId);
+                const avatarUrl = buildBillingAdminAvatarUrl(thread);
+                const fallbackAvatar = buildBillingAdminFallbackAvatarUrl(thread, initials);
+                const label = [thread.user_name, thread.user_email].filter(Boolean).join(' • ');
+                return '<button type="button" class="billing-admin-user-item' + (isActive ? ' is-active' : '') + '" data-admin-user-id="' + String(userId) + '">'
+                    + '<span class="billing-admin-user-avatar" title="' + escapeBillingFloatChatHtml(label || ('User #' + String(userId))) + '">'
+                    + '<img src="' + escapeBillingFloatChatHtml(avatarUrl !== '' ? avatarUrl : fallbackAvatar) + '" data-avatar-fallback="' + escapeBillingFloatChatHtml(fallbackAvatar) + '" alt="' + escapeBillingFloatChatHtml(initials) + '" loading="lazy" referrerpolicy="no-referrer">'
+                    + '</span>'
+                    + '</button>';
+            }).join('');
+            bindBillingAdminAvatarFallbacks(userListEl);
+        }
+    }
+
+    const activeThread = allThreads.find((thread) => Number(thread.user_id || 0) === Number(BILLING_FLOAT_CHAT.selectedUserId || 0));
+    if (titleEl) titleEl.textContent = activeThread ? String(activeThread.user_name || 'User') : 'Pilih user';
+    if (subtitleEl) subtitleEl.textContent = activeThread
+        ? (String(activeThread.user_email || '-') + ' • Last update ' + String(activeThread.latest_label || '-'))
+        : 'Thread chat user muncul di sini.';
+    if (sendBtn instanceof HTMLButtonElement) {
+        sendBtn.disabled = !activeThread;
+    }
+    if (clearThreadBtn instanceof HTMLButtonElement) {
+        clearThreadBtn.disabled = !activeThread;
+    }
+    if (inputEl instanceof HTMLTextAreaElement) {
+        inputEl.disabled = !activeThread;
+        inputEl.placeholder = activeThread ? 'Tulis balasan admin...' : 'Pilih user dulu untuk mulai balas chat...';
+    }
+
+    if (!activeThread) {
+        target.innerHTML = '<div class="billing-float-chat-empty">Belum ada chat aktif. Pilih user di kiri untuk membuka thread.</div>';
+        if (pendingListEl) {
+            pendingListEl.classList.add('is-empty');
+            pendingListEl.innerHTML = '<div class="small text-secondary">Belum ada pending billing untuk user terpilih.</div>';
+        }
+        return;
+    }
+
+    renderBillingFloatChatMessages();
+
+    if (pendingListEl) {
+        if (!Array.isArray(BILLING_FLOAT_CHAT.pendingBillings) || BILLING_FLOAT_CHAT.pendingBillings.length === 0) {
+            pendingListEl.classList.add('is-empty');
+            pendingListEl.innerHTML = '<div class="small text-secondary">Tidak ada pending billing untuk user ini.</div>';
+        } else {
+            pendingListEl.classList.remove('is-empty');
+            pendingListEl.innerHTML = BILLING_FLOAT_CHAT.pendingBillings.map((item) => {
+                const amount = Number(item.requested_amount || 0).toLocaleString('id-ID', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+                return '<div class="billing-admin-pending-item">'
+                    + '<div class="fw-semibold">Account ' + escapeBillingFloatChatHtml(item.account_id) + ' • ' + escapeBillingFloatChatHtml(String(item.requested_plan || '').toUpperCase()) + '</div>'
+                    + '<div class="small text-secondary">' + escapeBillingFloatChatHtml(String(item.requested_months || 0)) + ' bulan • Rp ' + escapeBillingFloatChatHtml(amount) + ' • ' + escapeBillingFloatChatHtml(item.created_label || '-') + '</div>'
+                    + '<div class="billing-admin-pending-actions">'
+                    + '<button type="button" class="billing-admin-action-btn is-approve" data-billing-id="' + escapeBillingFloatChatHtml(item.id) + '" data-billing-decision="approve" title="Approve billing" data-bs-toggle="tooltip" data-bs-placement="top">'
+                    + '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M5 12.5 9.2 17 19 7" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+                    + '</button>'
+                    + '<button type="button" class="billing-admin-action-btn is-reject" data-billing-id="' + escapeBillingFloatChatHtml(item.id) + '" data-billing-decision="reject" title="Reject billing" data-bs-toggle="tooltip" data-bs-placement="top">'
+                    + '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>'
+                    + '</button>'
+                    + '</div>'
+                    + '</div>';
+            }).join('');
+            initBillingAdminActionTooltips();
+        }
+    }
+}
+
+function initBillingAdminActionTooltips() {
+    if (typeof bootstrap === 'undefined' || !bootstrap?.Tooltip) return;
+    document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach((element) => {
+        const existing = bootstrap.Tooltip.getInstance(element);
+        if (existing) {
+            existing.dispose();
+        }
+        bootstrap.Tooltip.getOrCreateInstance(element, { trigger: 'hover focus' });
+    });
+}
+
+async function loadBillingFloatChatThread() {
+    const statusEl = el('billing-float-chat-status');
+    try {
+        const response = await fetch(ROUTES.billingChatThread, {
+            headers: { 'Accept': 'application/json' },
+            credentials: 'same-origin',
+            cache: 'no-store',
+        });
+        if (!response.ok) {
+            if (statusEl) statusEl.textContent = 'Gagal memuat chat (' + String(response.status) + ').';
+            return;
+        }
+
+        const payload = await response.json();
+        BILLING_FLOAT_CHAT.messages = Array.isArray(payload.messages) ? payload.messages : [];
+        BILLING_FLOAT_CHAT.unreadCount = 0;
+        BILLING_FLOAT_CHAT.shouldForceScrollBottom = true;
+        renderBillingFloatChatMessages();
+        renderBillingFloatChatUnreadBadge();
+        if (statusEl) statusEl.textContent = 'Terhubung. Pesan baru tampil otomatis.';
+    } catch (_error) {
+        if (statusEl) statusEl.textContent = 'Koneksi chat terputus. Coba lagi...';
+    }
+}
+
+async function loadBillingFloatChatUnreadCount() {
+    if (IS_ADMIN) {
+        await loadBillingFloatAdminNotifications();
+        return;
+    }
+
+    if (BILLING_FLOAT_CHAT.isOpen) {
+        BILLING_FLOAT_CHAT.unreadCount = 0;
+        renderBillingFloatChatUnreadBadge();
+        return;
+    }
+
+    try {
+        const response = await fetch(ROUTES.billingChatUnread, {
+            headers: { 'Accept': 'application/json' },
+            credentials: 'same-origin',
+            cache: 'no-store',
+        });
+        if (!response.ok) return;
+
+        const payload = await response.json();
+        BILLING_FLOAT_CHAT.unreadCount = Math.max(0, Number(payload.unread_count || 0));
+        renderBillingFloatChatUnreadBadge();
+    } catch (_error) {
+    }
+}
+
+async function loadBillingFloatAdminNotifications() {
+    try {
+        const response = await fetch(ROUTES.billingAdminThreads, {
+            headers: { 'Accept': 'application/json' },
+            credentials: 'same-origin',
+            cache: 'no-store',
+        });
+        if (!response.ok) return;
+
+        const payload = await response.json();
+        BILLING_FLOAT_CHAT.adminThreads = Array.isArray(payload.threads) ? payload.threads : [];
+        if (BILLING_FLOAT_CHAT.selectedUserId > 0) {
+            const selectedStillExists = BILLING_FLOAT_CHAT.adminThreads.some((thread) => Number(thread.user_id || 0) === Number(BILLING_FLOAT_CHAT.selectedUserId || 0));
+            if (!selectedStillExists) {
+                BILLING_FLOAT_CHAT.selectedUserId = 0;
+                BILLING_FLOAT_CHAT.messages = [];
+                BILLING_FLOAT_CHAT.pendingBillings = [];
+                BILLING_FLOAT_CHAT.threadClearedManually = false;
+            }
+        }
+        if (BILLING_FLOAT_CHAT.selectedUserId <= 0 && BILLING_FLOAT_CHAT.adminThreads.length > 0 && !BILLING_FLOAT_CHAT.threadClearedManually) {
+            BILLING_FLOAT_CHAT.selectedUserId = Number(BILLING_FLOAT_CHAT.adminThreads[0].user_id || 0);
+        }
+        BILLING_FLOAT_CHAT.unreadCount = BILLING_FLOAT_CHAT.adminThreads.reduce((sum, thread) => sum + Math.max(0, Number(thread.unread_count || 0)), 0);
+        BILLING_FLOAT_CHAT.pendingCount = BILLING_FLOAT_CHAT.adminThreads.reduce((sum, thread) => sum + Math.max(0, Number(thread.pending_billing_count || 0)), 0);
+        renderBillingFloatChatUnreadBadge();
+
+        if (BILLING_FLOAT_CHAT.isOpen) {
+            renderBillingFloatAdminNotifications();
+        }
+    } catch (_error) {
+    }
+}
+
+async function loadBillingFloatAdminThread(userId, options = {}) {
+    const resolvedUserId = Math.max(0, Number(userId || 0));
+    if (!resolvedUserId) return;
+
+    const statusEl = el('billing-float-chat-status');
+    if (!options.silent && statusEl) {
+        statusEl.textContent = 'Memuat thread user...';
+    }
+
+    try {
+        const response = await fetch(ROUTES.billingChatThread + '?user_id=' + encodeURIComponent(String(resolvedUserId)), {
+            headers: { 'Accept': 'application/json' },
+            credentials: 'same-origin',
+            cache: 'no-store',
+        });
+        if (!response.ok) {
+            if (statusEl) statusEl.textContent = 'Gagal memuat thread (' + String(response.status) + ').';
+            return;
+        }
+
+        const payload = await response.json();
+        BILLING_FLOAT_CHAT.selectedUserId = Number(payload.thread_user_id || resolvedUserId);
+        BILLING_FLOAT_CHAT.messages = Array.isArray(payload.messages) ? payload.messages : [];
+        BILLING_FLOAT_CHAT.pendingBillings = Array.isArray(payload.pending_billings) ? payload.pending_billings : [];
+        BILLING_FLOAT_CHAT.threadClearedManually = false;
+        BILLING_FLOAT_CHAT.shouldForceScrollBottom = true;
+        if (statusEl) statusEl.textContent = 'Thread user aktif.';
+        renderBillingFloatAdminNotifications();
+    } catch (_error) {
+        if (statusEl) statusEl.textContent = 'Koneksi thread terputus. Coba lagi...';
+    }
+}
+
+async function processBillingFloatAdminDecision(billingId, decision) {
+    const resolvedBillingId = Math.max(0, Number(billingId || 0));
+    const resolvedDecision = String(decision || '').toLowerCase();
+    if (!resolvedBillingId || !['approve', 'reject'].includes(resolvedDecision)) return;
+
+    const statusEl = el('billing-float-chat-status');
+    if (statusEl) statusEl.textContent = resolvedDecision === 'approve' ? 'Memproses approve...' : 'Memproses reject...';
+
+    try {
+        const response = await fetch(ROUTES.billingAdminDecisionBase + '/' + String(resolvedBillingId) + '/decision-json', {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+            },
+            credentials: 'same-origin',
+            body: JSON.stringify({ decision: resolvedDecision, user_id: BILLING_FLOAT_CHAT.selectedUserId || 0 }),
+        });
+
+        const payload = await response.json();
+        if (!response.ok || !payload.success) {
+            if (statusEl) statusEl.textContent = String(payload?.message || 'Gagal memproses request billing.');
+            return;
+        }
+
+        BILLING_FLOAT_CHAT.adminThreads = Array.isArray(payload.threads) ? payload.threads : BILLING_FLOAT_CHAT.adminThreads;
+        BILLING_FLOAT_CHAT.messages = Array.isArray(payload.messages) ? payload.messages : BILLING_FLOAT_CHAT.messages;
+        BILLING_FLOAT_CHAT.pendingBillings = Array.isArray(payload.pending_billings) ? payload.pending_billings : BILLING_FLOAT_CHAT.pendingBillings;
+        BILLING_FLOAT_CHAT.selectedUserId = Number(payload.thread_user_id || BILLING_FLOAT_CHAT.selectedUserId || 0);
+        BILLING_FLOAT_CHAT.unreadCount = BILLING_FLOAT_CHAT.adminThreads.reduce((sum, thread) => sum + Math.max(0, Number(thread.unread_count || 0)), 0);
+        BILLING_FLOAT_CHAT.pendingCount = BILLING_FLOAT_CHAT.adminThreads.reduce((sum, thread) => sum + Math.max(0, Number(thread.pending_billing_count || 0)), 0);
+        BILLING_FLOAT_CHAT.shouldForceScrollBottom = true;
+        renderBillingFloatChatUnreadBadge();
+        renderBillingFloatAdminNotifications();
+        if (statusEl) statusEl.textContent = String(payload.message || 'Request billing berhasil diproses.');
+    } catch (_error) {
+        if (statusEl) statusEl.textContent = 'Koneksi gagal. Coba ulangi aksi.';
+    }
+}
+
+function setBillingFloatChatOpen(open) {
+    const card = el('billing-float-chat-card');
+    const toggle = el('billing-float-chat-toggle');
+    if (!(card instanceof HTMLElement) || !(toggle instanceof HTMLButtonElement)) return;
+
+    BILLING_FLOAT_CHAT.isOpen = Boolean(open);
+    card.classList.toggle('is-open', BILLING_FLOAT_CHAT.isOpen);
+    toggle.classList.toggle('is-open', BILLING_FLOAT_CHAT.isOpen);
+    document.body.classList.toggle('billing-chat-lock-scroll', BILLING_FLOAT_CHAT.isOpen);
+    renderBillingFloatChatUnreadBadge();
+
+    if (BILLING_FLOAT_CHAT.isOpen) {
+        if (IS_ADMIN) {
+            renderBillingFloatAdminNotifications();
+            loadBillingFloatAdminNotifications();
+            if (BILLING_FLOAT_CHAT.selectedUserId > 0) {
+                loadBillingFloatAdminThread(BILLING_FLOAT_CHAT.selectedUserId, { silent: true });
+            }
+            return;
+        }
+
+        loadBillingFloatChatThread();
+        const input = el('billing-float-chat-input');
+        if (input instanceof HTMLTextAreaElement) {
+            setTimeout(() => input.focus(), 60);
+        }
+    }
+}
+
+function initFloatingBillingChatWidget() {
+    if (!el('billing-float-chat-toggle') || !el('billing-float-chat-card')) return;
+
+    el('billing-float-chat-toggle')?.addEventListener('click', () => {
+        setBillingFloatChatOpen(!BILLING_FLOAT_CHAT.isOpen);
+    });
+    el('billing-float-chat-close')?.addEventListener('click', () => {
+        setBillingFloatChatOpen(false);
+    });
+
+    document.addEventListener('pointerdown', (event) => {
+        if (!BILLING_FLOAT_CHAT.isOpen) return;
+        const card = el('billing-float-chat-card');
+        const toggle = el('billing-float-chat-toggle');
+        const target = event.target;
+        if (!(target instanceof Node) || !(card instanceof HTMLElement) || !(toggle instanceof HTMLElement)) return;
+        if (card.contains(target) || toggle.contains(target)) return;
+        setBillingFloatChatOpen(false);
+    });
+
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && BILLING_FLOAT_CHAT.isOpen) {
+            setBillingFloatChatOpen(false);
+        }
+    });
+
+    el('billing-float-chat-input')?.addEventListener('keydown', (event) => {
+        if (!(event.target instanceof HTMLTextAreaElement)) return;
+        if (event.key !== 'Enter' || event.shiftKey) return;
+        event.preventDefault();
+        el('billing-float-chat-form')?.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+    });
+
+    if (IS_ADMIN) {
+        renderBillingFloatAdminNotifications();
+
+        el('billing-admin-user-search')?.addEventListener('input', (event) => {
+            BILLING_FLOAT_CHAT.adminFilterQuery = String(event.target?.value || '');
+            renderBillingFloatAdminNotifications();
+        });
+
+        el('billing-admin-user-list')?.addEventListener('click', (event) => {
+            const target = event.target instanceof Element ? event.target.closest('[data-admin-user-id]') : null;
+            if (!(target instanceof HTMLElement)) return;
+            const userId = Number(target.getAttribute('data-admin-user-id') || 0);
+            if (!userId) return;
+            BILLING_FLOAT_CHAT.threadClearedManually = false;
+            BILLING_FLOAT_CHAT.selectedUserId = userId;
+            BILLING_FLOAT_CHAT.messages = [];
+            BILLING_FLOAT_CHAT.pendingBillings = [];
+            renderBillingFloatAdminNotifications();
+            loadBillingFloatAdminThread(userId);
+        });
+
+        el('billing-admin-clear-thread')?.addEventListener('click', () => {
+            clearBillingFloatAdminSelection();
+        });
+
+        el('billing-admin-pending-list')?.addEventListener('click', (event) => {
+            const target = event.target instanceof Element ? event.target.closest('[data-billing-id][data-billing-decision]') : null;
+            if (!(target instanceof HTMLElement)) return;
+            const billingId = Number(target.getAttribute('data-billing-id') || 0);
+            const decision = String(target.getAttribute('data-billing-decision') || '');
+            if (decision === 'reject') {
+                const ok = window.confirm('Reject request billing ini? User harus submit ulang jika ditolak.');
+                if (!ok) return;
+            }
+            processBillingFloatAdminDecision(billingId, decision);
+        });
+
+        el('billing-float-chat-form')?.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const input = el('billing-float-chat-input');
+            const sendBtn = el('billing-float-chat-send');
+            const statusEl = el('billing-float-chat-status');
+            const userId = Math.max(0, Number(BILLING_FLOAT_CHAT.selectedUserId || 0));
+            if (!(input instanceof HTMLTextAreaElement) || !(sendBtn instanceof HTMLButtonElement) || userId <= 0) return;
+
+            const message = String(input.value || '').trim();
+            if (!message) return;
+
+            sendBtn.disabled = true;
+            if (statusEl) statusEl.textContent = 'Mengirim balasan admin...';
+            try {
+                const response = await fetch(ROUTES.billingChatSend, {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+                    },
+                    credentials: 'same-origin',
+                    body: JSON.stringify({ user_id: userId, message }),
+                });
+                if (!response.ok) {
+                    if (statusEl) statusEl.textContent = 'Gagal kirim balasan (' + String(response.status) + ').';
+                    return;
+                }
+
+                const payload = await response.json();
+                BILLING_FLOAT_CHAT.messages = Array.isArray(payload.messages) ? payload.messages : BILLING_FLOAT_CHAT.messages;
+                if (Array.isArray(payload.threads)) {
+                    BILLING_FLOAT_CHAT.adminThreads = payload.threads;
+                }
+                BILLING_FLOAT_CHAT.pendingCount = BILLING_FLOAT_CHAT.adminThreads.reduce((sum, thread) => sum + Math.max(0, Number(thread.pending_billing_count || 0)), 0);
+                BILLING_FLOAT_CHAT.unreadCount = BILLING_FLOAT_CHAT.adminThreads.reduce((sum, thread) => sum + Math.max(0, Number(thread.unread_count || 0)), 0);
+                BILLING_FLOAT_CHAT.shouldForceScrollBottom = true;
+                input.value = '';
+                renderBillingFloatChatUnreadBadge();
+                renderBillingFloatAdminNotifications();
+                if (statusEl) statusEl.textContent = 'Balasan terkirim.';
+            } catch (_error) {
+                if (statusEl) statusEl.textContent = 'Koneksi gagal. Coba kirim ulang.';
+            } finally {
+                sendBtn.disabled = false;
+            }
+        });
+
+        loadBillingFloatAdminNotifications();
+        setInterval(() => {
+            loadBillingFloatAdminNotifications();
+            if (BILLING_FLOAT_CHAT.isOpen && BILLING_FLOAT_CHAT.selectedUserId > 0) {
+                loadBillingFloatAdminThread(BILLING_FLOAT_CHAT.selectedUserId, { silent: true });
+            }
+        }, 7000);
+        return;
+    }
+
+    renderBillingFloatChatMessages();
+    loadBillingFloatChatThread();
+
+    el('billing-float-chat-form')?.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const input = el('billing-float-chat-input');
+        const sendBtn = el('billing-float-chat-send');
+        const statusEl = el('billing-float-chat-status');
+        if (!(input instanceof HTMLTextAreaElement) || !(sendBtn instanceof HTMLButtonElement)) return;
+
+        const message = String(input.value || '').trim();
+        if (!message) return;
+
+        sendBtn.disabled = true;
+        if (statusEl) statusEl.textContent = 'Mengirim pesan...';
+        try {
+            const response = await fetch(ROUTES.billingChatSend, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+                },
+                credentials: 'same-origin',
+                body: JSON.stringify({ message }),
+            });
+            if (!response.ok) {
+                if (statusEl) statusEl.textContent = 'Gagal kirim pesan (' + String(response.status) + ').';
+                return;
+            }
+
+            const payload = await response.json();
+            BILLING_FLOAT_CHAT.messages = Array.isArray(payload.messages) ? payload.messages : BILLING_FLOAT_CHAT.messages;
+            BILLING_FLOAT_CHAT.unreadCount = 0;
+            BILLING_FLOAT_CHAT.shouldForceScrollBottom = true;
+            input.value = '';
+            renderBillingFloatChatMessages();
+            renderBillingFloatChatUnreadBadge();
+            if (statusEl) statusEl.textContent = 'Pesan terkirim.';
+        } catch (_error) {
+            if (statusEl) statusEl.textContent = 'Gagal kirim pesan. Coba lagi.';
+        } finally {
+            sendBtn.disabled = false;
+        }
+    });
+
+    BILLING_FLOAT_CHAT.timer = setInterval(() => {
+        if (!BILLING_FLOAT_CHAT.isOpen) return;
+        loadBillingFloatChatThread();
+    }, 7000);
+
+    loadBillingFloatChatUnreadCount();
+    setInterval(() => {
+        if (BILLING_FLOAT_CHAT.isOpen) return;
+        loadBillingFloatChatUnreadCount();
+    }, 7000);
+}
+
+function syncDashboardFloatingChatOffsets() {
+    const root = document.documentElement;
+    if (!(root instanceof HTMLElement)) return;
+
+    const defaultBtn = 'max(0.55rem, calc(0.55rem + env(safe-area-inset-bottom)))';
+    const defaultCard = 'max(4.9rem, calc(4.9rem + env(safe-area-inset-bottom)))';
+
+    const nav = document.querySelector('.workspace-nav');
+    if (!(nav instanceof HTMLElement)) {
+        root.style.setProperty('--billing-float-bottom-offset', defaultBtn);
+        root.style.setProperty('--billing-float-card-bottom-offset', defaultCard);
+        return;
+    }
+
+    const navRect = nav.getBoundingClientRect();
+    if (navRect.height <= 0) {
+        root.style.setProperty('--billing-float-bottom-offset', defaultBtn);
+        root.style.setProperty('--billing-float-card-bottom-offset', defaultCard);
+        return;
+    }
+
+    const viewportHeight = window.innerHeight || document.documentElement.clientHeight || 0;
+    if (viewportHeight <= 0) {
+        root.style.setProperty('--billing-float-bottom-offset', defaultBtn);
+        root.style.setProperty('--billing-float-card-bottom-offset', defaultCard);
+        return;
+    }
+
+    // Only adjust when the workspace nav is rendered in the lower viewport area.
+    if (navRect.top < viewportHeight * 0.55) {
+        root.style.setProperty('--billing-float-bottom-offset', defaultBtn);
+        root.style.setProperty('--billing-float-card-bottom-offset', defaultCard);
+        return;
+    }
+
+    const navBottomGap = Math.max(0, viewportHeight - navRect.bottom);
+    const rawBtnOffset = Math.max(8, Math.round(navRect.height + navBottomGap + 8));
+    const btnOffsetPx = Math.min(120, rawBtnOffset);
+    const cardOffsetPx = Math.min(240, btnOffsetPx + 86);
+
+    root.style.setProperty('--billing-float-bottom-offset', String(btnOffsetPx) + 'px');
+    root.style.setProperty('--billing-float-card-bottom-offset', String(cardOffsetPx) + 'px');
+}
+
+initFloatingBillingChatWidget();
+syncDashboardFloatingChatOffsets();
+window.addEventListener('resize', syncDashboardFloatingChatOffsets, { passive: true });
+window.addEventListener('orientationchange', syncDashboardFloatingChatOffsets, { passive: true });
+
+updateNewsWidget();
+renderLiveLicenseCountdownTick();
+setInterval(() => {
+    updateNewsWidget();
+    renderLiveLicenseCountdownTick();
+}, 1000);
+// Polling remains as fallback when SSE cannot be established.
+</script>
+</body>
+</html>

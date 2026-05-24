@@ -1,0 +1,18 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Redirecting to Dashboard</title>
+  <meta http-equiv="refresh" content="0;url=/dashboard" />
+  <script>
+    (function () {
+      var target = '/dashboard' + (window.location.search || '') + (window.location.hash || '');
+      window.location.replace(target);
+    })();
+  </script>
+</head>
+<body>
+  <p>Redirecting to <a href="/dashboard">/dashboard</a>...</p>
+</body>
+</html>
