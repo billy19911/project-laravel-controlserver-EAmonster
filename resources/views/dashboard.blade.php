@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>EA Monster Cloud Service {{ strtoupper((string) ($dashboardPatch ?? 'v209')) }}</title>
+        <title>Xynn EA Monster Cloud Pro</title>
     <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
     <link rel="shortcut icon" href="{{ asset('favicon.svg') }}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -157,6 +157,11 @@
             border-color: #cbd5e1;
         }
 
+        body:not([data-theme='dark']) .news-data-item.is-empty {
+            background: #f8fafc;
+            border-color: #d1d5db;
+        }
+
         body:not([data-theme='dark']) .news-metric-value {
             color: #0f172a;
         }
@@ -254,6 +259,115 @@
             border-color: #b91c1c;
             box-shadow: 0 4px 12px rgba(185, 28, 28, 0.4);
             transform: translateY(-2px);
+        }
+
+        .tooltip-info-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 1rem;
+            height: 1rem;
+            vertical-align: middle;
+            cursor: help;
+            opacity: 0.85;
+        }
+
+        .tooltip-info-icon:hover {
+            opacity: 1;
+        }
+
+        .tooltip-info-icon svg {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .component-header-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+
+        .risk-guide-btn {
+            --bs-btn-padding-y: 0.2rem;
+            --bs-btn-padding-x: 0.55rem;
+            --bs-btn-font-size: 0.75rem;
+            --bs-btn-border-radius: 999px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .risk-guide-btn-accent {
+            background: linear-gradient(135deg, #facc15, #f97316);
+            border: 1px solid rgba(249, 115, 22, 0.6);
+            color: #111827;
+            box-shadow: 0 6px 16px rgba(249, 115, 22, 0.28);
+        }
+
+        .risk-guide-btn-accent:hover,
+        .risk-guide-btn-accent:focus {
+            background: linear-gradient(135deg, #fde047, #fb923c);
+            color: #0f172a;
+            border-color: rgba(251, 146, 60, 0.85);
+            box-shadow: 0 8px 20px rgba(249, 115, 22, 0.32);
+        }
+
+        .risk-guide-list {
+            margin: 0;
+            padding-left: 1rem;
+        }
+
+        .risk-guide-list li {
+            margin-bottom: 0.28rem;
+            font-size: 0.9rem;
+            color: var(--monster-text-muted);
+        }
+
+        .risk-guide-card {
+            border: 1px solid var(--monster-border);
+            border-radius: 12px;
+            background: var(--monster-chip-bg);
+            padding: 0.75rem 0.85rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .risk-guide-card h6 {
+            margin-bottom: 0.45rem;
+            font-weight: 700;
+        }
+
+        .risk-guide-tabs {
+            border: 0;
+            gap: 0.45rem;
+        }
+
+        .risk-guide-tabs .nav-link {
+            border: 1px solid var(--monster-border);
+            background: rgba(15, 23, 42, 0.04);
+            color: var(--monster-text-secondary);
+            border-radius: 999px;
+            padding: 0.34rem 0.72rem;
+            font-size: 0.78rem;
+            font-weight: 700;
+        }
+
+        .risk-guide-tabs .nav-link.active {
+            background: linear-gradient(135deg, #facc15, #f97316);
+            border-color: rgba(249, 115, 22, 0.6);
+            color: #111827;
+            box-shadow: 0 4px 10px rgba(249, 115, 22, 0.22);
+        }
+
+        .risk-guide-tab-content {
+            margin-top: 0.8rem;
+        }
+
+        @media (max-width: 991.98px) {
+            .component-header-actions {
+                justify-content: flex-start;
+            }
         }
         
         .bot-toggle-btn {
@@ -364,6 +478,119 @@
             box-shadow: 0 20px 50px rgba(15, 23, 42, 0.08);
             backdrop-filter: blur(14px);
         }
+        
+        .workspace-pane {
+            will-change: opacity, transform;
+            transition: opacity .2s ease, transform .2s ease;
+        }
+
+        @keyframes workspacePaneIn {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .field-stack {
+            position: relative;
+        }
+
+        .field-stack.has-inline-save {
+            display: block;
+        }
+
+        .inline-save-row {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            column-gap: 0.45rem;
+            align-items: center;
+            width: 100%;
+        }
+
+        .inline-save-row .form-control,
+        .inline-save-row .form-select {
+            grid-column: 1;
+            min-width: 0;
+            width: 100%;
+        }
+        
+        .inline-save-btn {
+            position: static;
+            grid-column: 2;
+            justify-self: center;
+            align-self: center;
+            margin: 0;
+            width: 1.8rem;
+            height: 1.8rem;
+            border: 0;
+            border-radius: 999px;
+            color: #f8fafc;
+            background: linear-gradient(135deg, #16a34a, #10b981);
+            box-shadow: 0 8px 18px rgba(16, 185, 129, 0.28);
+            opacity: 0;
+            pointer-events: none;
+            z-index: 3;
+            display: none;
+            transition: transform 0.18s ease, opacity 0.18s ease;
+        }
+        
+        .inline-save-btn.is-visible {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 1;
+            pointer-events: auto;
+            transform: none;
+        }
+        
+        .legal-notice-card {
+            border: 1px solid rgba(217, 119, 6, 0.35);
+            background: linear-gradient(135deg, rgba(255, 251, 235, 0.88), rgba(254, 243, 199, 0.78));
+            border-radius: 14px;
+            padding: 0.95rem 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        body[data-theme='dark'] .legal-notice-card {
+            background: linear-gradient(135deg, rgba(120, 53, 15, 0.42), rgba(146, 64, 14, 0.3));
+            border-color: rgba(251, 191, 36, 0.35);
+        }
+        
+        .strategy-option-testing {
+            color: #94a3b8;
+        }
+
+        .dashboard-toast-stack {
+            position: fixed;
+            right: 0.9rem;
+            top: 0.9rem;
+            z-index: 6300;
+            display: grid;
+            gap: 0.5rem;
+            pointer-events: none;
+        }
+
+        .dashboard-toast {
+            min-width: 220px;
+            max-width: 320px;
+            border-radius: 12px;
+            padding: 0.62rem 0.76rem;
+            color: #f8fafc;
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.96), rgba(30, 41, 59, 0.96));
+            box-shadow: 0 14px 28px rgba(2, 6, 23, 0.42);
+            transform: translate3d(0, -8px, 0);
+            opacity: 0;
+            transition: transform 0.22s ease, opacity 0.22s ease;
+        }
+
+        .dashboard-toast.is-show {
+            transform: translate3d(0, 0, 0);
+            opacity: 1;
+        }
 
         .hero-shell {
             overflow: visible;
@@ -389,7 +616,7 @@
 
         .topbar-main {
             display: flex;
-            align-items: center;
+            align-items: flex-start;
             justify-content: flex-start;
             gap: 0.5rem;
             flex: 0 0 auto;
@@ -397,8 +624,25 @@
 
         .topbar-brand {
             display: grid;
-            gap: 0.12rem;
+            gap: 0.2rem;
             min-width: 220px;
+        }
+
+        .topbar-title-row {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .topbar-system-overline {
+            font-size: 0.72rem;
+            font-weight: 600;
+            letter-spacing: 0.11em;
+            text-transform: uppercase;
+            color: var(--monster-text-secondary);
+            opacity: 0.8;
+            line-height: 1.1;
         }
 
         .topbar-meta {
@@ -462,6 +706,15 @@
             color: #047857;
         }
 
+        .topbar-license-card[data-license-state='trial'] {
+            border-color: rgba(245, 158, 11, 0.26);
+            background: linear-gradient(135deg, rgba(255, 251, 235, 0.95), rgba(255, 237, 213, 0.9));
+        }
+
+        .topbar-license-card[data-license-state='trial'] .topbar-license-main {
+            color: #b45309;
+        }
+
         .topbar-license-card[data-license-state='inactive'] {
             border-color: rgba(148, 163, 184, 0.2);
             background: linear-gradient(135deg, rgba(248, 250, 252, 0.92), rgba(241, 245, 249, 0.8));
@@ -472,25 +725,37 @@
             display: flex;
             flex-wrap: wrap;
             align-items: center;
-            justify-content: flex-end;
-            gap: 0.55rem;
+            justify-content: space-between;
+            gap: 0.75rem;
             flex: 1 1 auto;
             min-width: 0;
         }
 
+        .topbar-center {
+            display: flex;
+            align-items: flex-end;
+            gap: 0.75rem;
+            min-width: 0;
+            flex: 1 1 auto;
+            flex-wrap: wrap;
+            justify-content: flex-start;
+            margin-left: 0;
+        }
+
         .topbar-account-tools {
             display: grid;
-            grid-template-columns: auto minmax(330px, 1fr);
-            align-items: center;
-            column-gap: 0.55rem;
-            row-gap: 0;
-            flex: 0 1 auto;
-            justify-content: flex-end;
+            grid-template-columns: 1fr;
+            gap: 0.3rem;
+            flex: 1 1 420px;
+            min-width: min(320px, 100%);
+            max-width: 560px;
+            justify-content: stretch;
             align-self: center;
         }
 
         .account-picker {
-            min-width: 330px;
+            min-width: min(330px, 100%);
+            max-width: 460px;
             width: 100%;
             position: relative;
             z-index: 1200;
@@ -498,8 +763,9 @@
 
         .account-picker-toggle {
             width: 100%;
-            min-height: 40px;
-            border-radius: 12px;
+            min-height: 56px;
+            height: 56px;
+            border-radius: 16px;
             border: 1px solid var(--monster-control-border);
             background: var(--monster-control-bg);
             color: var(--monster-ink);
@@ -507,8 +773,9 @@
             align-items: center;
             justify-content: space-between;
             gap: 0.4rem;
-            font-size: 0.9rem;
+            font-size: 0.92rem;
             font-weight: 700;
+            padding-inline: 0.9rem;
         }
 
         .account-picker-toggle::after {
@@ -554,6 +821,71 @@
             line-height: 1.35;
             padding-top: 0.48rem;
             padding-bottom: 0.48rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.5rem;
+        }
+
+        .account-picker-item-label {
+            flex: 1;
+            min-width: 0;
+            text-align: left;
+        }
+
+        .account-state-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 56px;
+            border-radius: 999px;
+            font-size: 0.64rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            padding: 0.2rem 0.5rem;
+            text-transform: uppercase;
+            border: 1px solid transparent;
+        }
+
+        .account-state-live {
+            color: #14532d;
+            background: rgba(74, 222, 128, 0.32);
+            border-color: rgba(22, 163, 74, 0.65);
+        }
+
+        .account-state-stop {
+            color: #7f1d1d;
+            background: rgba(248, 113, 113, 0.28);
+            border-color: rgba(220, 38, 38, 0.62);
+        }
+
+        .account-state-expired {
+            color: #78350f;
+            background: rgba(251, 191, 36, 0.28);
+            border-color: rgba(217, 119, 6, 0.62);
+        }
+
+        body[data-theme='dark'] .account-state-live {
+            color: #bbf7d0;
+            background: rgba(22, 163, 74, 0.3);
+            border-color: rgba(74, 222, 128, 0.75);
+        }
+
+        body[data-theme='dark'] .account-state-stop {
+            color: #fecaca;
+            background: rgba(220, 38, 38, 0.28);
+            border-color: rgba(248, 113, 113, 0.78);
+        }
+
+        body[data-theme='dark'] .account-state-expired {
+            color: #fde68a;
+            background: rgba(217, 119, 6, 0.3);
+            border-color: rgba(251, 191, 36, 0.78);
+        }
+
+        body[data-theme='dark'] .account-picker-item.active .account-state-badge,
+        body[data-theme='dark'] .account-picker-item:active .account-state-badge {
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
         }
 
         body[data-theme='dark'] .account-picker-search {
@@ -600,16 +932,15 @@
         }
 
         .topbar-account-label {
-            font-size: 0.72rem;
-            font-weight: 600;
-            letter-spacing: 0.03em;
+            font-size: 0.74rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
             text-transform: uppercase;
             color: var(--monster-text-muted);
             margin: 0;
-            white-space: nowrap;
-            min-height: 40px;
-            display: inline-flex;
-            align-items: center;
+            white-space: normal;
+            min-height: 0;
+            display: block;
             line-height: 1;
         }
 
@@ -639,10 +970,7 @@
             align-items: center;
             margin-left: auto;
             align-self: center;
-        }
-
-        .topbar-controls .topbar-meta {
-            margin-right: 0.15rem;
+            justify-content: flex-end;
         }
 
         .topbar-menu-btn {
@@ -657,7 +985,6 @@
 
         .topbar-actions .hero-action-btn,
         .topbar-actions .theme-toggle,
-        .account-picker-toggle,
         .topbar-meta .mini-chip {
             min-height: 40px;
             height: 40px;
@@ -747,6 +1074,15 @@
             color: #a7f3d0;
         }
 
+        body[data-theme='dark'] .topbar-license-card[data-license-state='trial'] {
+            border-color: rgba(251, 191, 36, 0.34);
+            background: linear-gradient(135deg, rgba(120, 53, 15, 0.82), rgba(67, 20, 7, 0.74));
+        }
+
+        body[data-theme='dark'] .topbar-license-card[data-license-state='trial'] .topbar-license-main {
+            color: #fde68a;
+        }
+
         .hero-shell::before {
             content: '';
             position: absolute;
@@ -763,6 +1099,57 @@
             letter-spacing: 0.01em;
             line-height: 1.15;
             word-break: break-word;
+        }
+
+        .topbar-license-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 1.45rem;
+            border-radius: 999px;
+            padding: 0.16rem 0.58rem;
+            font-size: 0.67rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            border: 1px solid transparent;
+            line-height: 1;
+        }
+
+        .topbar-license-badge.state-active {
+            color: #16a34a;
+            background: rgba(22, 163, 74, 0.12);
+            border-color: rgba(22, 163, 74, 0.28);
+        }
+
+        .topbar-license-badge.state-trial {
+            color: #d97706;
+            background: rgba(217, 119, 6, 0.13);
+            border-color: rgba(217, 119, 6, 0.28);
+        }
+
+        .topbar-license-badge.state-expired {
+            color: #dc2626;
+            background: rgba(220, 38, 38, 0.12);
+            border-color: rgba(220, 38, 38, 0.28);
+        }
+
+        body[data-theme='dark'] .topbar-license-badge.state-active {
+            color: #86efac;
+            background: rgba(22, 163, 74, 0.2);
+            border-color: rgba(134, 239, 172, 0.35);
+        }
+
+        body[data-theme='dark'] .topbar-license-badge.state-trial {
+            color: #fcd34d;
+            background: rgba(217, 119, 6, 0.24);
+            border-color: rgba(252, 211, 77, 0.35);
+        }
+
+        body[data-theme='dark'] .topbar-license-badge.state-expired {
+            color: #fca5a5;
+            background: rgba(220, 38, 38, 0.22);
+            border-color: rgba(252, 165, 165, 0.35);
         }
 
         .top-account-select {
@@ -1027,7 +1414,10 @@
 
         .form-row-compact.core-exec-grid .field-stack .form-label {
             min-height: 2.25rem;
-            align-items: flex-end;
+            align-items: flex-start;
+            justify-content: flex-start;
+            width: 100%;
+            text-align: left;
             gap: 0.35rem;
             line-height: 1.2;
         }
@@ -1036,6 +1426,7 @@
             margin-top: 0.45rem;
             min-height: 2.2em;
             line-height: 1.35;
+            text-align: left;
         }
 
         .form-text.inline-help {
@@ -1053,6 +1444,21 @@
 
         .label-text-nowrap {
             white-space: nowrap;
+        }
+
+        @media (min-width: 768px) and (max-width: 1199.98px) {
+            .workspace-nav {
+                position: fixed !important;
+                left: 0.75rem;
+                right: 0.75rem;
+                bottom: max(0.5rem, calc(0.5rem + env(safe-area-inset-bottom)));
+                margin: 0 !important;
+                z-index: 6100;
+            }
+
+            body {
+                padding-bottom: calc(6.2rem + env(safe-area-inset-bottom));
+            }
         }
 
         @media (max-width: 767.98px) {
@@ -1103,6 +1509,8 @@
         .switch-tile .form-check-input {
             width: 2.8rem;
             height: 1.5rem;
+            margin-top: 0;
+            align-self: center;
         }
 
         .switch-title {
@@ -1114,6 +1522,56 @@
             font-size: 0.82rem;
             color: var(--monster-text-muted);
             margin-top: 0.35rem;
+        }
+
+        .logic-readonly-banner {
+            border: 1px solid rgba(217, 119, 6, 0.4);
+            border-radius: 14px;
+            padding: 0.72rem 0.9rem;
+            background: linear-gradient(140deg, rgba(255, 237, 213, 0.92), rgba(255, 251, 235, 0.92));
+            color: #9a3412;
+            font-size: 0.82rem;
+            font-weight: 700;
+            margin-bottom: 0.95rem;
+        }
+
+        #workspace-pane-logic.logic-admin-locked .switch-tile,
+        #workspace-pane-logic.logic-admin-locked .save-bar {
+            opacity: 0.72;
+        }
+
+        #workspace-pane-logic .runtime-market-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1.35fr) minmax(270px, 1fr);
+            gap: 0.75rem;
+            align-items: stretch;
+        }
+
+        #workspace-pane-logic .runtime-market-note {
+            border: 1px dashed rgba(59, 130, 246, 0.28);
+            border-radius: 14px;
+            padding: 0.82rem 0.9rem;
+            background: rgba(255, 255, 255, 0.42);
+            color: var(--monster-text-muted);
+            display: flex;
+            align-items: center;
+            min-height: 100%;
+            line-height: 1.45;
+        }
+
+        #workspace-pane-logic .runtime-market-switch {
+            min-height: 100%;
+            padding: 0.8rem 0.88rem;
+        }
+
+        #workspace-pane-logic .runtime-market-switch .form-check {
+            margin: 0;
+            min-height: 100%;
+        }
+
+        #workspace-pane-logic .runtime-market-switch .switch-copy {
+            margin-top: 0.18rem;
+            max-width: 34ch;
         }
 
         .report-toolbar-select {
@@ -1176,10 +1634,19 @@
             padding-right: 2.4rem;
         }
 
+        input[type='time'] {
+            padding-right: 2.4rem;
+        }
+
         .session-time::-webkit-calendar-picker-indicator {
             opacity: 0.92;
             cursor: pointer;
             filter: none;
+        }
+
+        input[type='time']::-webkit-calendar-picker-indicator {
+            opacity: 0.92;
+            cursor: pointer;
         }
 
         .session-reference-grid {
@@ -1255,6 +1722,11 @@
             border-color: rgba(96, 165, 250, 0.2);
         }
 
+        body[data-theme='dark'] .news-data-item.is-empty {
+            background: rgba(15, 23, 42, 0.36);
+            border-color: rgba(148, 163, 184, 0.24);
+        }
+
         body[data-theme='dark'] .verdict-box {
             background: linear-gradient(135deg, rgba(30, 58, 138, 0.4), rgba(88, 40, 12, 0.4));
             border-color: rgba(59, 130, 246, 0.4);
@@ -1310,7 +1782,24 @@
             color: #dbeafe;
         }
 
+        body[data-theme='dark'] .logic-readonly-banner {
+            border-color: rgba(251, 191, 36, 0.4);
+            background: linear-gradient(140deg, rgba(120, 53, 15, 0.45), rgba(113, 63, 18, 0.4));
+            color: #fde68a;
+        }
+
+        body[data-theme='dark'] #workspace-pane-logic .runtime-market-note {
+            border-color: rgba(96, 165, 250, 0.28);
+            background: rgba(15, 23, 42, 0.42);
+            color: rgba(203, 213, 225, 0.92);
+        }
+
         body[data-theme='dark'] .session-time::-webkit-calendar-picker-indicator {
+            opacity: 1;
+            filter: invert(0.92) sepia(0.3) saturate(1.2);
+        }
+
+        body[data-theme='dark'] input[type='time']::-webkit-calendar-picker-indicator {
             opacity: 1;
             filter: invert(0.92) sepia(0.3) saturate(1.2);
         }
@@ -1417,6 +1906,7 @@
 
         .workspace-pane.is-active {
             display: block;
+            animation: workspacePaneIn 220ms ease both;
         }
 
         .pair-tabs-shell {
@@ -2059,18 +2549,20 @@
         }
 
         .news-data-item {
-            background: rgba(0, 0, 0, 0.05);
-            border-radius: 8px;
-            padding: 0.55rem 0.75rem;
-            min-width: fit-content;
+            border: 1px solid rgba(130, 163, 214, 0.18);
+            border-radius: 10px;
+            padding: 0.42rem 0.58rem;
+            min-width: 118px;
+            background: linear-gradient(180deg, rgba(18, 34, 60, 0.34), rgba(12, 24, 43, 0.3));
+            backdrop-filter: blur(1px);
         }
 
         .news-metric-label {
-            font-size: 0.72rem;
-            letter-spacing: 0.5px;
+            font-size: 0.66rem;
+            letter-spacing: 0.08em;
             text-transform: uppercase;
             font-weight: 700;
-            margin-bottom: 0.1rem;
+            margin-bottom: 0.08rem;
         }
 
         .news-metric-label-actual { color: #f87171; }
@@ -2078,10 +2570,29 @@
         .news-metric-label-previous { color: #4ade80; }
 
         .news-metric-value {
-            font-weight: 700;
-            font-size: 0.95rem;
+            font-weight: 600;
+            font-size: 0.88rem;
             color: rgba(226, 232, 240, 0.95);
             line-height: 1.2;
+        }
+
+        .news-item-title {
+            color: #f8fafc;
+        }
+
+        .news-item-meta {
+            color: rgba(203, 213, 225, 0.88);
+        }
+
+        .news-data-item.is-empty {
+            border-style: dashed;
+            border-color: rgba(148, 163, 184, 0.26);
+            background: rgba(15, 23, 42, 0.2);
+        }
+
+        .news-data-item.is-empty .news-metric-value {
+            color: rgba(148, 163, 184, 0.9);
+            font-weight: 500;
         }
 
         .news-history-card {
@@ -2104,6 +2615,18 @@
             color: rgba(148, 163, 184, 0.88);
             font-size: 0.82rem;
             line-height: 1.45;
+        }
+
+        body:not([data-theme='dark']) .news-item-title {
+            color: #0f172a;
+        }
+
+        body:not([data-theme='dark']) .news-item-meta {
+            color: #475569;
+        }
+
+        body:not([data-theme='dark']) .news-metric-value {
+            color: #0f172a;
         }
 
         .hero-actions {
@@ -2196,6 +2719,10 @@
             border-top: 1px solid rgba(15, 23, 42, 0.08);
             margin-top: 1.5rem;
             padding-top: 1rem;
+        }
+
+        .save-bar.is-hidden {
+            display: none !important;
         }
 
         body[data-theme='dark'] .save-bar {
@@ -2336,26 +2863,27 @@
                 justify-items: stretch;
             }
 
-            .topbar-meta,
+            .topbar-center,
             .topbar-account-tools,
             .topbar-actions {
                 margin: 0;
             }
 
-            .topbar-meta {
+            .topbar-center {
                 width: 100%;
                 grid-column: 1;
                 flex-wrap: wrap;
                 justify-content: flex-start;
+                gap: 0.6rem;
             }
 
             .topbar-account-tools {
-                display: grid;
-                grid-template-columns: 1fr;
-                align-items: stretch;
-                gap: 0.32rem;
+                align-items: center;
+                gap: 0.35rem;
                 width: 100%;
-                grid-column: 1;
+                justify-content: flex-start;
+                max-width: 100%;
+                min-width: 0;
             }
 
             .topbar-account-label {
@@ -2376,13 +2904,14 @@
 
             .topbar-actions {
                 display: grid;
-                grid-template-columns: repeat(4, minmax(0, 1fr));
+                grid-template-columns: repeat(2, minmax(0, 1fr));
                 align-items: stretch;
                 justify-content: flex-start;
                 flex-wrap: wrap;
                 gap: 0.45rem;
                 width: 100%;
                 grid-column: 1;
+                margin-left: 0;
             }
 
             .topbar-actions .theme-toggle,
@@ -2400,6 +2929,11 @@
 
             .monitor-bulk-hint {
                 text-align: left;
+            }
+
+            #workspace-pane-logic .runtime-market-grid {
+                grid-template-columns: 1fr;
+                gap: 0.58rem;
             }
         }
 
@@ -2424,7 +2958,7 @@
                 gap: 0.5rem;
             }
 
-            .topbar-meta,
+            .topbar-center,
             .topbar-account-tools,
             .topbar-actions {
                 grid-column: 1;
@@ -2432,7 +2966,7 @@
             }
 
             .topbar-actions {
-                grid-template-columns: repeat(4, minmax(0, 1fr));
+                grid-template-columns: repeat(2, minmax(0, 1fr));
                 justify-content: stretch;
             }
 
@@ -2473,13 +3007,24 @@
             }
 
             #workspace-tabs {
-                display: grid;
-                grid-template-columns: repeat(5, minmax(0, 1fr));
+                display: flex;
+                flex-wrap: nowrap;
                 gap: 0.25rem;
+                overflow-x: auto;
+                overflow-y: hidden;
+                -webkit-overflow-scrolling: touch;
+                scrollbar-width: none;
+                padding-bottom: 0.02rem;
+            }
+
+            #workspace-tabs::-webkit-scrollbar {
+                width: 0;
+                height: 0;
             }
 
             #workspace-tabs .nav-item {
-                width: 100%;
+                flex: 1 0 0;
+                min-width: 54px;
             }
 
             #workspace-tabs .workspace-tab-btn {
@@ -2576,6 +3121,15 @@
                 --bs-gutter-x: 0.75rem;
                 --bs-gutter-y: 0.75rem;
             }
+
+            #workspace-pane-logic .runtime-market-note,
+            #workspace-pane-logic .runtime-market-switch {
+                padding: 0.72rem 0.76rem;
+            }
+
+            #workspace-pane-logic .runtime-market-switch .form-check {
+                gap: 0.5rem;
+            }
         }
 
         @media (max-width: 767.98px) {
@@ -2602,7 +3156,7 @@
                 gap: 0.55rem;
             }
 
-            .topbar-meta {
+            .topbar-center {
                 margin-left: 0;
                 gap: 0.32rem;
                 justify-content: flex-start;
@@ -2621,7 +3175,7 @@
             .topbar-brand,
             .topbar-main,
             .topbar-controls,
-            .topbar-meta,
+            .topbar-center,
             .topbar-account-tools,
             .topbar-actions {
                 width: 100%;
@@ -2807,6 +3361,22 @@
             .modal-body {
                 padding: 0.9rem;
             }
+
+            #workspace-pane-logic .runtime-market-switch .form-check {
+                flex-direction: column;
+                align-items: stretch !important;
+            }
+
+            #workspace-pane-logic .runtime-market-switch .form-check-input {
+                align-self: flex-end;
+                margin-top: -0.1rem;
+            }
+
+            .logic-readonly-banner {
+                font-size: 0.78rem;
+                padding: 0.66rem 0.78rem;
+                margin-bottom: 0.85rem;
+            }
         }
     </style>
 </head>
@@ -2830,47 +3400,49 @@
         <div class="dashboard-topbar">
             <div class="topbar-main">
                 <div class="topbar-brand">
-                    <div class="eyebrow mb-1">EA MONSTER CLOUD SERVICE</div>
-                    <div class="top-nav-title">Dashboard Patch {{ strtoupper((string) ($dashboardPatch ?? 'v209')) }}</div>
+                    <div class="topbar-system-overline">AUTOMATED TRADING SYSTEM</div>
+                    <div class="topbar-title-row">
+                        <div class="top-nav-title">Xynn EA Monster Cloud Pro</div>
+                        <span id="topbar-license-badge" class="topbar-license-badge state-expired">NO LICENSE</span>
+                    </div>
                 </div>
             </div>
 
             <div class="topbar-controls">
-                <div class="topbar-meta">
+                <div class="topbar-center">
                     <div class="topbar-license-card" id="topbar-license-card" data-license-state="inactive">
                         <div class="topbar-license-label">Status Lisensi</div>
                         <div class="topbar-license-main" id="topbar-license-status">Belum dipilih</div>
                         <div class="topbar-license-sub" id="topbar-license-remaining">Sisa: --:--:--</div>
                     </div>
-                </div>
-                <div class="topbar-account-tools">
-                    <label class="topbar-account-label mb-0">Pilih Account MT5</label>
-                    <div class="dropdown account-picker">
-                        <button id="account-picker-toggle" class="btn account-picker-toggle dropdown-toggle" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
-                            Pilih account
-                        </button>
-                        <div class="dropdown-menu dropdown-menu-end account-picker-menu">
-                            <input id="account-search" type="text" class="form-control account-picker-search" placeholder="Cari account / alias / user" aria-label="Cari account">
-                            <div id="account-picker-options" class="account-picker-options"></div>
-                            <div class="account-picker-footer">
-                                <button id="btn-open-account-modal" type="button" class="btn btn-sm btn-outline-primary w-100">+ Tambah account baru</button>
+
+                    <div class="topbar-account-tools">
+                        <label class="topbar-account-label mb-0">Pilih Account MT5</label>
+                        <div class="dropdown account-picker">
+                            <button id="account-picker-toggle" class="btn account-picker-toggle dropdown-toggle" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+                                Pilih account
+                            </button>
+                            <div class="dropdown-menu dropdown-menu-end account-picker-menu">
+                                <input id="account-search" type="text" class="form-control account-picker-search" placeholder="Cari account / alias / user" aria-label="Cari account">
+                                <div id="account-picker-options" class="account-picker-options"></div>
+                                <div class="account-picker-footer">
+                                    <button id="btn-open-account-modal" type="button" class="btn btn-sm btn-outline-primary w-100">+ Tambah account baru</button>
+                                </div>
                             </div>
                         </div>
+                        <select id="account_id" class="form-select strategy-select top-account-select d-none">
+                            @forelse($accounts as $account)
+                                <option value="{{ $account->account_id }}">{{ $account->account_id }}</option>
+                            @empty
+                                <option value="">Belum ada account terdaftar</option>
+                            @endforelse
+                        </select>
                     </div>
-                    <select id="account_id" class="form-select strategy-select top-account-select d-none">
-                        @forelse($accounts as $account)
-                            <option value="{{ $account->account_id }}">{{ $account->account_id }}</option>
-                        @empty
-                            <option value="">Belum ada account terdaftar</option>
-                        @endforelse
-                    </select>
                 </div>
 
                 <div class="topbar-actions">
                     <button id="theme-toggle" type="button" class="btn hero-action-btn is-neutral theme-toggle" title="Toggle theme" aria-label="Toggle theme">&#9790;</button>
-                    @if($isAdmin)
-                        <button id="btn-account-alias" type="button" class="btn hero-action-btn is-neutral" data-bs-toggle="modal" data-bs-target="#account-alias-modal" title="Kelola alias account">Alias</button>
-                    @endif
+                    <button id="btn-account-alias" type="button" class="btn hero-action-btn is-neutral" data-bs-toggle="modal" data-bs-target="#account-alias-modal" title="Kelola alias account">Alias</button>
                     <button class="btn hero-action-btn is-primary" type="button" data-bs-toggle="modal" data-bs-target="#profile-modal">Profile</button>
 
                     <div class="dropdown">
@@ -2900,13 +3472,12 @@
         </div>
     </div>
 
-    @if($isAdmin)
     <div class="modal fade" id="account-alias-modal" tabindex="-1" aria-labelledby="account-alias-title" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
                     <div>
-                        <div class="eyebrow mb-1">Admin Label</div>
+                        <div class="eyebrow mb-1">Account Label</div>
                         <h3 id="account-alias-title" class="h5 mb-0">Alias Account</h3>
                     </div>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -2915,12 +3486,18 @@
                     <form id="account-alias-form" class="d-grid gap-3">
                         <div>
                             <label for="alias_account_id" class="form-label">Account ID</label>
-                            <input id="alias_account_id" class="form-control" readonly>
+                            <select id="alias_account_id" class="form-select">
+                                @forelse($accounts as $account)
+                                    <option value="{{ $account->account_id }}">{{ $account->account_id }}</option>
+                                @empty
+                                    <option value="">Belum ada account terdaftar</option>
+                                @endforelse
+                            </select>
                         </div>
                         <div>
-                            <label for="alias_account_name" class="form-label">Alias (khusus tampilan admin)</label>
+                            <label for="alias_account_name" class="form-label">Alias</label>
                             <input id="alias_account_name" class="form-control" maxlength="50" placeholder="Contoh: Akun Haji / Client A">
-                            <div class="form-text">Alias hanya tampil di dashboard admin sebagai pembeda account.</div>
+                            <div class="form-text">Alias digunakan sebagai pembeda account di dashboard.</div>
                         </div>
                         <div class="d-flex gap-2">
                             <button id="btn-alias-save" type="submit" class="btn btn-primary">Simpan Alias</button>
@@ -2932,7 +3509,77 @@
             </div>
         </div>
     </div>
-    @endif
+
+    <div class="modal fade" id="risk-profile-guide-modal" tabindex="-1" aria-labelledby="riskProfileGuideLabel" aria-hidden="true" data-bs-backdrop="true" data-bs-keyboard="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="riskProfileGuideLabel">Profil Risiko Siap Pakai</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <ul class="nav nav-pills risk-guide-tabs" id="risk-guide-tabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="risk-low-tab" data-bs-toggle="pill" data-bs-target="#risk-low" type="button" role="tab" aria-controls="risk-low" aria-selected="true">Low Risk</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="risk-medium-tab" data-bs-toggle="pill" data-bs-target="#risk-medium" type="button" role="tab" aria-controls="risk-medium" aria-selected="false">Medium Risk</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="risk-high-tab" data-bs-toggle="pill" data-bs-target="#risk-high" type="button" role="tab" aria-controls="risk-high" aria-selected="false">High Risk</button>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content risk-guide-tab-content" id="risk-guide-tab-content">
+                        <div class="tab-pane fade show active" id="risk-low" role="tabpanel" aria-labelledby="risk-low-tab" tabindex="0">
+                            <div class="risk-guide-card mb-0">
+                                <h6>Low Risk</h6>
+                                <ul class="risk-guide-list">
+                                    <li>Modal: 17.000 cent dolar (sekitar Rp 3.000.000)</li>
+                                    <li>Base Lot: 0.01</li>
+                                    <li>Penambahan Lot: 0.01</li>
+                                    <li>Mode Jarak Jaring: ATR Dinamis</li>
+                                    <li>ATR Multiplier: 1.5</li>
+                                    <li>Max Drawdown: 10%</li>
+                                    <li>Max Layer: 15</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="tab-pane fade" id="risk-medium" role="tabpanel" aria-labelledby="risk-medium-tab" tabindex="0">
+                            <div class="risk-guide-card mb-0">
+                                <h6>Medium Risk</h6>
+                                <ul class="risk-guide-list">
+                                    <li>Modal: 28.500 cent dolar (sekitar Rp 5.000.000)</li>
+                                    <li>Base Lot: 0.03</li>
+                                    <li>Penambahan Lot: 0.01</li>
+                                    <li>Mode Jarak Jaring: ATR Dinamis</li>
+                                    <li>ATR Multiplier: 1.3</li>
+                                    <li>Max Drawdown: 10%</li>
+                                    <li>Max Layer: 20</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="tab-pane fade" id="risk-high" role="tabpanel" aria-labelledby="risk-high-tab" tabindex="0">
+                            <div class="risk-guide-card mb-0">
+                                <h6>High Risk</h6>
+                                <ul class="risk-guide-list">
+                                    <li>Modal: 40.000 cent dolar (sekitar Rp 7.000.000)</li>
+                                    <li>Base Lot: 0.07</li>
+                                    <li>Penambahan Lot: 0.01</li>
+                                    <li>Mode Jarak Jaring: ATR Dinamis</li>
+                                    <li>ATR Multiplier: 1.0</li>
+                                    <li>Max Drawdown: 0% (nonaktif, batas rugi sesuai ketahanan modal)</li>
+                                    <li>Max Layer: 25</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <div class="workspace-nav mb-4 mb-lg-5">
         <ul class="nav nav-pills gap-2" id="workspace-tabs">
@@ -2947,6 +3594,7 @@
                     <span class="workspace-tab-label">Settings</span>
                 </button>
             </li>
+            @if($isAdmin)
             <li class="nav-item">
                 <button type="button" class="nav-link workspace-tab-btn" data-workspace-tab="logic" aria-label="Logic Lainnya">
                     <span class="workspace-tab-icon" aria-hidden="true">
@@ -2965,6 +3613,7 @@
                     <span class="workspace-tab-label">Logic</span>
                 </button>
             </li>
+            @endif
             <li class="nav-item">
                 <button type="button" class="nav-link workspace-tab-btn" data-workspace-tab="monitoring" aria-label="Monitoring">
                     <span class="workspace-tab-icon" aria-hidden="true">
@@ -2988,6 +3637,21 @@
                     <span class="workspace-tab-label">Analysis</span>
                 </button>
             </li>
+            @if($canUseBookkeepingTab ?? false)
+            <li class="nav-item">
+                <button type="button" class="nav-link workspace-tab-btn" data-workspace-tab="bookkeeping" aria-label="Pembukuan">
+                    <span class="workspace-tab-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M4 5h16"></path>
+                            <path d="M4 12h16"></path>
+                            <path d="M4 19h16"></path>
+                            <path d="M8 5v14"></path>
+                        </svg>
+                    </span>
+                    <span class="workspace-tab-label">Pembukuan</span>
+                </button>
+            </li>
+            @endif
             <li class="nav-item">
                 <button type="button" class="nav-link workspace-tab-btn" data-workspace-tab="reports" aria-label="Report">
                     <span class="workspace-tab-icon" aria-hidden="true">
@@ -3014,7 +3678,15 @@
                         <h1 class="h3 mb-1">Choose Active Strategy Selector</h1>
                         <p class="text-secondary mb-0">Hanya konfigurasi milik strategi aktif yang terbuka. Yang lain otomatis disembunyikan.</p>
                     </div>
-                    <div class="text-secondary small">Semua perubahan disimpan per account MT5.</div>
+                    <div class="component-header-actions">
+                        <div class="text-secondary small">Semua perubahan disimpan per account MT5.</div>
+                        <div class="d-flex flex-wrap gap-2">
+                            <button type="button" class="btn btn-sm risk-guide-btn risk-guide-btn-accent" data-bs-toggle="modal" data-bs-target="#risk-profile-guide-modal">Panduan Cepat</button>
+                            @if($isAdmin)
+                                <a href="{{ route('guides.operasional-bot') }}" class="btn btn-sm btn-outline-warning" target="_blank" rel="noopener noreferrer">Panduan Lengkap</a>
+                            @endif
+                        </div>
+                    </div>
                 </div>
 
                 <div class="pair-tabs-shell mb-4">
@@ -3032,15 +3704,23 @@
                             <label for="active_strategy" class="form-label">Strategi Utama Aktif</label>
                             <select id="active_strategy" class="form-select strategy-select">
                                 <option value="0">GRID SPAM</option>
-                                <option value="1">ZERO GAP</option>
-                                <option value="2">PURE MARTINGALE</option>
+                                <option value="1" class="strategy-option-testing" @if(!$isAdmin) disabled @endif>ZERO GAP (Testing)</option>
+                                <option value="2" class="strategy-option-testing" @if(!$isAdmin) disabled @endif>PURE MARTINGALE (Testing)</option>
                             </select>
-                            <div class="form-text">Dropdown ini mengontrol panel mana yang muncul di bawah.</div>
+                            <div class="form-text">
+                                @if($isAdmin)
+                                    Mode admin testing: bisa pilih ZERO GAP dan PURE MARTINGALE untuk uji internal.
+                                @else
+                                    Mode client: hanya GRID SPAM aktif. Strategi lain masih tahap testing internal admin.
+                                @endif
+                            </div>
                             </div>
                         </div>
                         <div class="col-md-6 col-lg-3">
                             <div class="field-stack">
-                            <label for="base_lot" class="form-label">Base Lot</label>
+                            <label for="base_lot" class="form-label">Base Lot
+                                <span class="text-secondary ms-1 tooltip-info-icon" data-bs-toggle="tooltip" data-bs-placement="top" title="Ukuran lot awal saat order pertama dibuka. Semakin besar lot, potensi untung dan risiko rugi ikut membesar." aria-label="Info Base Lot" role="button" tabindex="0"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="8" r="1.2" fill="currentColor"/><path d="M12 11.2V16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span>
+                            </label>
                             <input id="base_lot" type="number" step="0.01" min="0.01" class="form-control">
                             </div>
                         </div>
@@ -3061,6 +3741,7 @@
                         <div class="col-md-6 col-lg-3">
                             <div class="field-stack">
                             <label for="max_drawdown_pct" class="form-label"><span class="label-text-nowrap">Max Drawdown (%)</span>
+                                <span class="text-secondary ms-1 tooltip-info-icon" data-bs-toggle="tooltip" data-bs-placement="top" title="Batas penurunan ekuitas. Contoh 10 berarti EA berhenti tambah order baru saat drawdown menyentuh 10%. Isi 0 untuk menonaktifkan batas ini." aria-label="Info Max Drawdown" role="button" tabindex="0"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="8" r="1.2" fill="currentColor"/><path d="M12 11.2V16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span>
                                 <span class="badge bg-danger auto-close-badge" title="Saat drawdown mencapai nilai ini, EA akan otomatis berhenti masuk order baru (guard_status → DD_STOP)">AUTO-CLOSE</span>
                             </label>
                             <input id="max_drawdown_pct" type="number" step="0.1" min="0" class="form-control" placeholder="0 = nonaktif">
@@ -3095,7 +3776,9 @@
                     <div class="section-copy">Fokus pada layering cepat, kontrol akumulasi lot, dan close logic per basket maupun single-layer profit.</div>
                     <div class="row g-3">
                         <div class="col-md-4">
-                            <label for="grid_max_layers" class="form-label">Max Layers</label>
+                            <label for="grid_max_layers" class="form-label">Max Layers
+                                <span class="text-secondary ms-1 tooltip-info-icon" data-bs-toggle="tooltip" data-bs-placement="top" title="Batas jumlah layer/posisi yang boleh dibuka EA. Nilai lebih besar bisa bantu recovery, tapi floating loss juga bisa lebih berat." aria-label="Info Max Layers" role="button" tabindex="0"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="8" r="1.2" fill="currentColor"/><path d="M12 11.2V16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span>
+                            </label>
                             <input id="grid_max_layers" class="form-control" type="number" min="1">
                         </div>
                         <div class="col-md-4">
@@ -3103,18 +3786,24 @@
                             <input id="grid_max_accumulative_lot" class="form-control" type="number" step="0.01" min="0.01">
                         </div>
                         <div class="col-md-4">
-                            <label for="grid_mode" class="form-label">Mode Jarak Jaring</label>
+                            <label for="grid_mode" class="form-label">Mode Jarak Jaring
+                                <span class="text-secondary ms-1 tooltip-info-icon" data-bs-toggle="tooltip" data-bs-placement="top" title="Cara EA menentukan jarak antar layer. ATR Dinamis menyesuaikan kondisi market, Fix Points memakai jarak tetap." aria-label="Info Mode Jarak Jaring" role="button" tabindex="0"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="8" r="1.2" fill="currentColor"/><path d="M12 11.2V16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span>
+                            </label>
                             <select id="grid_mode" class="form-select">
                                 <option value="0">Fix Points</option>
                                 <option value="1">ATR Dinamis</option>
                             </select>
                         </div>
                         <div class="col-md-6">
-                            <label for="fix_grid_distance" class="form-label">Jarak Titik Grid</label>
+                            <label for="fix_grid_distance" class="form-label">Jarak Titik Grid
+                                <span class="text-secondary ms-1 tooltip-info-icon" data-bs-toggle="tooltip" data-bs-placement="top" title="Dipakai saat mode Fix Points. Semakin besar angka, jarak antar layer makin renggang dan entry jadi lebih jarang." aria-label="Info Jarak Titik Grid" role="button" tabindex="0"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="8" r="1.2" fill="currentColor"/><path d="M12 11.2V16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span>
+                            </label>
                             <input id="fix_grid_distance" class="form-control" type="number" min="1">
                         </div>
                         <div class="col-md-6">
-                            <label for="atr_multiplier" class="form-label">ATR Multiplier</label>
+                            <label for="atr_multiplier" class="form-label">ATR Multiplier
+                                <span class="text-secondary ms-1 tooltip-info-icon" data-bs-toggle="tooltip" data-bs-placement="top" title="Pengali ATR untuk menghitung jarak layer saat mode ATR Dinamis. Angka besar = lebih aman tapi entry lebih sedikit." aria-label="Info ATR Multiplier" role="button" tabindex="0"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="8" r="1.2" fill="currentColor"/><path d="M12 11.2V16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span>
+                            </label>
                             <input id="atr_multiplier" class="form-control" type="number" step="0.1" min="0.1">
                         </div>
                     </div>
@@ -3131,7 +3820,9 @@
                                 <div class="form-text">Mode ini dipakai saat layer baru terbuka.</div>
                             </div>
                             <div class="col-md-4" id="grid-mart-addition-wrap">
-                                <label for="grid_mart_addition" class="form-label">Penambahan per Layer</label>
+                                <label for="grid_mart_addition" class="form-label">Penambahan per Layer
+                                    <span class="text-secondary ms-1 tooltip-info-icon" data-bs-toggle="tooltip" data-bs-placement="top" title="Tambahan lot setiap terbuka layer baru pada mode Penambahan (+). Nilai terlalu besar membuat risiko naik cepat." aria-label="Info Penambahan per Layer" role="button" tabindex="0"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="8" r="1.2" fill="currentColor"/><path d="M12 11.2V16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span>
+                                </label>
                                 <input id="grid_mart_addition" class="form-control" type="number" step="0.01" min="0">
                                 <div class="form-text">Contoh: 0.01, 0.02, 0.05</div>
                             </div>
@@ -3348,16 +4039,6 @@
                         </div>
                     </div>
 
-                    <div class="switch-tile mb-4">
-                        <div class="form-check form-switch d-flex align-items-start justify-content-between gap-3">
-                            <div>
-                                <div class="switch-title">Tampilkan Log Fallback Indicator</div>
-                                <div class="switch-copy">Menampilkan log [INDICATOR] saat buffer indikator fallback dipakai. Matikan untuk mengurangi spam log terminal.</div>
-                            </div>
-                            <input id="show_indicator_fallback_logs" class="form-check-input" type="checkbox" role="switch">
-                        </div>
-                    </div>
-
                     <div class="sub-group">
                         <div class="sub-group-title">Behavior Eksekusi Entry</div>
                         <div class="row g-3">
@@ -3523,6 +4204,34 @@
                                     </div>
                                 </div>
                             </div>
+                            <div class="col-12">
+                                <div class="switch-tile">
+                                    <div class="form-check form-switch d-flex align-items-start justify-content-between gap-3 mb-3">
+                                        <div>
+                                            <div class="switch-title">Stop/Start Market Close Weekend</div>
+                                            <div class="switch-copy">Pause entry baru dari hari stop terpilih sampai jadwal start kembali.</div>
+                                        </div>
+                                        <input id="use_friday_market_close_window" class="form-check-input" type="checkbox" role="switch">
+                                    </div>
+                                    <div class="row g-2">
+                                        <div class="col-12 col-md-4">
+                                            <label for="friday_stop_day" class="form-label small text-secondary mb-1">Hari Stop</label>
+                                            <select id="friday_stop_day" class="form-select">
+                                                <option value="friday">Jumat</option>
+                                                <option value="saturday">Sabtu</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-6 col-md-4">
+                                            <label for="friday_stop_wib" class="form-label small text-secondary mb-1">Jam Stop WIB</label>
+                                            <input id="friday_stop_wib" type="time" class="form-control session-time" value="23:45">
+                                        </div>
+                                        <div class="col-6 col-md-4">
+                                            <label for="friday_resume_wib" class="form-label small text-secondary mb-1">Jam Start WIB (Senin)</label>
+                                            <input id="friday_resume_wib" type="time" class="form-control session-time" value="06:15">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -3574,7 +4283,7 @@
                     </div>
                 </div>
 
-                <div class="save-bar d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
+                <div id="save-bar-settings" class="save-bar d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
                     <div>
                         <button id="btn-save" class="btn btn-dark rounded-pill px-4 py-2">Simpan Pengaturan Dashboard</button>
                         <div id="save-msg" class="small mt-2 text-secondary">Belum ada perubahan tersimpan.</div>
@@ -3616,28 +4325,28 @@
                     <div class="d-grid gap-3" id="news-list">
                         @forelse($news as $item)
                             <div class="news-item {{ $loop->first ? 'news-item-next' : '' }} py-2">
-                                <div class="fw-semibold text-dark mb-2">{{ $item->title }}</div>
-                                <div class="small text-secondary mb-3">{{ $item->event_at?->timezone('Asia/Jakarta')?->locale('id')?->translatedFormat('l, d F Y') ?? '-' }} | {{ $item->event_at?->timezone('Asia/Jakarta')?->format('H:i') ?? '--:--' }} WIB</div>
+                                <div class="fw-semibold news-item-title mb-2">{{ $item->title }}</div>
+                                <div class="small news-item-meta mb-3">{{ $item->event_at?->timezone('Asia/Jakarta')?->locale('id')?->translatedFormat('l, d F Y') ?? '-' }} | {{ $item->event_at?->timezone('Asia/Jakarta')?->format('H:i') ?? '--:--' }} WIB</div>
                                 
                                 <div class="d-flex flex-wrap gap-3">
                                     @if(data_get($item->raw_payload, 'actual') || data_get($item->raw_payload, 'actual') === 0)
                                         <div class="news-data-item">
                                             <div class="small text-uppercase fw-bold text-danger" style="letter-spacing: 0.5px;">Actual</div>
-                                            <div class="fw-bold text-info" style="font-size: 0.95rem;">{{ data_get($item->raw_payload, 'actual') }}</div>
+                                            <div class="fw-bold news-metric-value" style="font-size: 0.95rem;">{{ data_get($item->raw_payload, 'actual') }}</div>
                                         </div>
                                     @endif
                                     
                                     @if(data_get($item->raw_payload, 'forecast'))
                                         <div class="news-data-item">
                                             <div class="small text-uppercase fw-bold text-warning" style="letter-spacing: 0.5px;">Forecast</div>
-                                            <div class="fw-bold text-dark" style="font-size: 0.95rem;">{{ data_get($item->raw_payload, 'forecast') }}</div>
+                                            <div class="fw-bold news-metric-value" style="font-size: 0.95rem;">{{ data_get($item->raw_payload, 'forecast') }}</div>
                                         </div>
                                     @endif
                                     
                                     @if(data_get($item->raw_payload, 'previous') || data_get($item->raw_payload, 'previous') === 0)
                                         <div class="news-data-item">
                                             <div class="small text-uppercase fw-bold text-success" style="letter-spacing: 0.5px;">Previous</div>
-                                            <div class="fw-bold text-dark" style="font-size: 0.95rem;">{{ data_get($item->raw_payload, 'previous') }}</div>
+                                            <div class="fw-bold news-metric-value" style="font-size: 0.95rem;">{{ data_get($item->raw_payload, 'previous') }}</div>
                                         </div>
                                     @endif
                                 </div>
@@ -3732,7 +4441,7 @@
                         </div>
                         <div>
                             <label for="new_pair_symbol" class="form-label">Pair Symbol</label>
-                            <input id="new_pair_symbol" class="form-control" value="XAUUSD" placeholder="XAUUSD" required>
+                            <input id="new_pair_symbol" class="form-control" value="XAUUSDC" placeholder="XAUUSDC" required>
                         </div>
                         <div>
                             <label for="new_base_lot" class="form-label">Base Lot</label>
@@ -3802,18 +4511,23 @@
 
                     <form id="users-form" class="d-grid gap-2">
                         <input type="hidden" id="manage_user_id">
-                        <input id="manage_name" class="form-control" placeholder="Nama" required>
-                        <input id="manage_username" class="form-control" placeholder="Username" required>
-                        <input id="manage_email" type="email" class="form-control" placeholder="Email" required>
-                        <select id="manage_role" class="form-select" required>
-                            <option value="user">user</option>
-                            <option value="manager">manager</option>
-                            <option value="admin">admin</option>
-                        </select>
+                        <div class="row g-2">
+                            <div class="col-md-6"><input id="manage_name" class="form-control" placeholder="Nama" required></div>
+                            <div class="col-md-6"><input id="manage_username" class="form-control" placeholder="Username" required></div>
+                            <div class="col-md-8"><input id="manage_email" type="email" class="form-control" placeholder="Email" required></div>
+                            <div class="col-md-4">
+                                <select id="manage_role" class="form-select" required>
+                                    <option value="user">user</option>
+                                    <option value="manager">manager</option>
+                                    <option value="admin">admin</option>
+                                </select>
+                            </div>
+                        </div>
                         <input id="manage_password" type="password" class="form-control" placeholder="Password (wajib saat create, opsional saat edit)">
                         <div class="d-flex flex-wrap gap-2">
                             <button id="btn-user-save" type="submit" class="btn btn-success rounded-pill px-4">Simpan User</button>
                             <button id="btn-user-reset" type="button" class="btn btn-outline-secondary rounded-pill px-4">Reset Form</button>
+                            <button id="btn-user-delete" type="button" class="btn btn-outline-danger rounded-pill px-4 d-none">Hapus User</button>
                         </div>
                         <div id="users-msg" class="small text-secondary">Kelola akun user langsung dari dashboard.</div>
                     </form>
@@ -3836,13 +4550,21 @@
 
             <div id="license-lock-msg-logic" class="mb-4"></div>
 
-            <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
-                <span class="small text-secondary">Preset Cepat:</span>
-                <button id="logic-preset-default" type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3">Default</button>
-                <button id="logic-preset-scalper" type="button" class="btn btn-sm btn-outline-warning rounded-pill px-3">Scalper</button>
-                <button id="logic-preset-medium" type="button" class="btn btn-sm btn-outline-info rounded-pill px-3">Medium</button>
-                <button id="logic-preset-conservative" type="button" class="btn btn-sm btn-outline-success rounded-pill px-3">Conservative</button>
-            </div>
+            @unless($isAdmin)
+                <div id="role-lock-msg-logic" class="logic-readonly-banner">
+                    Mode read-only: pengaturan Logic hanya bisa diubah oleh admin.
+                </div>
+            @endunless
+
+            @if($isAdmin)
+                <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+                    <span class="small text-secondary">Preset Cepat:</span>
+                    <button id="logic-preset-default" type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3">Default</button>
+                    <button id="logic-preset-scalper" type="button" class="btn btn-sm btn-outline-warning rounded-pill px-3">Scalper</button>
+                    <button id="logic-preset-medium" type="button" class="btn btn-sm btn-outline-info rounded-pill px-3">Medium</button>
+                    <button id="logic-preset-conservative" type="button" class="btn btn-sm btn-outline-success rounded-pill px-3">Conservative</button>
+                </div>
+            @endif
 
             <div class="row g-3">
                 <div class="col-lg-6">
@@ -3946,6 +4668,36 @@
                 </div>
             </div>
 
+            <div class="section-card mt-4">
+                <div class="section-title">Manual Stealth Trailing (Points)</div>
+                <div class="section-copy">Override trailing stealth secara manual. Nilai 0 akan mengembalikan ke mode default strategi.</div>
+                <div class="row g-3 mt-1">
+                    <div class="col-md-4">
+                        <label for="trail_start" class="form-label">Trail Start</label>
+                        <input id="trail_start" class="form-control" type="number" min="0" step="0.1" placeholder="Contoh: 200">
+                    </div>
+                    <div class="col-md-4">
+                        <label for="trail_stop" class="form-label">Trail Stop</label>
+                        <input id="trail_stop" class="form-control" type="number" min="0" step="0.1" placeholder="Contoh: 120">
+                    </div>
+                    <div class="col-md-4">
+                        <label for="trail_step" class="form-label">Trail Step</label>
+                        <input id="trail_step" class="form-control" type="number" min="0" step="0.1" placeholder="Contoh: 30">
+                    </div>
+                </div>
+
+                <div class="switch-tile mt-4">
+                    <div class="form-check form-switch d-flex align-items-start justify-content-between gap-3">
+                        <div>
+                            <div class="switch-title">Tampilkan Log Fallback Indicator</div>
+                            <div class="switch-copy">Menampilkan log [INDICATOR] saat buffer indikator fallback dipakai. Matikan untuk mengurangi spam log terminal.</div>
+                        </div>
+                        <input id="show_indicator_fallback_logs" class="form-check-input" type="checkbox" role="switch">
+                    </div>
+                </div>
+            </div>
+
+            @if($isAdmin)
             <div class="row g-3 mt-2">
                 <div class="col-xl-6">
                     <div class="switch-tile h-100 p-3">
@@ -4034,25 +4786,55 @@
                     <div class="switch-tile h-100 p-3">
                         <div class="switch-title mb-2">Runtime Market Group</div>
                         <div class="switch-copy mb-3">Kontrol timeframe logic dan filter makro tambahan.</div>
-                        <div class="row g-2">
-                            <div class="col-6">
-                                <div class="small text-secondary mt-2">Timeframe Logic diatur di tab Core Execution agar konsisten lintas strategi.</div>
+                        <div class="runtime-market-grid">
+                            <div class="runtime-market-note">
+                                Timeframe Logic diatur di tab Core Execution agar konsisten lintas strategi.
                             </div>
-                            <div class="col-6 d-flex align-items-end">
-                                <div class="switch-tile w-100 p-2">
-                                    <div class="form-check form-switch d-flex align-items-start justify-content-between gap-3 m-0">
-                                        <div>
-                                            <div class="switch-title">Use DXY Filter</div>
-                                            <div class="switch-copy">Filter kondisi pasar dari indeks dolar.</div>
-                                        </div>
-                                        <input id="use_dxy_filter" class="form-check-input" type="checkbox" role="switch">
+                            <div class="switch-tile runtime-market-switch">
+                                <div class="form-check form-switch d-flex align-items-start justify-content-between gap-3">
+                                    <div>
+                                        <div class="switch-title">Use DXY Filter</div>
+                                        <div class="switch-copy">Filter kondisi pasar dari indeks dolar.</div>
                                     </div>
+                                    <input id="use_dxy_filter" class="form-check-input" type="checkbox" role="switch">
+                                </div>
+                            </div>
+                            <div class="switch-tile runtime-market-switch">
+                                <div class="form-check form-switch d-flex align-items-start justify-content-between gap-3">
+                                    <div>
+                                        <div class="switch-title">Use US10Y Filter</div>
+                                        <div class="switch-copy">Tambahan konfirmasi risk-off/risk-on lewat yield US 10Y.</div>
+                                    </div>
+                                    <input id="use_us10y_filter" class="form-check-input" type="checkbox" role="switch">
+                                </div>
+                            </div>
+                            <div class="switch-tile runtime-market-switch">
+                                <div class="form-check form-switch d-flex align-items-start justify-content-between gap-3">
+                                    <div>
+                                        <div class="switch-title">Use VIX Filter</div>
+                                        <div class="switch-copy">Pantau spike volatilitas untuk hindari entry saat panic move.</div>
+                                    </div>
+                                    <input id="use_vix_filter" class="form-check-input" type="checkbox" role="switch">
+                                </div>
+                            </div>
+                            <div class="switch-tile runtime-market-switch">
+                                <div class="form-check form-switch d-flex align-items-start justify-content-between gap-3">
+                                    <div>
+                                        <div class="switch-title">Use OIL Filter</div>
+                                        <div class="switch-copy">Tambahan sinyal makro dari pergerakan minyak mentah.</div>
+                                    </div>
+                                    <input id="use_oil_filter" class="form-check-input" type="checkbox" role="switch">
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+            @else
+            <div class="meta-card mt-3">
+                <div class="small text-secondary">Indicator tuning lanjutan disembunyikan di dashboard client. Hubungi admin jika butuh perubahan parameter logic detail.</div>
+            </div>
+            @endif
 
             <div class="mt-4 pt-3 border-top">
                 <div class="d-flex gap-2 flex-wrap align-items-center">
@@ -4264,7 +5046,7 @@
                                     <th>SL</th>
                                     <th>TP</th>
                                     <th>Floating</th>
-                                    <th>Open Time</th>
+                                    <th>Open Time (WIB)</th>
                                     <th>Action</th>
                                 </tr>
                                 </thead>
@@ -4473,6 +5255,16 @@
                         <option value="50">50</option>
                         <option value="100">100</option>
                     </select>
+                    <label for="rep-history-period" class="small text-secondary mb-0">Filter</label>
+                    <select id="rep-history-period" class="form-select form-select-sm report-toolbar-select" style="width: 170px;">
+                        <option value="all" selected>Semua Waktu</option>
+                        <option value="today">Hari Ini</option>
+                        <option value="yesterday">Kemarin</option>
+                        <option value="this_week">Minggu Ini</option>
+                        <option value="last_week">Minggu Lalu</option>
+                        <option value="this_month">Bulan Ini</option>
+                        <option value="last_30_days">30 Hari Terakhir</option>
+                    </select>
                     <button type="button" class="btn btn-sm btn-outline-secondary report-toolbar-btn" id="rep-refresh-btn">Refresh</button>
                     <button type="button" class="btn btn-sm btn-outline-danger report-toolbar-btn" id="rep-reset-wr-btn">Hard Reset Profit</button>
                 </div>
@@ -4563,11 +5355,12 @@
                                     <th>Profit</th>
                                     <th>Swap</th>
                                     <th>Commission</th>
-                                    <th>Close Time</th>
+                                    <th>Open Time (WIB)</th>
+                                    <th>Close Time (WIB)</th>
                                 </tr>
                                 </thead>
                                 <tbody id="rep-history-body">
-                                <tr><td colspan="10" class="text-secondary">Belum ada trade history.</td></tr>
+                                <tr><td colspan="11" class="text-secondary">Belum ada trade history.</td></tr>
                                 </tbody>
                             </table>
                         </div>
@@ -4580,6 +5373,14 @@
             </div>
         </div>
     </section>
+
+    @if($canUseBookkeepingTab ?? false)
+    <section id="workspace-pane-bookkeeping" class="workspace-pane">
+        <div class="settings-card p-4 p-lg-5">
+            @include('partials.bookkeeping-panel')
+        </div>
+    </section>
+    @endif
 </div>
 
 <style>
@@ -5365,6 +6166,8 @@
 
 @include('partials.admin-livechat-shell', ['chatVariant' => $isAdmin ? 'admin' : 'billing', 'isAdmin' => $isAdmin])
 
+<div id="dashboard-toast-stack" class="dashboard-toast-stack" aria-live="polite" aria-atomic="true"></div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
 const ACCOUNT_ROWS = @json($accounts->values());
@@ -5383,16 +6186,21 @@ const CURRENT_USER = @json(['name' => $currentUser->name, 'username' => $current
 const MANAGED_USERS = @json($managedUsers ?? []);
 const IS_ADMIN = @json($isAdmin);
 const LICENSE_SNAPSHOTS = @json($licenseSnapshots ?? []);
+const SERVER_RISK_ACK = @json($riskConsentAccountMap ?? []);
 const LICENSE_ENFORCEMENT_ENABLED = @json((bool) ($licenseEnforcementEnabled ?? false));
 const AUTH_SESSION_ID = @json(session()->getId());
 const DASHBOARD_TAB_STORAGE_KEY = 'ea_dashboard_active_tab_v1';
 const DASHBOARD_TAB_SESSION_KEY = 'ea_dashboard_active_tab_session_v1';
 const DASHBOARD_ACCOUNT_STORAGE_KEY = 'ea_dashboard_active_account_v1';
 const DASHBOARD_ACCOUNT_SESSION_KEY = 'ea_dashboard_active_account_session_v1';
+const DASHBOARD_ALIAS_ACCOUNT_STORAGE_KEY = 'ea_dashboard_alias_account_v1';
+const DASHBOARD_ALIAS_ACCOUNT_SESSION_KEY = 'ea_dashboard_alias_account_session_v1';
 const DASHBOARD_PAIR_STORAGE_KEY = 'ea_dashboard_selected_pair_map_v1';
 const DASHBOARD_PAIR_SESSION_KEY = 'ea_dashboard_selected_pair_map_session_v1';
 const DEFAULT_WORKSPACE_TAB = 'settings';
-const WORKSPACE_TABS = ['settings', 'logic', 'monitoring', 'analysis', 'reports'];
+const WORKSPACE_TABS = Array.from(document.querySelectorAll('#workspace-tabs [data-workspace-tab]'))
+    .map((button) => String(button.getAttribute('data-workspace-tab') || '').toLowerCase())
+    .filter((name) => !!name);
 let BULK_CONTROL_WHITELIST = @json($bulkControlWhitelist ?? []);
 let BULK_CONTROL_ENABLED = @json((bool) ($bulkControlEnabled ?? true));
 let ACCOUNT_ALIASES = @json($accountAliases ?? []);
@@ -5404,12 +6212,14 @@ const ROUTES = {
     licenseRenew: @json($isAdmin ? route('licenses.admin.page') : route('licenses.billing.page')),
     userStore: @json(route('dashboard.users.store')),
     userUpdateBase: @json(url('/dashboard/users')),
+    userDeleteBase: @json(url('/dashboard/users')),
     newsLive: @json(route('dashboard.news.live')),
     newsCalendarApi: @json(url('/api/v1/economic-calendar')),
     liveStream: @json(route('dashboard.live-stream')),
     monitoringLive: @json(route('dashboard.monitoring.live')),
     reportsLive: @json(route('dashboard.reports.live')),
     reportsResetWr: @json(route('dashboard.reports.reset-wr')),
+    riskConsent: @json(route('dashboard.risk-consent')),
     botToggle: @json(route('dashboard.bot.toggle')),
     botBulkToggle: @json(route('dashboard.bot.toggle-all')),
     botWhitelistGet: @json(route('dashboard.bot.whitelist.get')),
@@ -5432,6 +6242,7 @@ let DASHBOARD_FALLBACK_REPORT_TIMER = null;
 let DASHBOARD_STREAM_WATCHDOG_TIMER = null;
 let DASHBOARD_STREAM_RETRY_TIMER = null;
 let DASHBOARD_PAIR_DISCOVERY_TIMER = null;
+let DASHBOARD_ACTIVE_SYNC_TIMER = null;
 let DASHBOARD_LAST_STREAM_EVENT_AT = 0;
 let DASHBOARD_LAST_MONITORING_SYNC_AT = 0;
 let DASHBOARD_LAST_REPORT_SYNC_AT = 0;
@@ -5444,8 +6255,14 @@ const DASHBOARD_STALE_REPORT_MS = 5500;
 const DASHBOARD_FALLBACK_MONITORING_MS = 1300;
 const DASHBOARD_FALLBACK_REPORT_MS = 2600;
 const DASHBOARD_PAIR_DISCOVERY_MS = 2200;
+const DASHBOARD_ACTIVE_MONITORING_MS = 1100;
+const DASHBOARD_ACTIVE_REPORT_MS = 2100;
 
 const DASHBOARD_PAIR_DISCOVERY_INFLIGHT = {};
+const DASHBOARD_RENDER_SIGNATURE = {
+    monitoringByKey: {},
+    reportByKey: {},
+};
 
 const LIVE_LICENSE_COUNTDOWN = {
     accountId: '',
@@ -5494,17 +6311,28 @@ function startDashboardWatchdog() {
         const reportAge = now - Number(DASHBOARD_LAST_REPORT_SYNC_AT || 0);
         const streamOpen = Boolean(DASHBOARD_LIVE_SOURCE && DASHBOARD_LIVE_SOURCE.readyState === EventSource.OPEN);
 
-        if (!streamOpen || streamAge > DASHBOARD_STALE_STREAM_MS) {
+        const streamHealthy = streamOpen && streamAge <= DASHBOARD_STALE_STREAM_MS;
+
+        if (!streamHealthy) {
             startDashboardFallbackPolling();
         } else {
             stopDashboardFallbackPolling();
         }
 
-        if (monitoringAge > DASHBOARD_STALE_MONITORING_MS) {
+        if (!streamHealthy && monitoringAge > DASHBOARD_STALE_MONITORING_MS) {
             refreshMonitoringOnly();
         }
-        if (reportAge > DASHBOARD_STALE_REPORT_MS) {
+        if (!streamHealthy && reportAge > DASHBOARD_STALE_REPORT_MS) {
             refreshReportOnly({ source: 'watchdog' });
+        }
+
+        // Some browsers can keep EventSource in CONNECTING forever without firing CLOSED.
+        // If that state is stale, recycle the stream explicitly.
+        if (DASHBOARD_LIVE_SOURCE
+            && DASHBOARD_LIVE_SOURCE.readyState !== EventSource.OPEN
+            && streamAge > DASHBOARD_STALE_STREAM_MS) {
+            restartDashboardLiveStream();
+            return;
         }
 
         if (!DASHBOARD_LIVE_SOURCE || DASHBOARD_LIVE_SOURCE.readyState === EventSource.CLOSED) {
@@ -5534,6 +6362,33 @@ function stopDashboardFallbackPolling() {
         clearInterval(DASHBOARD_FALLBACK_REPORT_TIMER);
         DASHBOARD_FALLBACK_REPORT_TIMER = null;
     }
+}
+
+function stopDashboardActiveSync() {
+    if (DASHBOARD_ACTIVE_SYNC_TIMER) {
+        clearInterval(DASHBOARD_ACTIVE_SYNC_TIMER);
+        DASHBOARD_ACTIVE_SYNC_TIMER = null;
+    }
+}
+
+function startDashboardActiveSync() {
+    if (DASHBOARD_ACTIVE_SYNC_TIMER) return;
+    DASHBOARD_ACTIVE_SYNC_TIMER = setInterval(() => {
+        if (document.hidden) return;
+        const accountId = currentAccount();
+        if (!accountId) return;
+
+        const now = Date.now();
+        const monitoringAge = now - Number(DASHBOARD_LAST_MONITORING_SYNC_AT || 0);
+        const reportAge = now - Number(DASHBOARD_LAST_REPORT_SYNC_AT || 0);
+
+        if (monitoringAge > DASHBOARD_ACTIVE_MONITORING_MS) {
+            refreshMonitoringOnly();
+        }
+        if (reportAge > DASHBOARD_ACTIVE_REPORT_MS) {
+            refreshReportOnly({ source: 'active-sync' });
+        }
+    }, 900);
 }
 
 function startDashboardFallbackPolling() {
@@ -5603,6 +6458,9 @@ function applyLiveStreamPayload(payload) {
     ensureAccountPairRegistered(accountId, pairSymbol);
     setStateByAccountPair(accountId, pairSymbol, {});
 
+    let monitoringChanged = false;
+    let reportChanged = false;
+
     const monitoring = payload?.monitoring;
     if (monitoring && monitoring.success) {
         const monitoringPatch = { ...monitoring };
@@ -5611,8 +6469,26 @@ function applyLiveStreamPayload(payload) {
         ['daily_profit', 'weekly_profit', 'monthly_profit', 'realized_profit', 'wins', 'losses', 'win_rate_percent', 'history'].forEach((key) => {
             delete monitoringPatch[key];
         });
-        setStateByAccountPair(accountId, pairSymbol, monitoringPatch);
-        DASHBOARD_LAST_MONITORING_SYNC_AT = Date.now();
+        const monitoringApplied = shouldApplyMonitoringPayload(accountId, pairSymbol, monitoringPatch);
+        if (monitoringApplied) {
+            setStateByAccountPair(accountId, pairSymbol, {
+                ...monitoringPatch,
+                _last_live_sync_at: Date.now(),
+                _runtime_bootstrap_pending: false,
+            });
+            DASHBOARD_LAST_MONITORING_SYNC_AT = Date.now();
+            const monitoringSignatureKey = accountPairKey(accountId, pairSymbol);
+            const monitoringSignature = JSON.stringify({
+                gf: monitoringPatch.global_floating ?? monitoringPatch.live_floating_pnl ?? 0,
+                lay: monitoringPatch.current_layers ?? monitoringPatch.live_open_layers ?? 0,
+                dd: monitoringPatch.drawdown_pct ?? 0,
+                lic: monitoringPatch.license_status ?? payload?.license_status ?? '',
+                guard: monitoringPatch.guard_status ?? monitoringPatch.live_guard_status ?? '',
+                t: monitoringPatch.updated_at ?? '',
+            });
+            monitoringChanged = DASHBOARD_RENDER_SIGNATURE.monitoringByKey[monitoringSignatureKey] !== monitoringSignature;
+            DASHBOARD_RENDER_SIGNATURE.monitoringByKey[monitoringSignatureKey] = monitoringSignature;
+        }
         if (CALC_DEBUG) {
             setStateByAccountPair(accountId, pairSymbol, { monitoring_calc_debug: monitoring?.calc_debug || null });
         }
@@ -5630,24 +6506,46 @@ function applyLiveStreamPayload(payload) {
 
     const report = payload?.report;
     if (report && report.success) {
+        const prevState = getStateByAccountPair(accountId, pairSymbol) || {};
+        const incomingHistory = safeArray(report.history);
+        const incomingHistoryTotal = Number(report?.history_meta?.total ?? incomingHistory.length);
+        const resolvedHistory = incomingHistory.length > 0
+            ? incomingHistory
+            : (incomingHistoryTotal === 0 ? [] : safeArray(prevState.history));
+        const incomingAnalysis = (report?.analysis && typeof report.analysis === 'object') ? report.analysis : null;
+        const resolvedAnalysis = hasMeaningfulAnalysisSnapshot(incomingAnalysis)
+            ? incomingAnalysis
+            : (prevState.analysis || null);
         const reportPatch = {
-            history: safeArray(report.history),
-            wins: Number(report?.wr?.wins ?? 0),
-            losses: Number(report?.wr?.losses ?? 0),
-            win_rate_percent: Number(report?.wr?.win_rate_percent ?? 0),
+            history: resolvedHistory,
+            wins: coalesceFiniteNumber(report?.wr?.wins, prevState.wins),
+            losses: coalesceFiniteNumber(report?.wr?.losses, prevState.losses),
+            win_rate_percent: coalesceFiniteNumber(report?.wr?.win_rate_percent, prevState.win_rate_percent),
             wr_reset_at: report?.wr?.reset_at || null,
-            realized_profit: Number(report?.profit?.realized ?? 0),
-            daily_profit: Number(report?.profit?.daily ?? 0),
-            weekly_profit: Number(report?.profit?.weekly ?? 0),
-            monthly_profit: Number(report?.profit?.monthly ?? 0),
-            report_daily_profit: Number(report?.profit?.daily ?? 0),
-            report_weekly_profit: Number(report?.profit?.weekly ?? 0),
-            report_monthly_profit: Number(report?.profit?.monthly ?? 0),
-            report_realized_profit: Number(report?.profit?.realized ?? 0),
-            analysis: report?.analysis || (getStateByAccountPair(accountId, pairSymbol)?.analysis || null),
+            realized_profit: coalesceFiniteNumber(report?.profit?.realized, prevState.realized_profit),
+            daily_profit: coalesceFiniteNumber(report?.profit?.daily, prevState.daily_profit),
+            weekly_profit: coalesceFiniteNumber(report?.profit?.weekly, prevState.weekly_profit),
+            monthly_profit: coalesceFiniteNumber(report?.profit?.monthly, prevState.monthly_profit),
+            report_daily_profit: coalesceFiniteNumber(report?.profit?.daily, prevState.report_daily_profit ?? prevState.daily_profit),
+            report_weekly_profit: coalesceFiniteNumber(report?.profit?.weekly, prevState.report_weekly_profit ?? prevState.weekly_profit),
+            report_monthly_profit: coalesceFiniteNumber(report?.profit?.monthly, prevState.report_monthly_profit ?? prevState.monthly_profit),
+            report_realized_profit: coalesceFiniteNumber(report?.profit?.realized, prevState.report_realized_profit ?? prevState.realized_profit),
+            analysis: resolvedAnalysis,
         };
         setStateByAccountPair(accountId, pairSymbol, reportPatch);
         DASHBOARD_LAST_REPORT_SYNC_AT = Date.now();
+        const reportSignatureKey = accountPairKey(accountId, pairSymbol);
+        const reportSignature = JSON.stringify({
+            d: reportPatch.daily_profit,
+            w: reportPatch.weekly_profit,
+            m: reportPatch.monthly_profit,
+            r: reportPatch.realized_profit,
+            wr: reportPatch.win_rate_percent,
+            h: safeArray(reportPatch.history).length,
+            p: Number(report?.history_meta?.current_page ?? REPORTS_STATE.page ?? 1),
+        });
+        reportChanged = DASHBOARD_RENDER_SIGNATURE.reportByKey[reportSignatureKey] !== reportSignature;
+        DASHBOARD_RENDER_SIGNATURE.reportByKey[reportSignatureKey] = reportSignature;
         if (CALC_DEBUG) {
             setStateByAccountPair(accountId, pairSymbol, { report_calc_debug: report?.calc_debug || null });
         }
@@ -5666,8 +6564,12 @@ function applyLiveStreamPayload(payload) {
         }
     }
 
-    renderMonitoring();
-    renderReport(el('save-msg')?.textContent || '');
+    if (monitoringChanged || reportChanged) {
+        renderMonitoring();
+    }
+    if (reportChanged) {
+        renderReport(el('save-msg')?.textContent || '');
+    }
 }
 
 function startDashboardLiveStream() {
@@ -5702,12 +6604,6 @@ function startDashboardLiveStream() {
         source.addEventListener('open', () => {
             touchDashboardStreamHeartbeat();
             stopDashboardFallbackPolling();
-            // Eagerly fetch report on first stream connect; stream's first event may
-            // arrive a few seconds later (seeding on backend). Direct fetch is faster.
-            const reportAge = Date.now() - Number(DASHBOARD_LAST_REPORT_SYNC_AT || 0);
-            if (reportAge > 2000) {
-                refreshReportOnly({ source: 'stream-open' });
-            }
         });
 
         const handleEvent = (event) => {
@@ -5725,9 +6621,8 @@ function startDashboardLiveStream() {
             if (!sourceRef || sourceRef.readyState !== EventSource.OPEN) {
                 startDashboardFallbackPolling();
             }
-            if (!sourceRef || sourceRef.readyState === EventSource.CLOSED) {
-                scheduleDashboardLiveReconnect(1200);
-            }
+            // Retry regardless of CLOSED/CONNECTING state so stuck streams can recover.
+            scheduleDashboardLiveReconnect(1200);
         };
     } catch (_e) {
         stopDashboardLiveStream();
@@ -5745,10 +6640,11 @@ function restartDashboardLiveStream() {
 // Signal Reason History Tracking
 const SIGNAL_REASON_HISTORY = {};
 
-function recordSignalReason(accountId, bias, power, reason, meta = null) {
+function recordSignalReason(accountId, pairSymbol, bias, power, reason, meta = null) {
     if (!accountId) return;
-    if (!SIGNAL_REASON_HISTORY[accountId]) {
-        SIGNAL_REASON_HISTORY[accountId] = [];
+    const scopeKey = accountPairKey(accountId, normalizePairSymbol(pairSymbol || currentPairSymbol()));
+    if (!SIGNAL_REASON_HISTORY[scopeKey]) {
+        SIGNAL_REASON_HISTORY[scopeKey] = [];
     }
     
     const entry = {
@@ -5759,9 +6655,9 @@ function recordSignalReason(accountId, bias, power, reason, meta = null) {
         meta: meta && typeof meta === 'object' ? { ...meta } : null,
     };
     
-    SIGNAL_REASON_HISTORY[accountId].unshift(entry); // Add to beginning
-    if (SIGNAL_REASON_HISTORY[accountId].length > 50) {
-        SIGNAL_REASON_HISTORY[accountId].pop(); // Keep only last 50
+    SIGNAL_REASON_HISTORY[scopeKey].unshift(entry); // Add to beginning
+    if (SIGNAL_REASON_HISTORY[scopeKey].length > 50) {
+        SIGNAL_REASON_HISTORY[scopeKey].pop(); // Keep only last 50
     }
 }
 
@@ -5875,16 +6771,16 @@ const CALC_DEBUG = URL_QUERY.get('calc_debug') === '1';
 const DEFAULTS = {
     active_strategy: 0,
     base_lot: 0.01,
-    timeframe_logic: 1,
-    max_drawdown_pct: 5,
+    timeframe_logic: 5,
+    max_drawdown_pct: 10,
     max_drawdown_stop_delay: 0,
     dd_breach_hits_required: 15,
     daily_profit_target: 0,
     grid_max_layers: 10,
     grid_max_accumulative_lot: 5.0,
-    grid_mode: 0,
-    fix_grid_distance: 4,
-    atr_multiplier: 0.5,
+    grid_mode: 1,
+    fix_grid_distance: 300,
+    atr_multiplier: 1.5,
     grid_tp_points: 0,
     grid_sl_points: 0,
     grid_use_trailing_layer1: true,
@@ -5892,9 +6788,9 @@ const DEFAULTS = {
     grid_basket_tp_percent: 60,
     grid_tp_mode: 0,
     grid_tier1_tp_percent: 60,
-    grid_tier2_tp_percent: 45,
-    grid_tier3_tp_percent: 30,
-    grid_tier4_tp_percent: 20,
+    grid_tier2_tp_percent: 60,
+    grid_tier3_tp_percent: 60,
+    grid_tier4_tp_percent: 55,
     zero_gap_tp_points: 50,
     zero_gap_sl_points: 100,
     zero_gap_max_layers: 3,
@@ -5905,14 +6801,14 @@ const DEFAULTS = {
     mart_tp_points: 100,
     mart_sl_points: 200,
     mart_max_steps: 7,
-    mart_type: 1,
+    mart_type: 0,
     mart_multiplier: 1.5,
     mart_addition: 0.01,
     mart_trailing_start_points: 50,
     mart_trailing_step_points: 10,
     use_mirror_trap: false,
-    always_in_market: false,
-    instant_reentry: false,
+    always_in_market: true,
+    instant_reentry: true,
     min_confluence_score: 5,
     use_pending_guard: false,
     auto_flip: false,
@@ -5938,6 +6834,13 @@ const DEFAULTS = {
     ema_slope_min: 0.03,
     atr_period: 14,
     use_dxy_filter: false,
+    use_us10y_filter: false,
+    use_vix_filter: false,
+    use_oil_filter: false,
+    use_friday_market_close_window: true,
+    friday_stop_day: 'friday',
+    friday_stop_wib: '23:45',
+    friday_resume_wib: '06:15',
     use_stealth_mode: true,
     show_indicator_fallback_logs: false,
     use_sydney_session: true,
@@ -5953,14 +6856,18 @@ const DEFAULTS = {
     us_start_wib: '21:00',
     us_end_wib: '04:00',
     news_filter_severity: 'HIGH',
-    news_pause_before_minutes: 15,
-    news_pause_after_minutes: 15,
+    news_pause_before_minutes: 10,
+    news_pause_after_minutes: 10,
     filter_snr_activation: true,
+    trail_start: 0,
+    trail_stop: 0,
+    trail_step: 0,
 };
 
 const FIELD_IDS = [
     'active_strategy', 'base_lot', 'timeframe_logic', 'max_drawdown_pct', 'max_drawdown_stop_delay', 'dd_breach_hits_required', 'daily_profit_target',
     'grid_max_layers', 'grid_max_accumulative_lot', 'grid_mode', 'fix_grid_distance', 'atr_multiplier',
+    'grid_mart_type', 'grid_mart_addition', 'grid_mart_multiplier',
     'grid_tp_points', 'grid_sl_points', 'grid_use_trailing_layer1', 'grid_use_basket_tp_percent', 'grid_basket_tp_percent',
     'grid_tp_mode', 'grid_tier1_tp_percent', 'grid_tier2_tp_percent', 'grid_tier3_tp_percent', 'grid_tier4_tp_percent',
     'zero_gap_tp_points', 'zero_gap_sl_points', 'zero_gap_max_layers', 'mirror_pending_distance_points', 'mirror_multiplier',
@@ -5972,19 +6879,153 @@ const FIELD_IDS = [
     'bb_period', 'bb_deviation', 'rsi_period', 'rsi_buy_level', 'rsi_sell_level',
     'adx_period', 'adx_level', 'adx_bars', 'adx_sideways',
     'ema_period', 'ema_fast', 'ema_slow', 'ema_slope_min', 'atr_period', 'use_dxy_filter',
+    'use_us10y_filter', 'use_vix_filter', 'use_oil_filter',
+    'use_friday_market_close_window', 'friday_stop_day', 'friday_stop_wib', 'friday_resume_wib',
     'use_sydney_session', 'sydney_start_wib', 'sydney_end_wib',
     'use_asia_session', 'asia_start_wib', 'asia_end_wib',
     'use_europe_session', 'europe_start_wib', 'europe_end_wib',
     'use_us_session', 'us_start_wib', 'us_end_wib',
-    'news_filter_severity', 'news_pause_before_minutes', 'news_pause_after_minutes', 'filter_snr_activation', 'close_all_on_news'
+    'news_filter_severity', 'news_pause_before_minutes', 'news_pause_after_minutes', 'filter_snr_activation', 'close_all_on_news',
+    'trail_start', 'trail_stop', 'trail_step'
 ];
 
 const CHECKBOX_FIELDS = [
     'grid_use_trailing_layer1', 'grid_use_basket_tp_percent', 'use_mirror_trap', 'always_in_market', 'instant_reentry', 'use_pending_guard', 'auto_flip',
     'use_trend_filter', 'use_ai_core_sharpening', 'use_ema_ribbon', 'use_dmi', 'use_mkt_struct', 'use_early_trend', 'use_sniper_entry', 'use_stealth_mode', 'show_indicator_fallback_logs',
-    'use_dxy_filter',
+    'use_dxy_filter', 'use_us10y_filter', 'use_vix_filter', 'use_oil_filter', 'use_friday_market_close_window',
     'use_sydney_session', 'use_asia_session', 'use_europe_session', 'use_us_session', 'filter_snr_activation', 'close_all_on_news'
 ];
+
+const LOGIC_ONLY_FIELD_IDS = [
+    'use_pending_guard', 'auto_flip', 'use_trend_filter', 'use_ai_core_sharpening',
+    'use_ema_ribbon', 'use_dmi', 'use_mkt_struct', 'use_early_trend', 'use_sniper_entry',
+    'bb_period', 'bb_deviation', 'rsi_period', 'rsi_buy_level', 'rsi_sell_level',
+    'adx_period', 'adx_level', 'adx_bars', 'adx_sideways',
+    'ema_period', 'ema_fast', 'ema_slow', 'ema_slope_min', 'atr_period', 'use_dxy_filter',
+    'use_us10y_filter', 'use_vix_filter', 'use_oil_filter',
+    'use_friday_market_close_window', 'friday_stop_day', 'friday_stop_wib', 'friday_resume_wib',
+    'use_stealth_mode', 'show_indicator_fallback_logs', 'close_all_on_news',
+    'trail_start', 'trail_stop', 'trail_step',
+    'use_sydney_session', 'sydney_start_wib', 'sydney_end_wib',
+    'use_asia_session', 'asia_start_wib', 'asia_end_wib',
+    'use_europe_session', 'europe_start_wib', 'europe_end_wib',
+    'use_us_session', 'us_start_wib', 'us_end_wib'
+];
+
+const INLINE_SAVE_BASELINE = {};
+const TOGGLE_AUTOSAVE_TIMERS = {};
+
+function isRiskAcknowledged(accountId) {
+    if (!accountId) return false;
+    return Boolean(SERVER_RISK_ACK[String(accountId)]);
+}
+
+async function setRiskAcknowledged(accountId, accepted) {
+    if (!accountId) return;
+    const csrf = document.querySelector('meta[name="csrf-token"]')?.content || '';
+    const response = await fetch(ROUTES.riskConsent, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-CSRF-TOKEN': csrf,
+        },
+        body: JSON.stringify({ account_id: String(accountId), accepted: Boolean(accepted) }),
+    });
+    if (!response.ok) {
+        throw new Error('Gagal menyimpan persetujuan ToS.');
+    }
+    SERVER_RISK_ACK[String(accountId)] = Boolean(accepted);
+}
+
+function syncRiskAckCheckbox() {
+    const accountId = currentAccount();
+    const checkbox = el('risk_acknowledged');
+    if (!checkbox) return;
+    checkbox.checked = isRiskAcknowledged(accountId);
+}
+
+function currentFieldValueById(id) {
+    if (!el(id)) return undefined;
+    if (isCheckbox(id)) return Boolean(el(id).checked);
+    return String(el(id).value ?? '');
+}
+
+function captureInlineSaveBaseline() {
+    FIELD_IDS.forEach((id) => {
+        INLINE_SAVE_BASELINE[id] = currentFieldValueById(id);
+    });
+}
+
+function isFieldDirty(id) {
+    return INLINE_SAVE_BASELINE[id] !== currentFieldValueById(id);
+}
+
+function refreshInlineSaveButton(id) {
+    const button = document.querySelector('.inline-save-btn[data-field-id="' + id + '"]');
+    if (!(button instanceof HTMLButtonElement)) return;
+    button.classList.toggle('is-visible', isFieldDirty(id));
+}
+
+function refreshInlineSaveButtons() {
+    FIELD_IDS.forEach((id) => refreshInlineSaveButton(id));
+}
+
+function initInlineSaveButtons() {
+    FIELD_IDS.forEach((id) => {
+        const input = el(id);
+        if (!(input instanceof HTMLElement)) return;
+        if (isCheckbox(id)) return;
+
+        let holder = input.closest('.field-stack');
+        if (!(holder instanceof HTMLElement) && input.parentElement instanceof HTMLElement) {
+            const parent = input.parentElement;
+            if (parent.classList.contains('switch-tile') || parent.classList.contains('form-check') || parent.classList.contains('session-toggle')) {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'field-stack';
+                parent.insertBefore(wrapper, input);
+                wrapper.appendChild(input);
+                holder = wrapper;
+            } else {
+                holder = parent;
+                holder.classList.add('field-stack');
+            }
+        }
+        if (!(holder instanceof HTMLElement)) return;
+        holder.classList.add('has-inline-save');
+
+        let row = holder.querySelector('.inline-save-row[data-field-id="' + id + '"]');
+        if (!(row instanceof HTMLElement)) {
+            row = document.createElement('div');
+            row.className = 'inline-save-row';
+            row.setAttribute('data-field-id', id);
+            if (input.parentElement === holder) {
+                holder.insertBefore(row, input);
+                row.appendChild(input);
+            } else if (input.parentElement instanceof HTMLElement) {
+                input.parentElement.insertBefore(row, input);
+                row.appendChild(input);
+            } else {
+                holder.appendChild(row);
+                row.appendChild(input);
+            }
+        }
+
+        if (row.querySelector('.inline-save-btn[data-field-id="' + id + '"]')) return;
+
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'inline-save-btn';
+        button.setAttribute('data-field-id', id);
+        button.setAttribute('title', 'Simpan cepat');
+        button.setAttribute('aria-label', 'Simpan cepat field ' + id);
+        button.textContent = '✓';
+        button.addEventListener('click', async () => {
+            await saveSetting(id);
+        });
+        row.appendChild(button);
+    });
+}
 
 const LOGIC_PRESETS = {
     default: {
@@ -6091,6 +7132,14 @@ function validateLogicInputs(showMessage = true) {
 }
 
 function applyLogicPreset(name) {
+    if (!IS_ADMIN) {
+        if (el('save-msg-logic')) {
+            el('save-msg-logic').textContent = 'Tab Logic hanya bisa diubah oleh admin.';
+            el('save-msg-logic').className = 'small text-danger';
+        }
+        return;
+    }
+
     const preset = LOGIC_PRESETS[name];
     if (!preset) return;
 
@@ -6147,6 +7196,17 @@ function loadSelectedAccount() {
     if (sessionMarker !== String(AUTH_SESSION_ID || '')) return '';
     return String(localStorage.getItem(DASHBOARD_ACCOUNT_STORAGE_KEY) || '').trim();
 }
+function saveSelectedAliasModalAccount(accountId) {
+    const normalized = String(accountId || '').trim();
+    if (!normalized) return;
+    localStorage.setItem(DASHBOARD_ALIAS_ACCOUNT_STORAGE_KEY, normalized);
+    localStorage.setItem(DASHBOARD_ALIAS_ACCOUNT_SESSION_KEY, String(AUTH_SESSION_ID || ''));
+}
+function loadSelectedAliasModalAccount() {
+    const sessionMarker = String(localStorage.getItem(DASHBOARD_ALIAS_ACCOUNT_SESSION_KEY) || '');
+    if (sessionMarker !== String(AUTH_SESSION_ID || '')) return '';
+    return String(localStorage.getItem(DASHBOARD_ALIAS_ACCOUNT_STORAGE_KEY) || '').trim();
+}
 function loadSelectedPairMap() {
     const sessionMarker = String(localStorage.getItem(DASHBOARD_PAIR_SESSION_KEY) || '');
     if (sessionMarker !== String(AUTH_SESSION_ID || '')) return {};
@@ -6179,7 +7239,7 @@ function restoreSelectedPairMap() {
 function normalizePairSymbol(raw) {
     const upper = String(raw || '').trim().toUpperCase();
     const cleaned = upper.replace(/[^A-Z0-9_\/\.\-]/g, '');
-    return cleaned || 'XAUUSD';
+    return cleaned || 'XAUUSDC';
 }
 function accountPairKey(accountId, pairSymbol) {
     const id = String(accountId || '').trim();
@@ -6203,31 +7263,102 @@ function getPairsForAccount(accountId) {
     const id = String(accountId || '').trim();
     if (!id) return [];
     const pairs = safeArray(ACCOUNT_PAIR_INDEX[id]).map((item) => normalizePairSymbol(item));
-    return pairs.length ? pairs : ['XAUUSD'];
+    return pairs.length ? pairs : ['XAUUSDC'];
+}
+
+function pairFamilyKey(pairSymbol) {
+    const normalized = normalizePairSymbol(pairSymbol);
+    const lettersOnly = String(normalized).replace(/[^A-Z]/g, '');
+    if (lettersOnly.endsWith('USDC')) {
+        return lettersOnly.slice(0, -1);
+    }
+    return lettersOnly;
+}
+
+function stateUpdatedAtMs(state) {
+    const parsed = Date.parse(String(state?.updated_at || ''));
+    return Number.isFinite(parsed) ? parsed : 0;
 }
 function isStateFreshOnline(state) {
     const heartbeatTs = Date.parse(String(state?.updated_at || ''));
     const staleHeartbeat = Number.isFinite(heartbeatTs) ? (Date.now() - heartbeatTs > 45000) : true;
     return Boolean(state?.is_online) && !staleHeartbeat;
 }
+
+function stateHeartbeatMs(value) {
+    const ts = Date.parse(String(value?.updated_at || ''));
+    return Number.isFinite(ts) ? ts : NaN;
+}
+
+function shouldApplyMonitoringPayload(accountId, pairSymbol, incomingPatch) {
+    const existingState = getStateByAccountPair(accountId, pairSymbol) || {};
+    const prevTs = stateHeartbeatMs(existingState);
+    const nextTs = stateHeartbeatMs(incomingPatch || {});
+
+    if (Number.isFinite(prevTs) && Number.isFinite(nextTs) && nextTs < prevTs) {
+        return false;
+    }
+
+    if (Number.isFinite(prevTs) && Number.isFinite(nextTs) && nextTs === prevTs) {
+        const prevOpenRows = safeArray(existingState?.open_positions);
+        const nextOpenRows = safeArray(incomingPatch?.open_positions);
+        const hasIncomingOpenRowsField = Object.prototype.hasOwnProperty.call(incomingPatch || {}, 'open_positions');
+        const nextLayers = Number(incomingPatch?.current_layers ?? incomingPatch?.live_open_layers ?? 0);
+        const nextFloating = Number(incomingPatch?.global_floating ?? incomingPatch?.live_floating_pnl ?? 0);
+        const stillExposed = (Number.isFinite(nextLayers) && nextLayers > 0)
+            || (Number.isFinite(nextFloating) && Math.abs(nextFloating) > 0.0000001);
+
+        // Guard against transient partial payloads: keep previous rows only when exposure is still active.
+        if (hasIncomingOpenRowsField && prevOpenRows.length > 0 && nextOpenRows.length === 0 && stillExposed) {
+            return false;
+        }
+    }
+
+    return true;
+}
 function getConnectedPairsForAccount(accountId) {
     const id = String(accountId || '').trim();
     if (!id) return [];
     const allPairs = getPairsForAccount(id);
-    return allPairs.filter((pair) => {
+    const connected = allPairs.filter((pair) => {
         const state = getStateByAccountPair(id, pair) || {};
         if (!isStateFreshOnline(state)) return false;
         const reportedPair = normalizePairSymbol(state?.pair_symbol || state?.symbol || '');
         return reportedPair === pair;
     });
+
+    const bestByFamily = {};
+    connected.forEach((pair) => {
+        const state = getStateByAccountPair(id, pair) || {};
+        const family = pairFamilyKey(pair);
+        const current = bestByFamily[family];
+        if (!current) {
+            bestByFamily[family] = pair;
+            return;
+        }
+
+        const currentState = getStateByAccountPair(id, current) || {};
+        const currentTs = stateUpdatedAtMs(currentState);
+        const nextTs = stateUpdatedAtMs(state);
+        if (nextTs > currentTs) {
+            bestByFamily[family] = pair;
+            return;
+        }
+
+        if (nextTs === currentTs && pair.length > current.length) {
+            bestByFamily[family] = pair;
+        }
+    });
+
+    return Object.values(bestByFamily);
 }
 function currentPairSymbol() {
     const accountId = String(currentAccount() || '').trim();
-    if (!accountId) return 'XAUUSD';
+    if (!accountId) return 'XAUUSDC';
     const pairs = getPairsForAccount(accountId);
-    const selected = normalizePairSymbol(SELECTED_PAIR_BY_ACCOUNT[accountId] || pairs[0] || 'XAUUSD');
+    const selected = normalizePairSymbol(SELECTED_PAIR_BY_ACCOUNT[accountId] || pairs[0] || 'XAUUSDC');
     if (!pairs.includes(selected)) {
-        SELECTED_PAIR_BY_ACCOUNT[accountId] = pairs[0] || 'XAUUSD';
+        SELECTED_PAIR_BY_ACCOUNT[accountId] = pairs[0] || 'XAUUSDC';
         return SELECTED_PAIR_BY_ACCOUNT[accountId];
     }
     SELECTED_PAIR_BY_ACCOUNT[accountId] = selected;
@@ -6273,13 +7404,41 @@ function hydrateAccountPairState() {
         const accountId = String(row?.account_id || '').trim();
         if (!accountId) return;
         const pair = normalizePairSymbol(row?.pair_symbol || row?.symbol || 'XAUUSD');
-        setStateByAccountPair(accountId, pair, { ...row, account_id: accountId, pair_symbol: pair });
+        setStateByAccountPair(accountId, pair, {
+            ...row,
+            account_id: accountId,
+            pair_symbol: pair,
+            _runtime_bootstrap_pending: true,
+        });
     });
 
     allAccountIdsSorted().forEach((accountId) => {
         const selectedPair = normalizePairSymbol(SELECTED_PAIR_BY_ACCOUNT[accountId] || getPairsForAccount(accountId)[0] || 'XAUUSD');
         SELECTED_PAIR_BY_ACCOUNT[accountId] = selectedPair;
         ACCOUNTS[accountId] = getActiveAccountState(accountId, selectedPair);
+    });
+}
+
+function neutralizeStaleBootstrapRuntimeState() {
+    const now = Date.now();
+    allAccountIdsSorted().forEach((accountId) => {
+        const pairs = getPairsForAccount(accountId);
+        pairs.forEach((pairSymbol) => {
+            const state = getStateByAccountPair(accountId, pairSymbol) || {};
+            const heartbeatTs = Date.parse(String(state?.updated_at || ''));
+            const stale = !Number.isFinite(heartbeatTs) || (now - heartbeatTs > 45000);
+            if (!stale) return;
+
+            setStateByAccountPair(accountId, pairSymbol, {
+                current_layers: 0,
+                current_accumulative_lot: 0,
+                global_floating: 0,
+                live_floating_pnl: 0,
+                drawdown_pct: 0,
+                open_positions: [],
+                pending_orders: [],
+            });
+        });
     });
 }
 function renderPairTabsForCurrentAccount() {
@@ -6327,11 +7486,6 @@ function accountUserLabelById(userId) {
 }
 
 async function loadAccountAliasesFromServer() {
-    if (!IS_ADMIN) {
-        ACCOUNT_ALIASES = {};
-        return;
-    }
-
     try {
         const response = await fetch(ROUTES.accountAliasesGet, {
             headers: { 'Accept': 'application/json' },
@@ -6372,7 +7526,6 @@ async function saveAccountAliasToServer(accountId, alias) {
 }
 
 function accountAliasById(accountId) {
-    if (!IS_ADMIN) return '';
     const key = String(accountId || '').trim();
     return String((ACCOUNT_ALIASES || {})[key] || '').trim();
 }
@@ -6380,17 +7533,33 @@ function accountAliasById(accountId) {
 function accountDisplayLabel(accountId, accountState = null) {
     const id = String(accountId || '').trim();
     if (!id) return '-';
-    if (!IS_ADMIN) return id;
 
     const state = accountState && typeof accountState === 'object' ? accountState : (ACCOUNTS[id] || {});
     const alias = accountAliasById(id);
-    const owner = accountUserLabelById(state?.user_id);
+    const owner = IS_ADMIN ? accountUserLabelById(state?.user_id) : '';
     const extra = [];
 
     if (alias) extra.push(alias);
     if (owner) extra.push(owner);
 
     return extra.length ? (id + ' - ' + extra.join(' | ')) : id;
+}
+
+function accountRuntimeState(accountId) {
+    const id = String(accountId || '').trim();
+    const state = getActiveAccountState(id, currentPairSymbol()) || ACCOUNTS[id] || {};
+    const licenseState = LICENSE_SNAPSHOTS[id] || {};
+    const licenseActive = Boolean(licenseState.license_active);
+    if (!licenseActive) {
+        return { css: 'account-state-expired', label: 'Expired' };
+    }
+
+    const guardStatus = String(state.guard_status || state.live_guard_status || '').toUpperCase();
+    if (guardStatus === 'LIVE') {
+        return { css: 'account-state-live', label: 'Live' };
+    }
+
+    return { css: 'account-state-stop', label: 'Stop' };
 }
 
 function allAccountIdsSorted() {
@@ -6435,7 +7604,11 @@ function renderAccountPickerOptions() {
     optionsEl.innerHTML = accountIds.map((id) => {
         const label = accountDisplayLabel(id, ACCOUNTS[id] || {});
         const isActive = id === String(currentAccount() || '').trim();
-        return '<button type="button" class="dropdown-item account-picker-item' + (isActive ? ' active' : '') + '" data-account-id="' + escapeHtml(id) + '">' + escapeHtml(label) + '</button>';
+        const runtime = accountRuntimeState(id);
+        return '<button type="button" class="dropdown-item account-picker-item' + (isActive ? ' active' : '') + '" data-account-id="' + escapeHtml(id) + '">' +
+            '<span class="account-picker-item-label">' + escapeHtml(label) + '</span>' +
+            '<span class="account-state-badge ' + escapeHtml(runtime.css) + '">' + escapeHtml(runtime.label) + '</span>' +
+            '</button>';
     }).join('');
 }
 
@@ -6508,13 +7681,34 @@ function themeIconSvg(theme) {
 }
 
 function syncAliasModalForCurrentAccount() {
-    if (!IS_ADMIN) return;
     const accountId = String(currentAccount() || '').trim();
+    const rememberedAliasAccountId = loadSelectedAliasModalAccount();
     const aliasInput = el('alias_account_name');
     const accountInput = el('alias_account_id');
-    if (accountInput) accountInput.value = accountId;
-    if (aliasInput) aliasInput.value = accountAliasById(accountId);
-    setAccountAliasMessage('Atur alias untuk account aktif.', 'secondary');
+    const accountIds = allAccountIdsSorted();
+
+    if (accountInput instanceof HTMLSelectElement) {
+        if (!accountIds.length) {
+            accountInput.innerHTML = '<option value="">Belum ada account terdaftar</option>';
+            accountInput.value = '';
+        } else {
+            accountInput.innerHTML = accountIds.map((id) => {
+                return '<option value="' + escapeHtml(id) + '">' + escapeHtml(accountDisplayLabel(id, ACCOUNTS[id] || {})) + '</option>';
+            }).join('');
+            const selectedId = accountIds.includes(accountId)
+                ? accountId
+                : (accountIds.includes(rememberedAliasAccountId) ? rememberedAliasAccountId : accountIds[0]);
+            accountInput.value = selectedId;
+            saveSelectedAliasModalAccount(selectedId);
+        }
+    } else if (accountInput) {
+        accountInput.value = accountId;
+        saveSelectedAliasModalAccount(accountId);
+    }
+
+    const selectedAccountId = String(accountInput?.value || accountId || '').trim();
+    if (aliasInput) aliasInput.value = accountAliasById(selectedAccountId);
+    setAccountAliasMessage(selectedAccountId ? 'Atur alias untuk account terpilih.' : 'Belum ada account yang bisa diberi alias.', 'secondary');
 }
 
 const _smoothCache = {};
@@ -6631,6 +7825,24 @@ function setAccountMessage(message, kind = 'secondary') {
     target.className = 'small mt-2 text-' + kind;
 }
 
+function showDashboardToast(message) {
+    const stack = el('dashboard-toast-stack');
+    if (!stack) return;
+    const toast = document.createElement('div');
+    toast.className = 'dashboard-toast';
+    toast.textContent = String(message || 'Tersimpan');
+    stack.appendChild(toast);
+    requestAnimationFrame(() => {
+        toast.classList.add('is-show');
+    });
+    setTimeout(() => {
+        toast.classList.remove('is-show');
+        setTimeout(() => {
+            toast.remove();
+        }, 220);
+    }, 1800);
+}
+
 function defaultAccountMessage() {
     if (IS_ADMIN) {
         return 'Admin: bisa tambah account baru atau input account yang sudah dipakai user untuk ditautkan ke dashboard admin.';
@@ -6686,11 +7898,50 @@ function itemDayDate(item) {
     return toWibDayDate(item?.event_at);
 }
 
-function metricValue(value) {
+function metricMeta(value, kind = 'generic') {
     const text = String(value ?? '').trim();
-    if (text === '' || text === '-') return 'Menunggu rilis';
-    if (text.toUpperCase() === 'N/A') return 'N/A';
-    return text;
+    const upper = text.toUpperCase();
+    const missing = text === '' || text === '-' || upper === 'N/A' || upper === 'NULL';
+    if (missing) {
+        return {
+            value: kind === 'actual' ? 'Belum rilis' : '-',
+            missing: true,
+        };
+    }
+
+    return {
+        value: text,
+        missing: false,
+    };
+}
+
+function metricValue(value, kind = 'generic') {
+    return metricMeta(value, kind).value;
+}
+
+function isGenericAiInsight(text) {
+    const normalized = String(text || '').trim().toLowerCase();
+    if (normalized === '') return true;
+
+    return normalized.includes('data live dari')
+        || normalized.includes('forexfactory live feed')
+        || normalized.includes('event upcoming dari calendar api')
+        || normalized.includes('data upcoming dari cache kalender')
+        || normalized.includes('calendar parser');
+}
+
+function preferredNewsInsightSource() {
+    const candidates = [];
+    const nextItem = getNextNewsItem();
+    if (nextItem) candidates.push(nextItem);
+    if (Array.isArray(NEWS_ITEMS)) candidates.push(...NEWS_ITEMS);
+    if (Array.isArray(INITIAL_NEWS_ITEMS)) candidates.push(...INITIAL_NEWS_ITEMS);
+
+    return candidates.find((item) => {
+        const analysis = String(item?.ai_analysis || '').trim();
+        const verdict = String(item?.ai_verdict || '').trim();
+        return !isGenericAiInsight(analysis) && verdict !== '';
+    }) || (nextItem || NEWS_ITEMS[0] || INITIAL_NEWS_ITEMS[0] || null);
 }
 
 const USERS_STATE = {
@@ -6704,6 +7955,7 @@ const REPORTS_STATE = {
     lastPage: 1,
     total: 0,
     perPage: 10,
+    period: 'all',
     isLoading: false,
     pendingRefresh: false,
     pendingPage: null,
@@ -6725,7 +7977,10 @@ function userRowTemplate(user) {
         '<td>' + (user.name || '') + '</td>' +
         '<td>' + (user.username || '') + '</td>' +
         '<td><span class="badge text-bg-' + roleBadge(user.role) + '">' + (user.role || 'user') + '</span></td>' +
-        '<td><button type="button" class="btn btn-sm btn-outline-primary" data-edit-user="' + user.id + '">Edit</button></td>' +
+        '<td class="d-flex flex-wrap gap-1">'
+            + '<button type="button" class="btn btn-sm btn-outline-primary" data-edit-user="' + user.id + '">Edit</button>'
+            + '<button type="button" class="btn btn-sm btn-outline-danger" data-delete-user="' + user.id + '">Delete</button>'
+            + '</td>' +
         '</tr>';
 }
 
@@ -6776,6 +8031,7 @@ function resetManageForm() {
     el('manage_email').value = '';
     el('manage_role').value = 'user';
     el('manage_password').value = '';
+    el('btn-user-delete')?.classList.add('d-none');
 }
 
 function fillManageForm(userId) {
@@ -6788,6 +8044,7 @@ function fillManageForm(userId) {
     el('manage_email').value = user.email || '';
     el('manage_role').value = user.role || 'user';
     el('manage_password').value = '';
+    el('btn-user-delete')?.classList.remove('d-none');
     setUsersMessage('Mode edit user #' + user.id + '. Password boleh dikosongkan jika tidak diubah.', 'warning');
 }
 
@@ -6832,6 +8089,10 @@ function switchWorkspaceTab(tabName, options = {}) {
     if (shouldPersist) {
         persistWorkspaceTab(activeTab);
     }
+
+    if (activeTab === 'bookkeeping' && typeof window.loadBookkeepingPanel === 'function') {
+        window.loadBookkeepingPanel().catch(function () {});
+    }
 }
 
 function formatNumber(value, digits = 2) {
@@ -6863,7 +8124,16 @@ function analysisBiasLabel(bias) {
 
 function normalizeCurrencyCode(value) {
     const code = String(value ?? '').trim().toUpperCase();
+    if (code === 'USDC') return 'USC';
     return code || 'USD';
+}
+
+function inferCurrencyFromPair(pairSymbol) {
+    const pair = normalizePairSymbol(pairSymbol);
+    const lettersOnly = String(pair).replace(/[^A-Z]/g, '');
+    if (lettersOnly.endsWith('USDC')) return 'USC';
+    if (lettersOnly.endsWith('USD')) return 'USD';
+    return '';
 }
 
 function formatMoneyByCurrency(value, currency) {
@@ -6880,8 +8150,45 @@ function formatMoneyByCurrency(value, currency) {
     return code + ' ' + new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(num);
 }
 
+function formatSignedMoneyByCurrency(value, currency) {
+    if (value === null || value === undefined || value === '') return '-';
+    const num = Number(value);
+    if (!Number.isFinite(num)) return '-';
+    const absText = formatMoneyByCurrency(Math.abs(num), currency);
+    if (num > 0) return '+' + absText;
+    if (num < 0) return '-' + absText;
+    return absText;
+}
+
+function formatSignedPercent(value, digits = 2) {
+    const num = Number(value ?? 0);
+    if (!Number.isFinite(num)) return '-';
+    const abs = Math.abs(num).toFixed(Math.max(0, Math.trunc(digits)));
+    if (num > 0) return '+' + abs + '%';
+    if (num < 0) return '-' + abs + '%';
+    return abs + '%';
+}
+
+function applySignedTone(id, value) {
+    const node = el(id);
+    if (!node) return;
+    const num = Number(value ?? 0);
+    node.classList.remove('text-success', 'text-danger');
+    if (!Number.isFinite(num) || Math.abs(num) < 0.0000001) return;
+    if (num > 0) {
+        node.classList.add('text-success');
+    } else {
+        node.classList.add('text-danger');
+    }
+}
+
 function accountCurrencyFor(state) {
-    return normalizeCurrencyCode(state?.account_currency || state?.currency || 'USD');
+    const reported = normalizeCurrencyCode(state?.account_currency || state?.currency || '');
+    const inferred = inferCurrencyFromPair(state?.pair_symbol || state?.symbol || currentPairSymbol());
+
+    if (inferred === 'USC') return 'USC';
+    if (reported === 'USD' && inferred) return inferred;
+    return reported || inferred || 'USD';
 }
 
 function boolText(value) {
@@ -6892,12 +8199,38 @@ function safeArray(value) {
     return Array.isArray(value) ? value : [];
 }
 
+function hasMagicField(row) {
+    return row && typeof row === 'object' && Object.prototype.hasOwnProperty.call(row, 'magic');
+}
+
+function isBotManagedPositionRow(row) {
+    if (!hasMagicField(row)) return true;
+    const magic = Number(row?.magic);
+    return Number.isFinite(magic) && Math.abs(magic) > 0.0000001;
+}
+
 function firstFiniteNumber(...values) {
     for (const value of values) {
         const num = Number(value);
         if (Number.isFinite(num)) return num;
     }
     return 0;
+}
+
+function coalesceFiniteNumber(value, fallback = 0) {
+    const num = Number(value);
+    if (Number.isFinite(num)) return num;
+    const fb = Number(fallback);
+    return Number.isFinite(fb) ? fb : 0;
+}
+
+function hasMeaningfulAnalysisSnapshot(snapshot) {
+    if (!snapshot || typeof snapshot !== 'object') return false;
+    const keys = Object.keys(snapshot);
+    if (keys.length === 0) return false;
+
+    const signalKeys = ['captured_at', 'reason_summary', 'bias', 'power_pct', 'confidence_pct', 'score_buy', 'score_sell', 'bull_votes', 'bear_votes'];
+    return signalKeys.some((key) => isMeaningfulAnalysisValue(key, snapshot[key]));
 }
 
 function parseSnapshotTimestamp(value) {
@@ -6983,11 +8316,148 @@ function assignDefined(target, source) {
     return target;
 }
 
+function parseDashboardDate(value) {
+    if (value === null || value === undefined || value === '') {
+        return null;
+    }
+
+    if (value instanceof Date) {
+        return Number.isNaN(value.getTime()) ? null : value;
+    }
+
+    if (typeof value === 'number' && Number.isFinite(value)) {
+        const millis = value > 1000000000000 ? value : value * 1000;
+        const asDate = new Date(millis);
+        return Number.isNaN(asDate.getTime()) ? null : asDate;
+    }
+
+    const raw = String(value).trim();
+    if (raw === '') {
+        return null;
+    }
+
+    if (/^\d{10,13}$/.test(raw)) {
+        const num = Number(raw);
+        if (Number.isFinite(num)) {
+            const millis = raw.length >= 13 ? num : num * 1000;
+            const asDate = new Date(millis);
+            if (!Number.isNaN(asDate.getTime())) {
+                return asDate;
+            }
+        }
+    }
+
+    if (/[zZ]$/.test(raw) || /[+-]\d{2}:?\d{2}$/.test(raw)) {
+        const direct = new Date(raw);
+        if (!Number.isNaN(direct.getTime())) {
+            return direct;
+        }
+    }
+
+    const cleaned = raw
+        .replace(/\bWIB\b/gi, '')
+        .replace(',', ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+
+    const fromWibParts = (year, month, day, hour = 0, minute = 0, second = 0) => {
+        const utcMillis = Date.UTC(year, month - 1, day, hour - 7, minute, second);
+        const asDate = new Date(utcMillis);
+        return Number.isNaN(asDate.getTime()) ? null : asDate;
+    };
+
+    const ymd = cleaned.match(/^(\d{4})[.\/-](\d{1,2})[.\/-](\d{1,2})(?:\s+(\d{1,2})[:.](\d{1,2})(?:[:.](\d{1,2}))?)?$/);
+    if (ymd) {
+        return fromWibParts(
+            Number(ymd[1]),
+            Number(ymd[2]),
+            Number(ymd[3]),
+            Number(ymd[4] || '0'),
+            Number(ymd[5] || '0'),
+            Number(ymd[6] || '0')
+        );
+    }
+
+    const dmy = cleaned.match(/^(\d{1,2})[.\/-](\d{1,2})[.\/-](\d{4})(?:\s+(\d{1,2})[:.](\d{1,2})(?:[:.](\d{1,2}))?)?$/);
+    if (dmy) {
+        return fromWibParts(
+            Number(dmy[3]),
+            Number(dmy[2]),
+            Number(dmy[1]),
+            Number(dmy[4] || '0'),
+            Number(dmy[5] || '0'),
+            Number(dmy[6] || '0')
+        );
+    }
+
+    const fallbackRaw = new Date(raw);
+    if (!Number.isNaN(fallbackRaw.getTime())) {
+        return fallbackRaw;
+    }
+
+    const fallbackCleaned = new Date(cleaned);
+    return Number.isNaN(fallbackCleaned.getTime()) ? null : fallbackCleaned;
+}
+
 function formatTime(value) {
     if (!value) return '-';
-    const date = new Date(value);
+    const date = parseDashboardDate(value);
+    if (!date) return String(value);
     if (Number.isNaN(date.getTime())) return String(value);
-    return date.toLocaleString('id-ID');
+    return date.toLocaleString('id-ID', {
+        timeZone: 'Asia/Jakarta',
+        hour12: false,
+    }) + ' WIB';
+}
+
+const ANALYSIS_SERVER_CLOCK = {
+    rawText: '-',
+    baseDate: null,
+    baseClientMs: 0,
+    calibrateOffsetMs: 0,
+};
+
+function updateAnalysisServerClock(rawValue, capturedAt = null) {
+    const nextRaw = String(rawValue ?? '-').trim() || '-';
+    ANALYSIS_SERVER_CLOCK.rawText = nextRaw;
+    const parsedServer = parseDashboardDate(nextRaw);
+    let calibrated = parsedServer;
+
+    if (parsedServer instanceof Date && !Number.isNaN(parsedServer.getTime())) {
+        let offsetMs = 0;
+        const parsedCaptured = parseDashboardDate(capturedAt);
+        if (parsedCaptured instanceof Date && !Number.isNaN(parsedCaptured.getTime())) {
+            const diffMs = parsedCaptured.getTime() - parsedServer.getTime();
+            // If snapshot time and server_time differ too far, treat as timezone mismatch.
+            if (Math.abs(diffMs) >= (60 * 60 * 1000) && Math.abs(diffMs) <= (12 * 60 * 60 * 1000)) {
+                offsetMs = diffMs;
+            }
+        }
+
+        ANALYSIS_SERVER_CLOCK.calibrateOffsetMs = offsetMs;
+        calibrated = new Date(parsedServer.getTime() + offsetMs);
+    } else {
+        ANALYSIS_SERVER_CLOCK.calibrateOffsetMs = 0;
+    }
+
+    ANALYSIS_SERVER_CLOCK.baseDate = calibrated;
+    ANALYSIS_SERVER_CLOCK.baseClientMs = Date.now();
+    renderAnalysisServerClockTick();
+}
+
+function renderAnalysisServerClockTick() {
+    const baseDate = ANALYSIS_SERVER_CLOCK.baseDate;
+    if (!(baseDate instanceof Date) || Number.isNaN(baseDate.getTime())) {
+        setSmooth('analysis-server-time', ANALYSIS_SERVER_CLOCK.rawText || '-');
+        return;
+    }
+
+    const elapsedSeconds = Math.max(0, Math.floor((Date.now() - ANALYSIS_SERVER_CLOCK.baseClientMs) / 1000));
+    const tickDate = new Date(baseDate.getTime() + (elapsedSeconds * 1000));
+    setSmooth('analysis-server-time', tickDate.toLocaleString('id-ID', {
+        timeZone: 'Asia/Jakarta',
+        hour12: false,
+    }) + ' WIB');
 }
 
 function escapeHtml(value) {
@@ -7090,6 +8560,7 @@ function buildHistoryRow(row) {
             '<td class="' + profitClass + '">' + escapeHtml(formatNumber(profit, 2)) + '</td>' +
             '<td>' + escapeHtml(formatNumber(row.swap ?? 0, 2)) + '</td>' +
             '<td>' + escapeHtml(formatNumber(row.commission ?? 0, 2)) + '</td>' +
+            '<td>' + escapeHtml(formatTime(row.open_time)) + '</td>' +
             '<td>' + escapeHtml(formatTime(row.close_time ?? row.open_time)) + '</td>' +
             '</tr>',
     };
@@ -7249,9 +8720,9 @@ function renderHistoryTable(rows) {
     const items = safeArray(rows);
     if (items.length === 0) {
         if (REPORTS_STATE.isLoading) {
-            target.innerHTML = '<tr><td colspan="10" class="text-secondary text-center" style="padding: 2rem 0;"><small>Loading trade history...</small></td></tr>';
+            target.innerHTML = '<tr><td colspan="11" class="text-secondary text-center" style="padding: 2rem 0;"><small>Loading trade history...</small></td></tr>';
         } else {
-            target.innerHTML = '<tr><td colspan="10" class="text-secondary">Belum ada trade history.</td></tr>';
+            target.innerHTML = '<tr><td colspan="11" class="text-secondary">Belum ada trade history.</td></tr>';
         }
         return;
     }
@@ -7269,6 +8740,12 @@ function renderHistoryPagination() {
         const selected = String(Math.max(5, Number(selectedLimitRaw)));
         if (el('rep-history-limit').value !== selected) {
             el('rep-history-limit').value = selected;
+        }
+    }
+    if (el('rep-history-period')) {
+        const selectedPeriod = String(REPORTS_STATE.period || 'all');
+        if (el('rep-history-period').value !== selectedPeriod) {
+            el('rep-history-period').value = selectedPeriod;
         }
     }
     if (el('rep-history-prev')) el('rep-history-prev').disabled = REPORTS_STATE.page <= 1;
@@ -7317,7 +8794,8 @@ function renderSignalReasonTimeline() {
     target.innerHTML = displayItems.map((item, idx) => {
         const time = new Date(item.timestamp);
         const timeStr = time.toLocaleTimeString('id-ID');
-        const biasClass = item.bias === 'BULL' ? 'is-bull' : (item.bias === 'BEAR' ? 'is-bear' : 'is-neutral');
+        const biasNorm = String(item.bias || '').toUpperCase();
+        const biasClass = (biasNorm === 'BULL' || biasNorm === 'BULLISH') ? 'is-bull' : ((biasNorm === 'BEAR' || biasNorm === 'BEARISH') ? 'is-bear' : 'is-neutral');
         const detailList = Array.isArray(item?.meta?.reason_details) ? item.meta.reason_details : [];
         const evidence = detailList.length > 0 ? detailList.slice(0, 2).join(' ') : buildSignalReasonEvidence(item.meta);
         return `<div class="signal-reason-item ${biasClass}">
@@ -7581,15 +9059,31 @@ function renderMonitoring() {
     setSmooth('monitor-account-chip', 'Account: ' + (accountId || '-') + ' • Pair: ' + (pairSymbol || '-'));
     setSmooth('monitor-license-enforcement-chip', 'License Enforcement: ' + (LICENSE_ENFORCEMENT_ENABLED ? 'ON' : 'OFF'));
     const topbarLicenseCard = el('topbar-license-card');
+    const topbarLicenseBadge = el('topbar-license-badge');
+    const applyTopbarLicenseBadge = (text, stateClass) => {
+        if (!topbarLicenseBadge) return;
+        topbarLicenseBadge.textContent = text;
+        topbarLicenseBadge.classList.remove('state-active', 'state-trial', 'state-expired');
+        topbarLicenseBadge.classList.add(stateClass);
+    };
+    const isTrialPlan = String(state.license_plan_name ?? '').toLowerCase().includes('trial');
+
     if (!accountId) {
         syncLiveLicenseCountdown(accountId, state, false);
         setSmooth('topbar-license-status', 'Belum dipilih');
         setSmooth('topbar-license-remaining', 'Sisa: --:--:--');
         topbarLicenseCard?.setAttribute('data-license-state', 'inactive');
+        applyTopbarLicenseBadge('NO LICENSE', 'state-expired');
     } else if (licenseActive) {
         syncLiveLicenseCountdown(accountId, state, true);
         setSmooth('topbar-license-status', 'Aktif');
-        topbarLicenseCard?.setAttribute('data-license-state', 'active');
+        if (isTrialPlan) {
+            topbarLicenseCard?.setAttribute('data-license-state', 'trial');
+            applyTopbarLicenseBadge('TRIAL', 'state-trial');
+        } else {
+            topbarLicenseCard?.setAttribute('data-license-state', 'active');
+            applyTopbarLicenseBadge('ACTIVE', 'state-active');
+        }
         if (Boolean(state.license_is_perpetual)) {
             setSmooth('topbar-license-remaining', 'Countdown: Permanent');
             setSmooth('mon-license', 'Permanent');
@@ -7601,24 +9095,51 @@ function renderMonitoring() {
         setSmooth('topbar-license-status', 'Habis');
         setSmooth('topbar-license-remaining', 'Countdown: 00d 00h 00m 00s');
         topbarLicenseCard?.setAttribute('data-license-state', 'expired');
+        applyTopbarLicenseBadge('NO LICENSE', 'state-expired');
     }
     setSmooth('mon-status', statusText);
-    setSmooth('mon-floating', formatMoneyByCurrency(state.global_floating ?? state.live_floating_pnl ?? 0, currency));
-    setSmooth('mon-layers', String(state.current_layers ?? state.live_open_layers ?? 0));
-    setSmooth('mon-lot', formatNumber(state.current_accumulative_lot ?? state.live_accumulative_lot ?? 0, 2));
+    const bootstrapPending = Boolean(state._runtime_bootstrap_pending);
+    const incomingOpenPositions = bootstrapPending ? [] : safeArray(state.open_positions);
+    const hasMagicMetadata = incomingOpenPositions.some((row) => hasMagicField(row));
+    const botOpenPositions = hasMagicMetadata
+        ? incomingOpenPositions.filter((row) => isBotManagedPositionRow(row))
+        : incomingOpenPositions;
+
+    const derivedBotLayers = bootstrapPending
+        ? 0
+        : (hasMagicMetadata
+        ? botOpenPositions.length
+        : Number(state.current_layers ?? state.live_open_layers ?? 0));
+    const derivedBotAccLot = bootstrapPending
+        ? 0
+        : (hasMagicMetadata
+        ? botOpenPositions.reduce((acc, row) => {
+            const lot = Number(row?.lot ?? row?.lots ?? row?.volume ?? 0);
+            return acc + (Number.isFinite(lot) ? lot : 0);
+        }, 0)
+        : Number(state.current_accumulative_lot ?? state.live_accumulative_lot ?? 0));
+    const derivedBotFloating = bootstrapPending
+        ? 0
+        : (hasMagicMetadata
+        ? botOpenPositions.reduce((acc, row) => {
+            const pnl = Number(row?.floating ?? (Number(row?.profit ?? 0) + Number(row?.swap ?? 0)));
+            return acc + (Number.isFinite(pnl) ? pnl : 0);
+        }, 0)
+        : Number(state.global_floating ?? state.live_floating_pnl ?? 0));
+
+    setSmooth('mon-layers', String(Math.max(0, Math.trunc(Number.isFinite(derivedBotLayers) ? derivedBotLayers : 0))));
+    setSmooth('mon-lot', formatNumber(Number.isFinite(derivedBotAccLot) ? derivedBotAccLot : 0, 2));
     setSmooth('mon-balance', formatMoneyByCurrency(state.balance, currency));
     setSmooth('mon-equity', formatMoneyByCurrency(state.equity, currency));
     const liveDailyProfit = firstFiniteNumber(
         state.report_daily_profit,
         state.daily_profit,
-        state.today_pnl,
-        state.profit_today,
-        state.realized_profit_today,
     );
-    setSmooth('mon-daily-profit', formatMoneyByCurrency(liveDailyProfit, currency));
+    setSmooth('mon-daily-profit', formatSignedMoneyByCurrency(liveDailyProfit, currency));
+    applySignedTone('mon-daily-profit', liveDailyProfit);
     setSmooth('mon-winrate', formatNumber(state.win_rate_percent ?? 0, 2) + '%');
     setSmooth('mon-realized-profit', formatMoneyByCurrency(state.realized_profit ?? 0, currency));
-    setSmooth('mon-drawdown', formatNumber(state.drawdown_pct ?? 0, 2) + '%');
+    // Drawdown rendered after displayFloating is computed (see below)
 
     setSmooth('mon-strategy', strategyName(state.active_strategy ?? 0));
     setSmooth('mon-timeframe', 'M' + String(state.timeframe_logic ?? 1));
@@ -7680,6 +9201,7 @@ function renderMonitoring() {
     if (stopAllBtn) stopAllBtn.disabled = !accountId || licenseLocked || stopAllBtn.disabled;
 
     applyLicenseFormLock(settingsLockedByLicense);
+    applyAccountSelectionLock(!accountId && !settingsLockedByLicense);
 
     updateBulkControlUi();
 
@@ -7694,16 +9216,73 @@ function renderMonitoring() {
     setSmooth('mon-session-us', boolText(Boolean(state.use_us_session)));
     setSmooth('mon-stealth', boolText(Boolean(state.use_stealth_mode)));
 
-    const incomingOpenPositions = safeArray(state.open_positions);
     const cachedOpenPositions = safeArray(accountState._last_open_positions_rows);
+    const nowMs = Date.now();
+    const lastOpenRowsSeenAt = Number(accountState._last_open_positions_seen_at ?? 0);
+    const holdWindowMs = 900;
+    const activeLayers = Number.isFinite(derivedBotLayers) ? Number(derivedBotLayers) : 0;
+    const botAccLot = Number.isFinite(derivedBotAccLot) ? Number(derivedBotAccLot) : 0;
+    const incomingFloatingRaw = Number.isFinite(derivedBotFloating) ? Number(derivedBotFloating) : 0;
+    const floatingExposureSignal = Number.isFinite(incomingFloatingRaw) && Math.abs(incomingFloatingRaw) > 0.0000001;
+    const drawdownExposureSignal = Math.abs(Number(state.drawdown_pct ?? 0)) > 0.0000001;
+    const shouldHoldByExposure = activeLayers > 0 || floatingExposureSignal || drawdownExposureSignal;
+    const withinShortHoldWindow = (nowMs - lastOpenRowsSeenAt) <= holdWindowMs;
+    const lastLiveSyncAt = Number(accountState._last_live_sync_at ?? 0);
+    const recentlyLiveSynced = (nowMs - lastLiveSyncAt) <= 7000;
     const shouldHoldPreviousOpenRows = incomingOpenPositions.length === 0
-        && Number(state.current_layers ?? state.live_open_layers ?? 0) > 0
+        && shouldHoldByExposure
+        && recentlyLiveSynced
+        && withinShortHoldWindow
         && cachedOpenPositions.length > 0;
     const openRows = shouldHoldPreviousOpenRows ? cachedOpenPositions : incomingOpenPositions;
+
+    let floatingFromRows = null;
+    const botExposureActive = activeLayers > 0 || (Number.isFinite(botAccLot) && Math.abs(botAccLot) > 0.0000001);
+    if (openRows.length > 0 && botExposureActive) {
+        floatingFromRows = openRows.reduce((acc, row) => {
+            const pnl = Number(row?.floating ?? (Number(row?.profit ?? 0) + Number(row?.swap ?? 0)));
+            return acc + (Number.isFinite(pnl) ? pnl : 0);
+        }, 0);
+    }
+
+    const incomingFloating = incomingFloatingRaw;
+    const previousFloating = Number(accountState._last_monitor_floating ?? 0);
+    let displayFloating = Number.isFinite(floatingFromRows)
+        ? floatingFromRows
+        : (Number.isFinite(incomingFloating) ? incomingFloating : previousFloating);
+    if (activeLayers > 0 && !Number.isFinite(floatingFromRows) && Math.abs(displayFloating) < 0.0000001 && Math.abs(previousFloating) > 0.0000001) {
+        displayFloating = previousFloating;
+    }
+    // Fallback: derive from equity-balance when no open_positions rows and global_floating is missing/zero
+    const _fbBalance = Number(state.current_balance ?? state.balance ?? 0);
+    const _fbEquity  = Number(state.current_equity  ?? state.equity  ?? 0);
+    if (Math.abs(displayFloating) < 0.0000001 && _fbBalance > 0.0000001 && _fbEquity > 0.0000001) {
+        const equityDerived = _fbEquity - _fbBalance;
+        if (Math.abs(equityDerived) > 0.0000001) {
+            displayFloating = equityDerived;
+        }
+    }
+    accountState._last_monitor_floating = displayFloating;
+    setSmooth('mon-floating', formatSignedMoneyByCurrency(displayFloating, currency));
+    applySignedTone('mon-floating', displayFloating);
+
+    // Drawdown: computed here (after displayFloating is ready) from floating/balance
+    const _ddBalance = _fbBalance;
+    let drawdownSigned;
+    if (_ddBalance > 0.0000001) {
+        drawdownSigned = (displayFloating / _ddBalance) * 100.0;
+    } else {
+        drawdownSigned = firstFiniteNumber(state.drawdown_pct, state.dd);
+    }
+    setSmooth('mon-drawdown', formatSignedPercent(drawdownSigned, 2));
+    applySignedTone('mon-drawdown', drawdownSigned);
+
     if (incomingOpenPositions.length > 0) {
         accountState._last_open_positions_rows = incomingOpenPositions;
-    } else if (Number(state.current_layers ?? state.live_open_layers ?? 0) === 0) {
+        accountState._last_open_positions_seen_at = nowMs;
+    } else if (!shouldHoldPreviousOpenRows) {
         accountState._last_open_positions_rows = [];
+        accountState._last_open_positions_seen_at = 0;
     }
     setStateByAccountPair(accountId, pairSymbol, accountState);
 
@@ -7807,7 +9386,7 @@ function renderAnalysis() {
     setSmooth('analysis-session-asia', boolText(Boolean(analysis?.sessions?.use_asia_session ?? state.use_asia_session)));
     setSmooth('analysis-session-europe', boolText(Boolean(analysis?.sessions?.use_europe_session ?? state.use_europe_session)));
     setSmooth('analysis-session-us', boolText(Boolean(analysis?.sessions?.use_us_session ?? state.use_us_session)));
-    setSmooth('analysis-server-time', String(analysis.server_time ?? '-'));
+    updateAnalysisServerClock(analysis.server_time ?? '-', analysis.captured_at ?? null);
     setSmooth('analysis-age', Number.isFinite(Number(analysis.age_seconds)) ? String(Math.max(0, Math.trunc(Number(analysis.age_seconds)))) + 's' : '-');
 
     const mtf = (analysis.mtf_bias && typeof analysis.mtf_bias === 'object') ? analysis.mtf_bias : {};
@@ -7897,11 +9476,11 @@ function renderAnalysis() {
         || (newsBlockedActive !== prevNewsBlocked)
         || (remotePausedActive !== prevRemotePaused);
     const cooldownMs = currentBias === 'NEUTRAL' ? 180000 : 120000;
-    const shouldRecord = lastSignature === '' || majorShift || (Date.now() - lastRecordedAt) >= cooldownMs;
+    const shouldRecord = lastSignature === '' || signalSignature !== lastSignature || majorShift || (Date.now() - lastRecordedAt) >= cooldownMs;
 
     if (shouldRecord) {
         const reason = String(analysis.reason_summary || buildSignalReasonNarrative(analysis, currentBias, power));
-        recordSignalReason(accountId, currentBias, power, reason, {
+        recordSignalReason(accountId, pairSymbol, currentBias, power, reason, {
             score_buy: score,
             score_sell: scoreSell,
             bull_votes: bullVotes,
@@ -7931,23 +9510,26 @@ function renderReport(lastSave = '') {
     const state = { ...DEFAULTS, ...(getActiveAccountState(accountId, pairSymbol) || {}) };
     const currency = accountCurrencyFor(state);
 
-    if (el('rep-account-id')) el('rep-account-id').textContent = accountId || '-';
-    if (el('rep-strategy')) el('rep-strategy').textContent = strategyName(state.active_strategy ?? 0);
-    if (el('rep-news-severity')) el('rep-news-severity').textContent = String(state.news_filter_severity ?? 'HIGH');
-    if (el('rep-snr')) el('rep-snr').textContent = boolText(Boolean(state.filter_snr_activation));
-    if (el('rep-last-save')) el('rep-last-save').textContent = lastSave || 'Belum ada aksi simpan.';
-    if (el('rep-before-news')) el('rep-before-news').textContent = String(state.news_pause_before_minutes ?? 0);
-    if (el('rep-after-news')) el('rep-after-news').textContent = String(state.news_pause_after_minutes ?? 0);
-    if (el('rep-widget-time')) el('rep-widget-time').textContent = new Date().toLocaleTimeString('id-ID');
-    if (el('rep-news-count')) el('rep-news-count').textContent = String(NEWS_ITEMS.length);
-    if (el('rep-theme')) el('rep-theme').textContent = (document.body.getAttribute('data-theme') || 'light') === 'dark' ? 'Dark' : 'Light';
-    if (el('rep-winrate')) el('rep-winrate').textContent = formatNumber(state.win_rate_percent ?? 0, 2) + '%';
-    if (el('rep-wl')) el('rep-wl').textContent = String(state.wins ?? 0) + '/' + String(state.losses ?? 0);
-    if (el('rep-profit-daily')) el('rep-profit-daily').textContent = formatMoneyByCurrency(state.daily_profit ?? 0, currency);
-    if (el('rep-profit-weekly')) el('rep-profit-weekly').textContent = formatMoneyByCurrency(state.weekly_profit ?? 0, currency);
-    if (el('rep-profit-monthly')) el('rep-profit-monthly').textContent = formatMoneyByCurrency(state.monthly_profit ?? 0, currency);
-    if (el('rep-profit-realized')) el('rep-profit-realized').textContent = formatMoneyByCurrency(state.realized_profit ?? 0, currency);
-    if (el('rep-reset-at')) el('rep-reset-at').textContent = state.wr_reset_at ? formatTime(state.wr_reset_at) : 'Belum pernah';
+    setSmooth('rep-account-id', accountId || '-');
+    setSmooth('rep-strategy', strategyName(state.active_strategy ?? 0));
+    setSmooth('rep-news-severity', String(state.news_filter_severity ?? 'HIGH'));
+    setSmooth('rep-snr', boolText(Boolean(state.filter_snr_activation)));
+    setSmooth('rep-last-save', lastSave || 'Belum ada aksi simpan.');
+    setSmooth('rep-before-news', String(state.news_pause_before_minutes ?? 0));
+    setSmooth('rep-after-news', String(state.news_pause_after_minutes ?? 0));
+    setSmooth('rep-widget-time', new Date().toLocaleTimeString('id-ID'));
+    setSmooth('rep-news-count', String(NEWS_ITEMS.length));
+    setSmooth('rep-theme', (document.body.getAttribute('data-theme') || 'light') === 'dark' ? 'Dark' : 'Light');
+    setSmooth('rep-winrate', formatNumber(state.win_rate_percent ?? 0, 2) + '%');
+    setSmooth('rep-wl', String(state.wins ?? 0) + '/' + String(state.losses ?? 0));
+    setSmooth('rep-profit-daily', formatSignedMoneyByCurrency(state.daily_profit ?? 0, currency));
+    applySignedTone('rep-profit-daily', state.daily_profit ?? 0);
+    setSmooth('rep-profit-weekly', formatSignedMoneyByCurrency(state.weekly_profit ?? 0, currency));
+    applySignedTone('rep-profit-weekly', state.weekly_profit ?? 0);
+    setSmooth('rep-profit-monthly', formatSignedMoneyByCurrency(state.monthly_profit ?? 0, currency));
+    applySignedTone('rep-profit-monthly', state.monthly_profit ?? 0);
+    setSmooth('rep-profit-realized', formatMoneyByCurrency(state.realized_profit ?? 0, currency));
+    setSmooth('rep-reset-at', state.wr_reset_at ? formatTime(state.wr_reset_at) : 'Belum pernah');
     renderHistoryTable(state.history || []);
     renderHistoryPagination();
     renderCalcDebug();
@@ -7967,6 +9549,12 @@ async function refreshMonitoringOnly() {
     _monitoringInflight = true;
     const controller = new AbortController();
     _monitoringAbortController = controller;
+    const timeoutHandle = setTimeout(() => {
+        try {
+            controller.abort();
+        } catch (_e) {
+        }
+    }, 7000);
     const csrf = document.querySelector('meta[name="csrf-token"]')?.content || '';
 
     try {
@@ -7985,17 +9573,24 @@ async function refreshMonitoringOnly() {
         if (res.ok && json.success) {
             const REPORT_FIELDS = ['daily_profit','weekly_profit','monthly_profit',
                                    'realized_profit','win_rate_percent','wins','losses',
-                                   'drawdown_pct','history'];
+                                   'history'];
             REPORT_FIELDS.forEach(k => delete json[k]);
-            setStateByAccountPair(accountId, pairSymbol, json);
-            DASHBOARD_LAST_MONITORING_SYNC_AT = Date.now();
-            if (CALC_DEBUG) {
-                setStateByAccountPair(accountId, pairSymbol, { monitoring_calc_debug: json?.calc_debug || null });
+            if (shouldApplyMonitoringPayload(accountId, pairSymbol, json)) {
+                setStateByAccountPair(accountId, pairSymbol, {
+                    ...json,
+                    _last_live_sync_at: Date.now(),
+                    _runtime_bootstrap_pending: false,
+                });
+                DASHBOARD_LAST_MONITORING_SYNC_AT = Date.now();
+                if (CALC_DEBUG) {
+                    setStateByAccountPair(accountId, pairSymbol, { monitoring_calc_debug: json?.calc_debug || null });
+                }
             }
             renderMonitoring();
         }
     } catch (_e) {
     } finally {
+        clearTimeout(timeoutHandle);
         if (_monitoringAbortController === controller) {
             _monitoringAbortController = null;
             _monitoringInflight = false;
@@ -8041,7 +9636,13 @@ async function refreshConnectedPairsRealtime() {
             if (!response.ok || !json.success) return;
 
             const prevState = getStateByAccountPair(accountId, pairSymbol) || {};
-            setStateByAccountPair(accountId, pairSymbol, json);
+            if (shouldApplyMonitoringPayload(accountId, pairSymbol, json)) {
+                setStateByAccountPair(accountId, pairSymbol, {
+                    ...json,
+                    _last_live_sync_at: Date.now(),
+                    _runtime_bootstrap_pending: false,
+                });
+            }
 
             const prevOnline = isStateFreshOnline(prevState);
             const nextOnline = isStateFreshOnline(getStateByAccountPair(accountId, pairSymbol) || {});
@@ -8087,6 +9688,11 @@ async function refreshReportOnly(options = {}) {
             ?? el('rep-history-limit')?.value
             ?? REPORTS_STATE.perPage
             ?? 10;
+        const selectedPeriodRaw = REPORTS_STATE.period || el('rep-history-period')?.value || 'all';
+        const selectedPeriod = ['all', 'today', 'yesterday', 'this_week', 'last_week', 'this_month', 'last_30_days'].includes(String(selectedPeriodRaw))
+            ? String(selectedPeriodRaw)
+            : 'all';
+        REPORTS_STATE.period = selectedPeriod;
         const limit = Math.max(5, Number(selectedLimitRaw));
         const requestedPageRaw = Number(REPORTS_STATE.pendingPage ?? REPORTS_STATE.page);
         const requestedPage = Number.isFinite(requestedPageRaw) ? Math.max(1, requestedPageRaw) : 1;
@@ -8099,6 +9705,7 @@ async function refreshReportOnly(options = {}) {
             + '&pair_symbol=' + encodeURIComponent(pairSymbol)
             + '&limit=' + encodeURIComponent(String(limit))
             + '&page=' + encodeURIComponent(String(requestedPage))
+            + '&period=' + encodeURIComponent(selectedPeriod)
             + (CALC_DEBUG ? '&calc_debug=1' : '')
             + '&_ts=' + Date.now();
         const res = await fetch(url, {
@@ -8113,21 +9720,31 @@ async function refreshReportOnly(options = {}) {
             REPORTS_STATE.lastPage = Number(json?.history_meta?.last_page ?? 1);
             REPORTS_STATE.total    = Number(json?.history_meta?.total ?? 0);
             REPORTS_STATE.perPage  = Number(json?.history_meta?.per_page ?? limit);
+            const prevState = getStateByAccountPair(accountId, pairSymbol) || {};
+            const incomingHistory = safeArray(json.history);
+            const incomingHistoryTotal = Number(json?.history_meta?.total ?? incomingHistory.length);
+            const resolvedHistory = incomingHistory.length > 0
+                ? incomingHistory
+                : (incomingHistoryTotal === 0 ? [] : safeArray(prevState.history));
+            const incomingAnalysis = (json?.analysis && typeof json.analysis === 'object') ? json.analysis : null;
+            const resolvedAnalysis = hasMeaningfulAnalysisSnapshot(incomingAnalysis)
+                ? incomingAnalysis
+                : (prevState.analysis || null);
             setStateByAccountPair(accountId, pairSymbol, {
-                history: safeArray(json.history),
-                wins: Number(json?.wr?.wins ?? 0),
-                losses: Number(json?.wr?.losses ?? 0),
-                win_rate_percent: Number(json?.wr?.win_rate_percent ?? 0),
+                history: resolvedHistory,
+                wins: coalesceFiniteNumber(json?.wr?.wins, prevState.wins),
+                losses: coalesceFiniteNumber(json?.wr?.losses, prevState.losses),
+                win_rate_percent: coalesceFiniteNumber(json?.wr?.win_rate_percent, prevState.win_rate_percent),
                 wr_reset_at: json?.wr?.reset_at || null,
-                realized_profit: Number(json?.profit?.realized ?? 0),
-                daily_profit: Number(json?.profit?.daily ?? 0),
-                weekly_profit: Number(json?.profit?.weekly ?? 0),
-                monthly_profit: Number(json?.profit?.monthly ?? 0),
-                report_daily_profit: Number(json?.profit?.daily ?? 0),
-                report_weekly_profit: Number(json?.profit?.weekly ?? 0),
-                report_monthly_profit: Number(json?.profit?.monthly ?? 0),
-                report_realized_profit: Number(json?.profit?.realized ?? 0),
-                analysis: json?.analysis || (getStateByAccountPair(accountId, pairSymbol)?.analysis || null),
+                realized_profit: coalesceFiniteNumber(json?.profit?.realized, prevState.realized_profit),
+                daily_profit: coalesceFiniteNumber(json?.profit?.daily, prevState.daily_profit),
+                weekly_profit: coalesceFiniteNumber(json?.profit?.weekly, prevState.weekly_profit),
+                monthly_profit: coalesceFiniteNumber(json?.profit?.monthly, prevState.monthly_profit),
+                report_daily_profit: coalesceFiniteNumber(json?.profit?.daily, prevState.report_daily_profit ?? prevState.daily_profit),
+                report_weekly_profit: coalesceFiniteNumber(json?.profit?.weekly, prevState.report_weekly_profit ?? prevState.weekly_profit),
+                report_monthly_profit: coalesceFiniteNumber(json?.profit?.monthly, prevState.report_monthly_profit ?? prevState.monthly_profit),
+                report_realized_profit: coalesceFiniteNumber(json?.profit?.realized, prevState.report_realized_profit ?? prevState.realized_profit),
+                analysis: resolvedAnalysis,
             });
             DASHBOARD_LAST_REPORT_SYNC_AT = Date.now();
             if (CALC_DEBUG) {
@@ -8158,6 +9775,11 @@ async function refreshReportOnly(options = {}) {
 }
 
 async function refreshLiveTelemetry(force = false) {
+    const streamHealthy = Boolean(DASHBOARD_LIVE_SOURCE && DASHBOARD_LIVE_SOURCE.readyState === EventSource.OPEN)
+        && (Date.now() - Number(DASHBOARD_LAST_STREAM_EVENT_AT || 0) <= DASHBOARD_STALE_STREAM_MS);
+    if (!force && streamHealthy) {
+        return;
+    }
     await refreshMonitoringOnly();
     await refreshReportOnly();
 }
@@ -8212,6 +9834,7 @@ function applyLicenseFormLock(locked) {
         { id: 'workspace-pane-logic', visualLock: true },
         { id: 'workspace-pane-monitoring', visualLock: false },
         { id: 'workspace-pane-analysis', visualLock: false },
+        { id: 'workspace-pane-bookkeeping', visualLock: false },
         { id: 'workspace-pane-reports', visualLock: false },
     ];
 
@@ -8254,6 +9877,9 @@ function applyLicenseFormLock(locked) {
     if (saveLogicMsg) {
         if (locked) {
             saveLogicMsg.textContent = 'Lisensi account tidak aktif. Form Logic dikunci sampai lisensi aktif kembali.';
+            saveLogicMsg.className = 'small text-danger';
+        } else if (!IS_ADMIN) {
+            saveLogicMsg.textContent = 'Tab Logic hanya bisa diubah oleh admin.';
             saveLogicMsg.className = 'small text-danger';
         } else {
             saveLogicMsg.textContent = 'Klik untuk menyimpan perubahan logic di panel ini.';
@@ -8312,6 +9938,62 @@ function applyLicenseFormLock(locked) {
             )
             : '';
         reportsLockMsg.className = locked ? 'mt-3' : 'small text-secondary mt-1';
+    }
+}
+
+function applyAccountSelectionLock(locked) {
+    const paneIds = ['workspace-pane-settings', 'workspace-pane-logic'];
+
+    paneIds.forEach((paneId) => {
+        const pane = el(paneId);
+        if (!pane) return;
+
+        pane.setAttribute('data-account-required-locked', locked ? '1' : '0');
+        pane.querySelectorAll('input, select, textarea, button').forEach((control) => {
+            if (!(control instanceof HTMLInputElement || control instanceof HTMLSelectElement || control instanceof HTMLTextAreaElement || control instanceof HTMLButtonElement)) {
+                return;
+            }
+
+            if (locked) {
+                if (!control.dataset.accountPrevDisabled) {
+                    control.dataset.accountPrevDisabled = control.disabled ? '1' : '0';
+                }
+                control.disabled = true;
+            } else if (control.dataset.accountPrevDisabled) {
+                control.disabled = control.dataset.accountPrevDisabled === '1';
+                delete control.dataset.accountPrevDisabled;
+            }
+        });
+    });
+
+    const settingsLockMsg = el('license-lock-msg-settings');
+    if (settingsLockMsg) {
+        if (locked) {
+            settingsLockMsg.innerHTML = '<div class="alert alert-secondary py-2 px-3 mb-0" data-account-lock="1">Pilih account MT5 dulu untuk membuka tab Settings.</div>';
+        } else if (settingsLockMsg.querySelector('[data-account-lock="1"]')) {
+            settingsLockMsg.innerHTML = '';
+        }
+    }
+
+    const logicLockMsg = el('license-lock-msg-logic');
+    if (logicLockMsg) {
+        if (locked) {
+            logicLockMsg.innerHTML = '<div class="alert alert-secondary py-2 px-3 mb-0" data-account-lock="1">Pilih account MT5 dulu untuk membuka tab Logic.</div>';
+        } else if (logicLockMsg.querySelector('[data-account-lock="1"]')) {
+            logicLockMsg.innerHTML = '';
+        }
+    }
+
+    const saveMsg = el('save-msg');
+    if (saveMsg && locked) {
+        saveMsg.textContent = 'Pilih account MT5 dulu untuk mengubah Settings.';
+        saveMsg.className = 'small mt-2 text-warning';
+    }
+
+    const saveLogicMsg = el('save-msg-logic');
+    if (saveLogicMsg && locked) {
+        saveLogicMsg.textContent = 'Pilih account MT5 dulu untuk mengubah Logic.';
+        saveLogicMsg.className = 'small text-warning';
     }
 }
 
@@ -8401,6 +10083,11 @@ function toggleDependentState() {
 }
 
 function loadAccountForm(accountId) {
+    let options = {};
+    if (typeof arguments[1] === 'object' && arguments[1] !== null) {
+        options = arguments[1];
+    }
+    const deferInitialRender = Boolean(options.deferInitialRender);
     const account = getActiveAccountState(accountId, currentPairSymbol()) || {};
     const state = { ...DEFAULTS, ...account };
 
@@ -8417,16 +10104,31 @@ function loadAccountForm(accountId) {
         el('use_mirror_trap_mart').checked = Boolean(state.use_mirror_trap);
     }
 
+    if (!IS_ADMIN && el('active_strategy') && String(el('active_strategy').value || '0') !== '0') {
+        el('active_strategy').value = '0';
+    }
+
     syncGridLotScalingInputsFromCore();
 
     toggleStrategyPanels();
     toggleDependentState();
     toggleWorkspaceThemeCard();
+    syncRiskAckCheckbox();
+    captureInlineSaveBaseline();
+    refreshInlineSaveButtons();
     markClean();
-    renderMonitoring();
-    renderAnalysis();
-    renderReport(el('save-msg')?.textContent || '');
-    refreshLiveTelemetry(true);
+    if (deferInitialRender) {
+        refreshLiveTelemetry(true).finally(() => {
+            renderMonitoring();
+            renderAnalysis();
+            renderReport(el('save-msg')?.textContent || '');
+        });
+    } else {
+        renderMonitoring();
+        renderAnalysis();
+        renderReport(el('save-msg')?.textContent || '');
+        refreshLiveTelemetry(true);
+    }
 }
 
 function buildPayload() {
@@ -8436,8 +10138,14 @@ function buildPayload() {
 
     FIELD_IDS.forEach((id) => {
         if (!el(id)) return;
+        if (!IS_ADMIN && LOGIC_ONLY_FIELD_IDS.includes(id)) return;
         payload[id] = isCheckbox(id) ? el(id).checked : el(id).value;
     });
+
+    // Client feature-flag: strategy selector is restricted to Grid Spam.
+    if (!IS_ADMIN) {
+        payload.active_strategy = 0;
+    }
 
     // Protective override logic: Only override fields NOT already in FIELD_IDS to avoid double-set
     // Kombo field untuk Mirror Trap strategy
@@ -8457,17 +10165,66 @@ function buildPayload() {
     return payload;
 }
 
+function applyLogicRoleLock() {
+    const logicPane = el('workspace-pane-logic');
+    if (!logicPane) return;
+
+    const lockByRole = !IS_ADMIN;
+    logicPane.classList.toggle('logic-admin-locked', lockByRole);
+
+    logicPane.querySelectorAll('input, select, textarea, button').forEach((control) => {
+        if (!(control instanceof HTMLInputElement || control instanceof HTMLSelectElement || control instanceof HTMLTextAreaElement || control instanceof HTMLButtonElement)) {
+            return;
+        }
+
+        if (lockByRole) {
+            if (!control.dataset.rolePrevDisabled) {
+                control.dataset.rolePrevDisabled = control.disabled ? '1' : '0';
+            }
+            control.disabled = true;
+        } else if (control.dataset.rolePrevDisabled) {
+            control.disabled = control.dataset.rolePrevDisabled === '1';
+            delete control.dataset.rolePrevDisabled;
+        }
+    });
+
+    if (lockByRole && el('save-msg-logic')) {
+        el('save-msg-logic').textContent = 'Tab Logic hanya bisa diubah oleh admin.';
+        el('save-msg-logic').className = 'small text-danger';
+    }
+}
+
 function markDirty() {
+    el('save-bar-settings')?.classList.remove('is-hidden');
     el('save-msg').textContent = 'Perubahan terdeteksi. Simpan untuk menerapkan konfigurasi baru.';
     el('save-msg').className = 'small mt-2 text-warning';
+    refreshInlineSaveButtons();
+}
+
+function scheduleToggleAutoSave(fieldId) {
+    if (!fieldId || !isCheckbox(fieldId) || !currentAccount()) return;
+    if (!isFieldDirty(fieldId)) return;
+
+    if (TOGGLE_AUTOSAVE_TIMERS[fieldId]) {
+        clearTimeout(TOGGLE_AUTOSAVE_TIMERS[fieldId]);
+    }
+
+    TOGGLE_AUTOSAVE_TIMERS[fieldId] = setTimeout(async () => {
+        delete TOGGLE_AUTOSAVE_TIMERS[fieldId];
+        if (!isFieldDirty(fieldId)) return;
+        await saveSetting(fieldId);
+    }, 280);
 }
 
 function markClean(message = 'Pengaturan sudah sinkron dengan data terakhir account ini.') {
+    el('save-bar-settings')?.classList.add('is-hidden');
     el('save-msg').textContent = message;
     el('save-msg').className = 'small mt-2 text-secondary';
+    captureInlineSaveBaseline();
+    refreshInlineSaveButtons();
 }
 
-async function saveSetting() {
+async function saveSetting(changedFieldId = '') {
     if (!currentAccount()) return;
 
     const accountId = currentAccount();
@@ -8488,6 +10245,10 @@ async function saveSetting() {
     if (!validateLogicInputs(true)) return;
 
     const payload = buildPayload();
+    const activeWorkspaceTab = normalizeWorkspaceTab(document.querySelector('#workspace-tabs [data-workspace-tab].active')?.getAttribute('data-workspace-tab') || DEFAULT_WORKSPACE_TAB);
+    if (IS_ADMIN && activeWorkspaceTab === 'logic') {
+        payload.apply_logic_globally = true;
+    }
     el('btn-save').disabled = true;
     el('btn-save').textContent = 'Menyimpan...';
 
@@ -8509,9 +10270,11 @@ async function saveSetting() {
 
         setStateByAccountPair(accountId, currentPairSymbol(), { ...payload, ...(json.data || {}) });
         markClean(json.message || 'Setting updated successfully.');
+        showDashboardToast(json.message || 'Pengaturan tersimpan.');
         renderMonitoring();
         renderReport(json.message || 'Setting updated successfully.');
     } catch (error) {
+        el('save-bar-settings')?.classList.remove('is-hidden');
         el('save-msg').textContent = error.message || 'Terjadi kesalahan saat menyimpan.';
         el('save-msg').className = 'small mt-2 text-danger';
         renderReport(error.message || 'Terjadi kesalahan saat menyimpan.');
@@ -8572,7 +10335,7 @@ async function saveAccount(event) {
 
     const payload = {
         account_id: el('new_account_id').value.trim(),
-        pair_symbol: el('new_pair_symbol').value.trim().toUpperCase() || 'XAUUSD',
+        pair_symbol: el('new_pair_symbol').value.trim().toUpperCase() || 'XAUUSDC',
         base_lot: el('new_base_lot').value,
     };
 
@@ -8602,7 +10365,7 @@ async function saveAccount(event) {
         }
 
         const accountData = json.data || payload;
-        const createdPair = normalizePairSymbol(accountData?.pair_symbol || payload.pair_symbol || 'XAUUSD');
+        const createdPair = normalizePairSymbol(accountData?.pair_symbol || payload.pair_symbol || 'XAUUSDC');
         ensureAccountPairRegistered(payload.account_id, createdPair);
         setStateByAccountPair(payload.account_id, createdPair, { ...DEFAULTS, ...accountData, pair_symbol: createdPair });
         SELECTED_PAIR_BY_ACCOUNT[payload.account_id] = createdPair;
@@ -8747,6 +10510,54 @@ async function saveManagedUser(event) {
     } finally {
         btn.disabled = false;
         btn.textContent = 'Simpan User';
+    }
+}
+
+async function deleteManagedUser(userId) {
+    if (!IS_ADMIN) return;
+    const normalizedId = Number(userId);
+    if (!Number.isFinite(normalizedId) || normalizedId <= 0) return;
+    if (!window.confirm('Hapus user #' + normalizedId + '? Semua account MT5 user ini juga akan dihapus.')) {
+        return;
+    }
+
+    const btnDelete = el('btn-user-delete');
+    const previousText = btnDelete ? btnDelete.textContent : 'Hapus User';
+    if (btnDelete) {
+        btnDelete.disabled = true;
+        btnDelete.textContent = 'Menghapus...';
+    }
+
+    try {
+        const response = await fetch(ROUTES.userDeleteBase + '/' + normalizedId, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                'Accept': 'application/json',
+            },
+        });
+
+        const json = await response.json();
+        if (!response.ok || !json.success) {
+            throw new Error(json.message || 'Gagal menghapus user.');
+        }
+
+        const idx = MANAGED_USERS.findIndex((item) => Number(item.id) === normalizedId);
+        if (idx >= 0) {
+            MANAGED_USERS.splice(idx, 1);
+        }
+
+        renderUsersTable();
+        resetManageForm();
+        setUsersMessage(json.message || 'User berhasil dihapus.', 'success');
+    } catch (error) {
+        setUsersMessage(error.message || 'Terjadi kesalahan saat menghapus user.', 'danger');
+    } finally {
+        if (btnDelete) {
+            btnDelete.disabled = false;
+            btnDelete.textContent = previousText;
+        }
     }
 }
 
@@ -8936,30 +10747,27 @@ function renderNewsList() {
     const visibleItems = NEWS_ITEMS.slice(0, 7);
 
     el('news-list').innerHTML = visibleItems.map((item, idx) => {
-        let dataHtml = '';
-        if (item?.actual !== undefined && item?.actual !== null) {
-            dataHtml += '<div class="news-data-item">' +
-                '<div class="news-metric-label news-metric-label-actual">Actual</div>' +
-                '<div class="news-metric-value">' + escapeHtml(metricValue(item.actual)) + '</div>' +
+        const actualMeta = metricMeta(item?.actual, 'actual');
+        const forecastMeta = metricMeta(item?.forecast, 'forecast');
+        const previousMeta = metricMeta(item?.previous, 'previous');
+
+        const dataHtml = [
+            { label: 'Actual', css: 'actual', meta: actualMeta },
+            { label: 'Forecast', css: 'forecast', meta: forecastMeta },
+            { label: 'Previous', css: 'previous', meta: previousMeta },
+        ].map((metric) => {
+            const emptyClass = metric.meta.missing ? ' is-empty' : '';
+            return '<div class="news-data-item' + emptyClass + '">' +
+                '<div class="news-metric-label news-metric-label-' + metric.css + '">' + metric.label + '</div>' +
+                '<div class="news-metric-value">' + escapeHtml(metric.meta.value) + '</div>' +
                 '</div>';
-        }
-        if (item?.forecast) {
-            dataHtml += '<div class="news-data-item">' +
-                '<div class="news-metric-label news-metric-label-forecast">Forecast</div>' +
-                '<div class="news-metric-value">' + escapeHtml(metricValue(item.forecast)) + '</div>' +
-                '</div>';
-        }
-        if (item?.previous !== undefined && item?.previous !== null) {
-            dataHtml += '<div class="news-data-item">' +
-                '<div class="news-metric-label news-metric-label-previous">Previous</div>' +
-                '<div class="news-metric-value">' + escapeHtml(metricValue(item.previous)) + '</div>' +
-                '</div>';
-        }
+        }).join('');
+
         const nextClass = idx === 0 ? ' news-item-next' : '';
         return '<div class="news-item' + nextClass + ' py-2">' +
-            '<div class="fw-semibold text-body mb-2">' + escapeHtml(item.title || 'USD Event') + '</div>' +
-            '<div class="small text-secondary mb-3">' + escapeHtml(itemDayDate(item)) + ' | ' + escapeHtml(itemClock(item)) + ' WIB</div>' +
-            '<div class="d-flex flex-wrap gap-3">' + dataHtml + '</div>' +
+            '<div class="fw-semibold news-item-title mb-2">' + escapeHtml(item.title || 'USD Event') + '</div>' +
+            '<div class="small news-item-meta mb-3">' + escapeHtml(itemDayDate(item)) + ' | ' + escapeHtml(itemClock(item)) + ' WIB</div>' +
+            '<div class="d-flex flex-wrap gap-2">' + dataHtml + '</div>' +
             '</div>';
     }).join('');
 }
@@ -9056,16 +10864,19 @@ function renderNewsHistoryList() {
 
     el('news-history-list').innerHTML = items.map((item) => {
         const impact = String(item?.impact || 'MEDIUM').toUpperCase();
+        const actualMeta = metricMeta(item?.actual, 'actual');
+        const forecastMeta = metricMeta(item?.forecast, 'forecast');
+        const previousMeta = metricMeta(item?.previous, 'previous');
         return '<div class="news-item news-history-card py-2">'
             + '<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-1">'
             + '<div class="fw-semibold text-body">' + escapeHtml(item.title || 'USD Event') + '</div>'
             + '<span class="news-impact-badge">' + escapeHtml(impact) + '</span>'
             + '</div>'
             + '<div class="small text-secondary mb-3">' + escapeHtml(itemDayDate(item)) + ' | ' + escapeHtml(itemClock(item)) + ' WIB</div>'
-            + '<div class="d-flex flex-wrap gap-3 mb-2">'
-            + '<div class="news-data-item"><div class="news-metric-label news-metric-label-actual">Actual</div><div class="news-metric-value">' + escapeHtml(metricValue(item.actual)) + '</div></div>'
-            + '<div class="news-data-item"><div class="news-metric-label news-metric-label-forecast">Forecast</div><div class="news-metric-value">' + escapeHtml(metricValue(item.forecast)) + '</div></div>'
-            + '<div class="news-data-item"><div class="news-metric-label news-metric-label-previous">Previous</div><div class="news-metric-value">' + escapeHtml(metricValue(item.previous)) + '</div></div>'
+            + '<div class="d-flex flex-wrap gap-2 mb-2">'
+            + '<div class="news-data-item' + (actualMeta.missing ? ' is-empty' : '') + '"><div class="news-metric-label news-metric-label-actual">Actual</div><div class="news-metric-value">' + escapeHtml(actualMeta.value) + '</div></div>'
+            + '<div class="news-data-item' + (forecastMeta.missing ? ' is-empty' : '') + '"><div class="news-metric-label news-metric-label-forecast">Forecast</div><div class="news-metric-value">' + escapeHtml(forecastMeta.value) + '</div></div>'
+            + '<div class="news-data-item' + (previousMeta.missing ? ' is-empty' : '') + '"><div class="news-metric-label news-metric-label-previous">Previous</div><div class="news-metric-value">' + escapeHtml(previousMeta.value) + '</div></div>'
             + '</div>'
             + '<div class="news-history-note">' + escapeHtml(item.ai_analysis || '-') + '</div>'
             + '</div>';
@@ -9099,11 +10910,11 @@ function normalizeCalendarApiEvents(events) {
                     hour12: false,
                     timeZone: 'Asia/Jakarta',
                 }),
-                actual: item?.actual ?? 'Menunggu rilis',
-                forecast: item?.forecast ?? 'Menunggu rilis',
-                previous: item?.previous ?? 'Menunggu rilis',
-                ai_analysis: item?.ai_analysis || 'Event upcoming dari calendar API.',
-                ai_verdict: item?.ai_verdict || 'GOLD NEUTRAL',
+                actual: item?.actual ?? '',
+                forecast: item?.forecast ?? '',
+                previous: item?.previous ?? '',
+                ai_analysis: item?.ai_analysis || '',
+                ai_verdict: item?.ai_verdict || '',
                 eventDate,
             };
         })
@@ -9249,9 +11060,13 @@ function updateNewsWidget() {
         checkNewsApproaching(nextItem, distance);
     }
 
-    const verdictSource = nextItem || NEWS_ITEMS[0] || null;
-    el('ai-verdict-label').textContent = verdictSource?.ai_verdict || 'N/A';
-    el('ai-verdict-copy').textContent = verdictSource?.ai_analysis || 'Belum ada analisis AI yang bisa dijadikan ringkasan arah emas hari ini.';
+    const verdictSource = preferredNewsInsightSource();
+    const verdictLabel = String(verdictSource?.ai_verdict || '').trim();
+    const verdictCopy = String(verdictSource?.ai_analysis || '').trim();
+    el('ai-verdict-label').textContent = verdictLabel !== '' ? verdictLabel : 'WAITING DATA';
+    el('ai-verdict-copy').textContent = !isGenericAiInsight(verdictCopy)
+        ? verdictCopy
+        : 'Analisa AI belum tersedia untuk event terdekat. Menunggu update model setelah data ekonomi masuk.';
 
     if (el('rep-widget-time')) {
         el('rep-widget-time').textContent = new Date().toLocaleTimeString('id-ID');
@@ -9271,7 +11086,7 @@ el('account_id')?.addEventListener('change', (event) => {
         saveSelectedPair(accountId, availablePairs[0]);
     }
     renderPairTabsForCurrentAccount();
-    loadAccountForm(event.target.value);
+    loadAccountForm(event.target.value, { deferInitialRender: true });
     updateAccountPickerToggle();
     syncDeleteAccountInput();
     syncAliasModalForCurrentAccount();
@@ -9279,6 +11094,9 @@ el('account_id')?.addEventListener('change', (event) => {
     refreshConnectedPairsRealtime();
 });
 el('active_strategy')?.addEventListener('change', () => {
+    if (!IS_ADMIN && el('active_strategy') && String(el('active_strategy').value || '0') !== '0') {
+        el('active_strategy').value = '0';
+    }
     toggleStrategyPanels();
     markDirty();
 });
@@ -9322,6 +11140,24 @@ el('use_mirror_trap_mart')?.addEventListener('change', () => {
 FIELD_IDS.forEach((id) => {
     el(id)?.addEventListener('input', markDirty);
     el(id)?.addEventListener('change', markDirty);
+    if (isCheckbox(id)) {
+        el(id)?.addEventListener('change', () => {
+            scheduleToggleAutoSave(id);
+        });
+    }
+});
+
+el('risk_acknowledged')?.addEventListener('change', async (event) => {
+    const accountId = currentAccount();
+    const accepted = Boolean(event?.target?.checked);
+    try {
+        await setRiskAcknowledged(accountId, accepted);
+    } catch (_error) {
+        if (event?.target) {
+            event.target.checked = !accepted;
+        }
+        alert('Persetujuan ToS gagal disimpan. Coba lagi.');
+    }
 });
 
 ['ema_fast', 'ema_slow'].forEach((id) => {
@@ -9346,7 +11182,8 @@ el('btn-bot-toggle')?.addEventListener('click', async () => {
         alert('Lisensi account tidak aktif. Start/Stop bot diblokir.');
         return;
     }
-    const isLive = String(state.guard_status ?? '') === 'LIVE';
+    const guardStatus = String(state.guard_status ?? state.live_guard_status ?? '').toUpperCase();
+    const isLive = guardStatus === 'LIVE';
     const action = isLive ? 'stop' : 'start';
     const btn = el('btn-bot-toggle');
     const iconEl = el('btn-bot-icon');
@@ -9368,7 +11205,21 @@ el('btn-bot-toggle')?.addEventListener('click', async () => {
         });
         const json = await res.json();
         if (json.success) {
-            setStateByAccountPair(accountId, pairSymbol, { guard_status: json.guard_status });
+            const runtimeReset = action === 'start'
+                ? {
+                    current_layers: 0,
+                    current_accumulative_lot: 0,
+                    global_floating: 0,
+                    live_floating_pnl: 0,
+                    open_positions: [],
+                    pending_orders: [],
+                }
+                : {};
+            setStateByAccountPair(accountId, pairSymbol, {
+                guard_status: json.guard_status,
+                live_guard_status: json.guard_status,
+                ...runtimeReset,
+            });
             const msg = json.guard_status === 'LIVE' ? '✅ Bot diaktifkan.' : '⏹ Bot dihentikan.';
             const saveMsgEl = el('save-msg');
             if (saveMsgEl) {
@@ -9451,19 +11302,30 @@ async function triggerBulkBotToggle(action) {
         updatedAccounts.forEach((accountId) => {
             const pairs = getPairsForAccount(accountId);
             pairs.forEach((pairSymbol) => {
+                const runtimeReset = action === 'start'
+                    ? {
+                        current_layers: 0,
+                        current_accumulative_lot: 0,
+                        global_floating: 0,
+                        live_floating_pnl: 0,
+                        open_positions: [],
+                        pending_orders: [],
+                    }
+                    : {};
                 setStateByAccountPair(accountId, pairSymbol, {
                     guard_status: nextGuardStatus,
                     live_guard_status: nextGuardStatus,
+                    ...runtimeReset,
                 });
             });
         });
 
         if (saveMsgEl) {
-            const forceClosedCount = safeArray(json.force_closed_accounts).length;
+            const reloadQueuedCount = safeArray(json.reload_queued_accounts).length;
             const syncCount = safeArray(json.start_sync_accounts).length;
             const syncAt = json.start_sync_at ? (' | Sync at: ' + formatTime(json.start_sync_at)) : '';
             const extraText = action === 'stop'
-                ? (' | Force close queued: ' + forceClosedCount + ' account')
+                ? (' | Graceful stop queued: ' + reloadQueuedCount + ' account')
                 : (' | Sync queued: ' + syncCount + ' account' + syncAt);
             saveMsgEl.textContent = String(json.message || (actionLabel + ' berhasil.')) + ' (' + updatedAccounts.length + ' account)' + extraText;
             saveMsgEl.className = 'small mt-2 text-success';
@@ -9581,9 +11443,11 @@ el('bulkWhitelistModal')?.addEventListener('hidden.bs.modal', () => {
 
 document.addEventListener('visibilitychange', () => {
     if (document.hidden) {
+        stopDashboardActiveSync();
         stopDashboardFallbackPolling();
         return;
     }
+    startDashboardActiveSync();
     const now = Date.now();
     if ((now - Number(DASHBOARD_LAST_MONITORING_SYNC_AT || 0)) > 1800) {
         refreshMonitoringOnly();
@@ -9655,7 +11519,6 @@ el('theme-toggle')?.addEventListener('click', () => {
 
 el('account-alias-form')?.addEventListener('submit', async (event) => {
     event.preventDefault();
-    if (!IS_ADMIN) return;
 
     const accountId = String(el('alias_account_id')?.value || '').trim();
     const alias = String(el('alias_account_name')?.value || '').trim();
@@ -9687,7 +11550,6 @@ el('account-alias-form')?.addEventListener('submit', async (event) => {
 });
 
 el('btn-alias-clear')?.addEventListener('click', async () => {
-    if (!IS_ADMIN) return;
     const accountId = String(el('alias_account_id')?.value || '').trim();
     if (!accountId) {
         setAccountAliasMessage('Account belum dipilih.', 'danger');
@@ -9725,6 +11587,15 @@ el('account-alias-modal')?.addEventListener('shown.bs.modal', () => {
     el('alias_account_name')?.focus();
 });
 
+el('alias_account_id')?.addEventListener('change', (event) => {
+    const accountId = String(event.target?.value || '').trim();
+    saveSelectedAliasModalAccount(accountId);
+    if (el('alias_account_name')) {
+        el('alias_account_name').value = accountAliasById(accountId);
+    }
+    setAccountAliasMessage(accountId ? 'Atur alias untuk account terpilih.' : 'Belum ada account yang bisa diberi alias.', 'secondary');
+});
+
 el('account-search')?.addEventListener('input', (event) => {
     ACCOUNT_SEARCH_QUERY = String(event.target?.value || '').trim();
     renderAccountPickerOptions();
@@ -9749,7 +11620,9 @@ el('pair-tabs-settings')?.addEventListener('click', (event) => {
 });
 
 el('account-picker-options')?.addEventListener('click', (event) => {
-    const target = event.target;
+    const target = event.target instanceof HTMLElement
+        ? event.target.closest('.account-picker-item[data-account-id]')
+        : null;
     if (!(target instanceof HTMLElement)) return;
     const accountId = String(target.getAttribute('data-account-id') || '').trim();
     if (!accountId) return;
@@ -9800,6 +11673,14 @@ el('btn-user-reset')?.addEventListener('click', () => {
     resetManageForm();
     setUsersMessage('Form direset ke mode create.', 'secondary');
 });
+el('btn-user-delete')?.addEventListener('click', async () => {
+    const userId = Number(el('manage_user_id')?.value || 0);
+    if (!userId) {
+        setUsersMessage('Pilih user yang ingin dihapus dari tabel.', 'warning');
+        return;
+    }
+    await deleteManagedUser(userId);
+});
 
 el('btn-refresh-news')?.addEventListener('click', () => {
     fetchLiveNewsFallback(true);
@@ -9822,7 +11703,7 @@ el('rep-reset-wr-btn')?.addEventListener('click', async () => {
     if (!accountId) return;
     const pairSymbol = currentPairSymbol();
 
-    if (!window.confirm('Hard reset profit untuk account ' + accountId + '? History profit account ini akan dikosongkan.')) {
+    if (!window.confirm('Hard reset profit untuk account ' + accountId + '? Baseline profit akan direset, history trade tetap disimpan.')) {
         return;
     }
 
@@ -9889,6 +11770,14 @@ el('rep-history-limit')?.addEventListener('change', () => {
     restartDashboardLiveStream();
 });
 
+el('rep-history-period')?.addEventListener('change', () => {
+    REPORTS_STATE.period = String(el('rep-history-period')?.value || 'all');
+    REPORTS_STATE.page = 1;
+    REPORTS_STATE.pendingPage = 1;
+    refreshReportOnly({ priority: true, source: 'manual' });
+    restartDashboardLiveStream();
+});
+
 el('rep-history-prev')?.addEventListener('click', () => {
     if (REPORTS_STATE.page <= 1) return;
     REPORTS_STATE.page -= 1;
@@ -9930,6 +11819,11 @@ document.querySelectorAll('#workspace-tabs [data-workspace-tab]').forEach((butto
 el('users-tbody')?.addEventListener('click', (event) => {
     const target = event.target;
     if (!(target instanceof HTMLElement)) return;
+    const deleteUserId = target.getAttribute('data-delete-user');
+    if (deleteUserId) {
+        deleteManagedUser(deleteUserId);
+        return;
+    }
     const userId = target.getAttribute('data-edit-user');
     if (!userId) return;
     fillManageForm(userId);
@@ -9937,6 +11831,7 @@ el('users-tbody')?.addEventListener('click', (event) => {
 
 hydrateAccountPairState();
 restoreSelectedPairMap();
+neutralizeStaleBootstrapRuntimeState();
 const initialSavedAccountId = loadSelectedAccount();
 if (initialSavedAccountId) {
     const accountSelect = el('account_id');
@@ -9949,7 +11844,7 @@ if (initialSavedAccountId) {
 }
 if (el('account_id')?.value) {
     renderPairTabsForCurrentAccount();
-    loadAccountForm(el('account_id').value);
+    loadAccountForm(el('account_id').value, { deferInitialRender: true });
 }
 syncDeleteAccountInput();
 
@@ -9960,6 +11855,8 @@ if (el('profile_name')) {
 }
 
 initTheme();
+initInlineSaveButtons();
+applyLogicRoleLock();
 ensureModalAttachedToBody('bulkWhitelistModal');
 ensureModalAttachedToBody('account-alias-modal');
 ensureModalAttachedToBody('account-modal');
@@ -9972,15 +11869,18 @@ renderUsersTable();
 renderMonitoring();
 renderAnalysis();
 renderReport(el('save-msg')?.textContent || '');
+syncRiskAckCheckbox();
 renderNewsList();
 fetchLiveNewsFallback();
+syncAliasModalForCurrentAccount();
+loadAccountAliasesFromServer();
 if (IS_ADMIN) {
-    syncAliasModalForCurrentAccount();
-    loadAccountAliasesFromServer();
     loadBulkWhitelistSettings();
 }
-refreshLiveTelemetry(true);
 startDashboardLiveStream();
+startDashboardActiveSync();
+refreshMonitoringOnly();
+refreshReportOnly({ source: 'bootstrap' });
 refreshConnectedPairsRealtime();
 
 const BILLING_FLOAT_CHAT = {
@@ -10684,6 +12584,71 @@ function syncDashboardFloatingChatOffsets() {
     root.style.setProperty('--billing-float-card-bottom-offset', String(cardOffsetPx) + 'px');
 }
 
+function attachInputHelpTooltips() {
+    const helpByField = {
+        active_strategy: 'Pilih strategi aktif yang dipakai bot saat ini.',
+        base_lot: 'Lot awal order pertama; makin besar, risiko dan profit ikut naik.',
+        timeframe_logic: 'Timeframe baca sinyal; kecil lebih cepat, besar lebih stabil.',
+        max_drawdown_pct: 'Batas DD untuk stop entry baru; isi 0 jika ingin nonaktif.',
+        dd_breach_hits_required: 'Jumlah konfirmasi DD sebelum stop agar tidak mudah false alarm.',
+        max_drawdown_stop_delay: 'Jeda sebelum DD stop dieksekusi; 0 berarti langsung stop.',
+        daily_profit_target: 'Target profit harian; saat tercapai, bot bisa berhenti entry baru.',
+        grid_max_layers: 'Batas maksimum jumlah layer grid yang boleh terbuka.',
+        grid_max_accumulative_lot: 'Batas total lot semua layer agar akumulasi tetap terkendali.',
+        grid_mode: 'Pilih jarak grid tetap (Fix) atau mengikuti volatilitas (ATR).',
+        fix_grid_distance: 'Jarak antar layer saat mode Fix Points aktif.',
+        atr_multiplier: 'Pengali ATR untuk jarak grid dinamis; makin besar makin renggang.',
+        grid_mart_type: 'Cara naik lot per layer: tambah tetap atau kali lipat.',
+        grid_mart_addition: 'Nilai tambahan lot untuk setiap layer baru pada mode Penambahan.',
+        grid_mart_multiplier: 'Nilai pengali lot untuk setiap layer baru pada mode Perkalian.',
+        grid_tp_points: 'Target take profit grid dalam points; isi 0 untuk nonaktif.',
+        grid_sl_points: 'Batas stop loss grid dalam points; isi 0 untuk nonaktif.',
+        grid_basket_tp_percent: 'Target close semua posisi basket berdasarkan persentase profit.',
+        grid_tp_mode: 'Mode TP basket: satu target atau bertingkat sesuai jumlah layer.',
+        zero_gap_tp_points: 'Target take profit Zero Gap dalam points.',
+        zero_gap_sl_points: 'Batas stop loss Zero Gap dalam points.',
+        zero_gap_max_layers: 'Batas layer maksimum khusus strategi Zero Gap.',
+        mirror_pending_distance_points: 'Jarak pending order pelindung dari harga sekarang.',
+        mirror_multiplier: 'Pengali lot untuk Mirror Trap; naikkan perlahan sesuai modal.',
+        mart_tp_points: 'Target take profit Pure Martingale dalam points.',
+        mart_sl_points: 'Batas stop loss Pure Martingale dalam points.',
+        mart_max_steps: 'Jumlah langkah martingale maksimum yang diizinkan.',
+        mart_type: 'Jenis martingale: linear atau geometris.',
+        mart_multiplier: 'Nilai pengali lot saat martingale geometris aktif.',
+        mart_addition: 'Nilai tambahan lot saat martingale linear aktif.',
+        min_confluence_score: 'Ambang minimal kualitas sinyal; makin tinggi makin selektif.',
+        sydney_start_wib: 'Jam mulai sesi Sydney dalam WIB.',
+        sydney_end_wib: 'Jam selesai sesi Sydney dalam WIB.',
+        asia_start_wib: 'Jam mulai sesi Asia/Tokyo dalam WIB.',
+        asia_end_wib: 'Jam selesai sesi Asia/Tokyo dalam WIB.',
+        europe_start_wib: 'Jam mulai sesi London dalam WIB.',
+        europe_end_wib: 'Jam selesai sesi London dalam WIB.',
+        us_start_wib: 'Jam mulai sesi New York/US dalam WIB.',
+        us_end_wib: 'Jam selesai sesi New York/US dalam WIB; waspadai news 19.00-21.00.'
+    };
+
+    const infoIconSvg = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="8" r="1.2" fill="currentColor"/><path d="M12 11.2V16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
+
+    Object.keys(helpByField).forEach((fieldId) => {
+        const label = document.querySelector('label[for="' + fieldId + '"]');
+        if (!(label instanceof HTMLElement)) return;
+        if (label.querySelector('.tooltip-info-icon')) return;
+
+        const icon = document.createElement('span');
+        icon.className = 'text-secondary ms-1 tooltip-info-icon';
+        icon.setAttribute('data-bs-toggle', 'tooltip');
+        icon.setAttribute('data-bs-placement', 'top');
+        icon.setAttribute('title', helpByField[fieldId]);
+        icon.setAttribute('aria-label', 'Info ' + fieldId);
+        icon.setAttribute('role', 'button');
+        icon.setAttribute('tabindex', '0');
+        icon.innerHTML = infoIconSvg;
+        label.appendChild(icon);
+    });
+}
+
+attachInputHelpTooltips();
+initBillingAdminActionTooltips();
 initFloatingBillingChatWidget();
 syncDashboardFloatingChatOffsets();
 window.addEventListener('resize', syncDashboardFloatingChatOffsets, { passive: true });
@@ -10694,6 +12659,7 @@ renderLiveLicenseCountdownTick();
 setInterval(() => {
     updateNewsWidget();
     renderLiveLicenseCountdownTick();
+    renderAnalysisServerClockTick();
 }, 1000);
 // Polling remains as fallback when SSE cannot be established.
 </script>

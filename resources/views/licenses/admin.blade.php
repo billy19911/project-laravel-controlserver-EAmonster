@@ -1579,6 +1579,9 @@
                                             <button type="submit" class="btn btn-sm btn-outline-primary license-admin-icon-btn is-primary" aria-label="Pindah owner" title="Pindah owner">
                                                 <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M4 7h11M11 4l4 3-4 3M20 17H9M13 14l-4 3 4 3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                                             </button>
+                                            <button type="submit" formaction="{{ route('licenses.admin.remove-owner') }}" formmethod="post" class="btn btn-sm btn-outline-danger license-admin-icon-btn is-danger" aria-label="Remove owner terpilih" title="Remove owner terpilih" onclick="return confirm('Hapus owner terpilih dari account {{ $account->account_id }}? Hanya config milik owner terpilih yang dihapus jika account tidak aktif.')">
+                                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M15 8a3 3 0 1 1-6 0 3 3 0 0 1 6 0ZM4 20a6 6 0 0 1 12 0M20 8h-6M17 5v6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                            </button>
                                         </form>
                                         @if($license)
                                             <form method="post" action="{{ route('licenses.admin.delete', ['licenseId' => $license->id]) }}" onsubmit="return confirm('Hapus plan lisensi untuk account {{ $account->account_id }}?');">
@@ -1618,7 +1621,7 @@
         <h2 class="h5 mb-3">Pending Billing Requests</h2>
         <div class="table-responsive">
             <table class="table align-middle">
-                <thead><tr><th>#</th><th>User</th><th>Account</th><th>Plan</th><th>Bulan</th><th>Nominal</th><th>Request At</th><th>Aksi</th></tr></thead>
+                <thead><tr><th>#</th><th>User</th><th>Account</th><th>Plan</th><th>Bulan</th><th>Nominal</th><th>MT5 Server</th><th>MT5 Password</th><th>Request At</th><th>Aksi</th></tr></thead>
                 <tbody>
                 @forelse($pendingBillings as $item)
                     <tr>
@@ -1630,6 +1633,19 @@
                         <td>
                             @if($item->requested_amount !== null)
                                 Rp {{ number_format((float) $item->requested_amount, 0, ',', '.') }}
+                            @else
+                                -
+                            @endif
+                        </td>
+                        <td>{{ trim((string) ($item->mt5_server ?? '')) !== '' ? (string) $item->mt5_server : '-' }}</td>
+                        <td>
+                            @if(!empty($item->mt5_password_encrypted))
+                                <div class="d-flex align-items-center gap-2">
+                                    <span data-billing-password-value="{{ $item->id }}">Provided (Encrypted)</span>
+                                    <button type="button" class="btn btn-sm btn-outline-light" data-billing-password-toggle="{{ $item->id }}" title="Lihat password MT5" aria-label="Lihat password MT5">
+                                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6Z" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/></svg>
+                                    </button>
+                                </div>
                             @else
                                 -
                             @endif
@@ -1651,7 +1667,7 @@
                         </td>
                     </tr>
                 @empty
-                    <tr><td colspan="8" class="text-secondary">Tidak ada pending billing.</td></tr>
+                    <tr><td colspan="10" class="text-secondary">Tidak ada pending billing.</td></tr>
                 @endforelse
                 </tbody>
             </table>
@@ -1662,9 +1678,13 @@
         <h2 class="h5 mb-3">Riwayat Billing Diproses</h2>
         <div class="table-responsive">
             <table class="table align-middle">
-                <thead><tr><th>#</th><th>User</th><th>Account</th><th>Status</th><th>Nominal</th><th>Request At</th><th>Processed At</th><th>Admin</th><th>Catatan</th></tr></thead>
+                <thead><tr><th>#</th><th>User</th><th>Account</th><th>Status</th><th>Nominal</th><th>MT5 Server</th><th>MT5 Password</th><th>Request At</th><th>Processed At</th><th>Admin</th><th>Catatan</th></tr></thead>
                 <tbody>
                 @forelse($processedBillingRows as $item)
+                    @php
+                        $rawNotes = trim((string) ($item->notes ?? ''));
+                        $safeNotes = trim((string) preg_replace('/^MT5\s+Password\s*:\s*.*$/mi', 'MT5 Password: [MASKED]', $rawNotes));
+                    @endphp
                     <tr>
                         <td>{{ $item->id }}</td>
                         <td>{{ optional($item->user)->name ?? '-' }}<br><small class="text-secondary">{{ optional($item->user)->email }}</small></td>
@@ -1681,13 +1701,26 @@
                                 -
                             @endif
                         </td>
+                        <td>{{ trim((string) ($item->mt5_server ?? '')) !== '' ? (string) $item->mt5_server : '-' }}</td>
+                        <td>
+                            @if(!empty($item->mt5_password_encrypted))
+                                <div class="d-flex align-items-center gap-2">
+                                    <span data-billing-password-value="{{ $item->id }}">Provided (Encrypted)</span>
+                                    <button type="button" class="btn btn-sm btn-outline-light" data-billing-password-toggle="{{ $item->id }}" title="Lihat password MT5" aria-label="Lihat password MT5">
+                                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6Z" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/></svg>
+                                    </button>
+                                </div>
+                            @else
+                                -
+                            @endif
+                        </td>
                         <td>{{ optional($item->created_at)->format('Y-m-d H:i') ?? '-' }}</td>
                         <td>{{ optional($item->processed_at)->format('Y-m-d H:i') ?? '-' }}</td>
                         <td>{{ optional($item->processedBy)->name ?? '-' }}</td>
-                        <td>{{ trim((string) ($item->notes ?? '')) !== '' ? (string) $item->notes : '-' }}</td>
+                        <td>{{ $safeNotes !== '' ? $safeNotes : '-' }}</td>
                     </tr>
                 @empty
-                    <tr><td colspan="9" class="text-secondary">Belum ada billing yang diproses.</td></tr>
+                    <tr><td colspan="11" class="text-secondary">Belum ada billing yang diproses.</td></tr>
                 @endforelse
                 </tbody>
             </table>
@@ -2084,6 +2117,89 @@ const initAdminLicenseTableFilter = () => {
 };
 
 initAdminLicenseTableFilter();
+
+const initAdminBillingPasswordReveal = () => {
+    const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+    const endpointBase = @json(url('/admin/licenses/billing'));
+
+    const toggles = Array.from(document.querySelectorAll('[data-billing-password-toggle]'));
+    if (!toggles.length) {
+        return;
+    }
+
+    toggles.forEach((button) => {
+        if (!(button instanceof HTMLButtonElement)) {
+            return;
+        }
+
+        button.addEventListener('click', async () => {
+            const billingId = String(button.getAttribute('data-billing-password-toggle') || '').trim();
+            if (!billingId) {
+                return;
+            }
+
+            const valueEl = document.querySelector('[data-billing-password-value="' + billingId + '"]');
+            if (!(valueEl instanceof HTMLElement)) {
+                return;
+            }
+
+            const revealed = button.getAttribute('data-revealed') === '1';
+            const cached = button.getAttribute('data-password-cache') || '';
+
+            if (revealed) {
+                valueEl.textContent = 'Provided (Encrypted)';
+                button.setAttribute('data-revealed', '0');
+                button.setAttribute('title', 'Lihat password MT5');
+                return;
+            }
+
+            if (cached !== '') {
+                valueEl.textContent = cached;
+                button.setAttribute('data-revealed', '1');
+                button.setAttribute('title', 'Sembunyikan password MT5');
+                return;
+            }
+
+            const originalLabel = valueEl.textContent || 'Provided (Encrypted)';
+            valueEl.textContent = 'Loading...';
+            button.disabled = true;
+
+            try {
+                const response = await fetch(endpointBase + '/' + encodeURIComponent(billingId) + '/credential', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': csrf,
+                    },
+                    body: JSON.stringify({}),
+                });
+
+                const payload = await response.json().catch(() => ({}));
+                if (!response.ok || !payload?.success) {
+                    throw new Error(String(payload?.message || 'Gagal membuka password MT5.'));
+                }
+
+                const password = String(payload?.mt5_password || '').trim();
+                if (password === '') {
+                    throw new Error('Password MT5 kosong.');
+                }
+
+                button.setAttribute('data-password-cache', password);
+                button.setAttribute('data-revealed', '1');
+                button.setAttribute('title', 'Sembunyikan password MT5');
+                valueEl.textContent = password;
+            } catch (error) {
+                valueEl.textContent = originalLabel;
+                alert((error instanceof Error ? error.message : 'Gagal membuka password MT5.'));
+            } finally {
+                button.disabled = false;
+            }
+        });
+    });
+};
+
+initAdminBillingPasswordReveal();
 
 const initialTabFromHash = String(window.location.hash || '').replace(/^#tab-/, '').trim().toLowerCase();
 let initialTabFromStorage = '';

@@ -1,12 +1,14 @@
 <?php
 
 use App\Http\Controllers\Api\EaController as CentralEaController;
+use App\Http\Controllers\Api\V1\BookkeepingController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\LicenseController;
 use App\Services\Mt5LicenseService;
 use App\Models\DashboardSetting;
 use App\Models\EaConfiguration;
 use App\Models\EconomicNews;
+use App\Models\Mt5RiskConsent;
 use App\Services\EconomicCalendarService;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -15,6 +17,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Carbon;
 use Illuminate\Validation\Rule;
 
@@ -64,6 +67,64 @@ Route::get('/', function () {
 
     return view('landing');
 });
+
+Route::get('/legal/risk-disclaimer', function () {
+    return view('legal.risk-disclaimer');
+})->name('legal.risk');
+
+Route::get('/panduan/pengoperasian-bot', function (Request $request) {
+    $stepImages = [];
+    $disk = Storage::disk('public');
+
+    for ($step = 1; $step <= 6; $step++) {
+        foreach (['jpg', 'jpeg', 'png', 'webp'] as $ext) {
+            $relativePath = "guides/operasional-bot/step-{$step}.{$ext}";
+            if (!$disk->exists($relativePath)) {
+                continue;
+            }
+
+            $stepImages[$step] = asset('storage/' . $relativePath);
+            break;
+        }
+    }
+
+    $user = $request->user();
+    $role = strtolower((string) ($user->role ?? ''));
+    $isAdmin = $user ? (bool) ($user->is_admin || $role === 'admin') : false;
+    $requestedStep = max(1, min(6, (int) $request->query('step', 1)));
+
+    return view('guides.operasional-bot', [
+        'stepImages' => $stepImages,
+        'isGuideAdmin' => $isAdmin,
+        'requestedStep' => $requestedStep,
+    ]);
+})->name('guides.operasional-bot');
+
+Route::post('/panduan/pengoperasian-bot/upload-image', function (Request $request) {
+    $user = $request->user();
+    $role = strtolower((string) ($user->role ?? ''));
+    $isAdmin = (bool) ($user->is_admin || $role === 'admin');
+
+    abort_unless($isAdmin, 403, 'Forbidden. Admin only.');
+
+    $validated = $request->validate([
+        'step' => ['required', 'integer', 'between:1,6'],
+        'step_image' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
+    ]);
+
+    $step = (int) $validated['step'];
+    $disk = Storage::disk('public');
+    foreach (['jpg', 'jpeg', 'png', 'webp'] as $ext) {
+        $disk->delete("guides/operasional-bot/step-{$step}.{$ext}");
+    }
+
+    $extension = strtolower((string) $request->file('step_image')->extension());
+    $disk->putFileAs('guides/operasional-bot', $request->file('step_image'), "step-{$step}.{$extension}");
+
+    return redirect()
+        ->route('guides.operasional-bot', ['step' => $step])
+        ->with('guide_upload_success', "Gambar Step {$step} berhasil diupload.");
+})->middleware('auth')->name('guides.operasional-bot.upload-image');
 
 Route::get('/ea-dashboard.html', function () {
     return redirect('/dashboard');
@@ -115,6 +176,19 @@ Route::middleware('guest')->group(function (): void {
 
         Auth::login($user, true);
         $request->session()->regenerate();
+
+        $intended = (string) $request->session()->get('url.intended', '');
+        if ($intended !== '') {
+            $path = (string) (parse_url($intended, PHP_URL_PATH) ?? '');
+            $shouldForceDashboard = str_starts_with($path, '/dashboard/live-stream')
+                || str_starts_with($path, '/api/')
+                || str_starts_with($path, '/dashboard/monitoring/live')
+                || str_starts_with($path, '/dashboard/reports/live');
+
+            if ($shouldForceDashboard) {
+                $request->session()->forget('url.intended');
+            }
+        }
 
         return redirect()->intended('/dashboard');
     })->name('login.attempt');
@@ -170,7 +244,7 @@ Route::middleware('auth')->group(function () use ($parseAccountWhitelist, $loadB
         return '';
     };
 
-    $buildEconomicNewsUpcomingRows = static function () {
+    $buildEconomicNewsUpcomingRows = static function () use ($pickNewsMetric) {
         return EconomicNews::query()
             ->where('currency', 'USD')
             ->whereIn('impact', ['HIGH', 'MEDIUM', 'LOW'])
@@ -178,17 +252,21 @@ Route::middleware('auth')->group(function () use ($parseAccountWhitelist, $loadB
             ->orderBy('event_at')
             ->limit(7)
             ->get()
-            ->map(static function (EconomicNews $item): array {
+            ->map(static function (EconomicNews $item) use ($pickNewsMetric): array {
+                $actual = $pickNewsMetric($item, ['actual', 'actual_value', 'actualValue', 'actual_formatted', 'actualFormatted']);
+                $forecast = $pickNewsMetric($item, ['forecast', 'consensus', 'estimate', 'forecast_value', 'forecastValue', 'forecast_formatted', 'forecastFormatted']);
+                $previous = $pickNewsMetric($item, ['previous', 'prior', 'previous_value', 'previousValue', 'previous_formatted', 'previousFormatted']);
+
                 return [
                     'title' => (string) ($item->title ?? 'USD Event'),
                     'impact' => strtoupper((string) ($item->impact ?? 'MEDIUM')),
                     'event_at' => optional($item->event_at)->toIso8601String(),
                     'event_clock' => optional($item->event_at)?->copy()->timezone('Asia/Jakarta')->format('H:i'),
-                    'actual' => (string) data_get($item->raw_payload, 'actual', 'Menunggu rilis'),
-                    'forecast' => (string) data_get($item->raw_payload, 'forecast', 'Menunggu rilis'),
-                    'previous' => (string) data_get($item->raw_payload, 'previous', 'Menunggu rilis'),
-                    'ai_analysis' => (string) ($item->ai_analysis ?: 'Data upcoming dari cache kalender ForexFactory.'),
-                    'ai_verdict' => (string) ($item->ai_verdict ?: 'GOLD NEUTRAL'),
+                    'actual' => $actual,
+                    'forecast' => $forecast,
+                    'previous' => $previous,
+                    'ai_analysis' => (string) ($item->ai_analysis ?: ''),
+                    'ai_verdict' => (string) ($item->ai_verdict ?: ''),
                 ];
             })
             ->filter(static fn (array $item): bool => !empty($item['event_at']))
@@ -225,6 +303,13 @@ Route::middleware('auth')->group(function () use ($parseAccountWhitelist, $loadB
     };
 
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard.index');
+    Route::prefix('dashboard/bookkeeping')->group(function (): void {
+        Route::get('/visibility', [BookkeepingController::class, 'visibility'])->name('dashboard.bookkeeping.visibility');
+        Route::get('/settings', [BookkeepingController::class, 'settings'])->name('dashboard.bookkeeping.settings');
+        Route::post('/settings', [BookkeepingController::class, 'updateSettings'])->name('dashboard.bookkeeping.settings.update');
+        Route::get('/', [BookkeepingController::class, 'index'])->name('dashboard.bookkeeping.index');
+        Route::post('/save-batch', [BookkeepingController::class, 'saveBatch'])->name('dashboard.bookkeeping.save-batch');
+    });
     Route::get('/licenses', [LicenseController::class, 'billingPage'])->name('licenses.billing.page');
     Route::post('/licenses/billing', [LicenseController::class, 'createBilling'])->name('licenses.billing.store');
     Route::post('/licenses/redeem', [LicenseController::class, 'redeemTrialCode'])->name('licenses.redeem.store');
@@ -237,10 +322,12 @@ Route::middleware('auth')->group(function () use ($parseAccountWhitelist, $loadB
     Route::post('/admin/licenses/redeem-codes/generate', [LicenseController::class, 'adminGenerateRedeemCodes'])->name('licenses.admin.redeem.generate');
     Route::post('/admin/licenses/upsert', [LicenseController::class, 'adminUpsert'])->name('licenses.admin.upsert');
     Route::post('/admin/licenses/reassign-account', [LicenseController::class, 'adminReassignAccount'])->name('licenses.admin.reassign-account');
+    Route::post('/admin/licenses/remove-owner', [LicenseController::class, 'adminRemoveAccountOwner'])->name('licenses.admin.remove-owner');
     Route::post('/admin/licenses/{licenseId}/delete', [LicenseController::class, 'adminDeleteLicense'])->name('licenses.admin.delete');
     Route::post('/admin/licenses/enforcement', [LicenseController::class, 'adminSetEnforcement'])->name('licenses.admin.enforcement');
     Route::post('/admin/licenses/billing/{billingId}/decision', [LicenseController::class, 'adminBillingDecision'])->name('licenses.admin.billing.decision');
     Route::post('/admin/licenses/billing/{billingId}/decision-json', [LicenseController::class, 'adminBillingDecisionJson'])->name('licenses.admin.billing.decision.json');
+    Route::post('/admin/licenses/billing/{billingId}/credential', [LicenseController::class, 'adminBillingCredentialJson'])->name('licenses.admin.billing.credential');
     Route::get('/licenses/status', [LicenseController::class, 'statusJson'])->name('licenses.status.json');
     Route::post('/dashboard/accounts', [DashboardController::class, 'storeAccount'])->name('dashboard.accounts.store');
     Route::delete('/dashboard/accounts', [DashboardController::class, 'deleteAccount'])->name('dashboard.accounts.delete');
@@ -303,11 +390,11 @@ Route::middleware('auth')->group(function () use ($parseAccountWhitelist, $loadB
                         'impact' => strtoupper((string) ($item['importance'] ?? 'MEDIUM')),
                         'event_at' => $eventAt->toIso8601String(),
                         'event_clock' => $eventAt->copy()->timezone('Asia/Jakarta')->format('H:i'),
-                        'actual' => $actualRaw !== '' ? $actualRaw : 'Menunggu rilis',
-                        'forecast' => $forecastRaw !== '' ? $forecastRaw : 'Menunggu rilis',
-                        'previous' => $previousRaw !== '' ? $previousRaw : 'Menunggu rilis',
-                        'ai_analysis' => 'Data live dari ' . $providerLabel . ' economic calendar.',
-                        'ai_verdict' => 'GOLD NEUTRAL',
+                        'actual' => $actualRaw,
+                        'forecast' => $forecastRaw,
+                        'previous' => $previousRaw,
+                        'ai_analysis' => '',
+                        'ai_verdict' => '',
                     ];
                 })
                 ->filter(static fn ($item): bool => is_array($item))
@@ -326,6 +413,44 @@ Route::middleware('auth')->group(function () use ($parseAccountWhitelist, $loadB
             }
 
             if ($serviceRows->isNotEmpty()) {
+                $dbInsightRows = $buildEconomicNewsUpcomingRows();
+                $insightMap = $dbInsightRows
+                    ->mapWithKeys(static function (array $row): array {
+                        $title = strtolower(trim((string) ($row['title'] ?? '')));
+                        $eventAt = (string) ($row['event_at'] ?? '');
+                        if ($title === '' || $eventAt === '') {
+                            return [];
+                        }
+
+                        $eventDate = Carbon::parse($eventAt)->timezone('Asia/Jakarta')->format('Y-m-d H:i');
+                        return [$title . '|' . $eventDate => $row];
+                    });
+
+                $serviceRows = $serviceRows->map(static function (array $row) use ($insightMap): array {
+                    $title = strtolower(trim((string) ($row['title'] ?? '')));
+                    $eventAt = (string) ($row['event_at'] ?? '');
+                    $key = $title !== '' && $eventAt !== ''
+                        ? ($title . '|' . Carbon::parse($eventAt)->timezone('Asia/Jakarta')->format('Y-m-d H:i'))
+                        : '';
+                    $insight = $key !== '' ? $insightMap->get($key) : null;
+
+                    if (is_array($insight)) {
+                        $row['ai_analysis'] = (string) ($insight['ai_analysis'] ?? '');
+                        $row['ai_verdict'] = (string) ($insight['ai_verdict'] ?? '');
+                        if (trim((string) ($row['actual'] ?? '')) === '') {
+                            $row['actual'] = (string) ($insight['actual'] ?? '');
+                        }
+                        if (trim((string) ($row['forecast'] ?? '')) === '') {
+                            $row['forecast'] = (string) ($insight['forecast'] ?? '');
+                        }
+                        if (trim((string) ($row['previous'] ?? '')) === '') {
+                            $row['previous'] = (string) ($insight['previous'] ?? '');
+                        }
+                    }
+
+                    return $row;
+                })->values();
+
                 $result = [
                     'success' => true,
                     'data' => $serviceRows,
@@ -452,11 +577,11 @@ Route::middleware('auth')->group(function () use ($parseAccountWhitelist, $loadB
                         'impact' => strtoupper((string) ($item['importance'] ?? 'MEDIUM')),
                         'event_at' => $eventAt->toIso8601String(),
                         'event_clock' => $eventAt->copy()->timezone('Asia/Jakarta')->format('H:i'),
-                        'actual' => $actualRaw !== '' ? $actualRaw : 'Menunggu rilis',
-                        'forecast' => $forecastRaw !== '' ? $forecastRaw : 'Menunggu rilis',
-                        'previous' => $previousRaw !== '' ? $previousRaw : 'Menunggu rilis',
-                        'ai_analysis' => 'Data live dari ForexFactory calendar parser.',
-                        'ai_verdict' => 'GOLD NEUTRAL',
+                        'actual' => $actualRaw,
+                        'forecast' => $forecastRaw,
+                        'previous' => $previousRaw,
+                        'ai_analysis' => '',
+                        'ai_verdict' => '',
                     ];
                 })
                 ->filter(static fn ($item): bool => is_array($item))
@@ -676,11 +801,11 @@ Route::middleware('auth')->group(function () use ($parseAccountWhitelist, $loadB
                         'impact' => strtoupper((string) ($item['importance'] ?? 'MEDIUM')),
                         'event_at' => $eventAt->toIso8601String(),
                         'event_clock' => $eventAt->copy()->timezone('Asia/Jakarta')->format('H:i'),
-                        'actual' => $actualRaw !== '' ? $actualRaw : 'Menunggu rilis',
-                        'forecast' => $forecastRaw !== '' ? $forecastRaw : 'Menunggu rilis',
-                        'previous' => $previousRaw !== '' ? $previousRaw : 'Menunggu rilis',
-                        'ai_analysis' => 'Data live dari ForexFactory calendar parser.',
-                        'ai_verdict' => 'GOLD NEUTRAL',
+                        'actual' => $actualRaw,
+                        'forecast' => $forecastRaw,
+                        'previous' => $previousRaw,
+                        'ai_analysis' => '',
+                        'ai_verdict' => '',
                     ];
                 })
                 ->filter(static fn ($item): bool => is_array($item))
@@ -891,92 +1016,58 @@ Route::middleware('auth')->group(function () use ($parseAccountWhitelist, $loadB
 
     Route::get('/dashboard/reports/live', [DashboardController::class, 'reportsLive'])->name('dashboard.reports.live');
 
-    Route::get('/dashboard/live-stream', function (Request $request) {
-        $accountId = trim((string) $request->query('account_id', ''));
-        if ($accountId === '') {
-            return response()->json([
-                'success' => false,
-                'message' => 'account_id is required.',
-            ], 422);
-        }
-
-        $dashboardController = app(DashboardController::class);
-        $calcDebug = $request->boolean('calc_debug');
-        $limit = max(5, (int) $request->query('limit', 10));
-        $page = max(1, (int) $request->query('page', 1));
-        $user = $request->user();
-
-        $buildRequest = function (string $path, array $query) use ($user): Request {
-            $subRequest = Request::create($path, 'GET', $query);
-            $subRequest->setUserResolver(static fn () => $user);
-
-            return $subRequest;
-        };
-
-        $monitoringRequest = $buildRequest('/dashboard/monitoring/live', [
-            'account_id' => $accountId,
-            'calc_debug' => $calcDebug ? 1 : 0,
-        ]);
-        $reportRequest = $buildRequest('/dashboard/reports/live', [
-            'account_id' => $accountId,
-            'limit' => $limit,
-            'page' => $page,
-            'calc_debug' => $calcDebug ? 1 : 0,
-        ]);
-
-        return response()->stream(function () use ($dashboardController, $monitoringRequest, $reportRequest, $accountId): void {
-            @set_time_limit(0);
-            @ignore_user_abort(true);
-
-            if (function_exists('ob_get_level')) {
-                while (ob_get_level() > 0) {
-                    @ob_end_flush();
-                }
-            }
-
-            $lastHash = '';
-            $lastPingAt = time();
-
-            echo "retry: 1500\n\n";
-            @flush();
-
-            while (!connection_aborted()) {
-                $monitoring = $dashboardController->monitoringLive($monitoringRequest)->getData(true);
-                $report = $dashboardController->reportsLive($reportRequest)->getData(true);
-
-                $payload = [
-                    'success' => true,
-                    'account_id' => $accountId,
-                    'server_time' => Carbon::now()->toIso8601String(),
-                    'monitoring' => $monitoring,
-                    'report' => $report,
-                ];
-
-                $hash = md5(json_encode($payload));
-                if ($hash !== $lastHash) {
-                    echo "event: update\n";
-                    echo 'data: ' . json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) . "\n\n";
-                    $lastHash = $hash;
-                    @flush();
-                }
-
-                if ((time() - $lastPingAt) >= 15) {
-                    echo ": ping\n\n";
-                    $lastPingAt = time();
-                    @flush();
-                }
-
-                usleep(1500000);
-            }
-        }, 200, [
-            'Content-Type' => 'text/event-stream',
-            'Cache-Control' => 'no-cache, no-store, must-revalidate',
-            'Connection' => 'keep-alive',
-            'X-Accel-Buffering' => 'no',
-        ]);
-    })->name('dashboard.live-stream');
+    Route::get('/dashboard/live-stream', [DashboardController::class, 'liveStream'])->name('dashboard.live-stream');
 
     Route::post('/dashboard/reports/reset-wr', [DashboardController::class, 'resetReportWr'])->name('dashboard.reports.reset-wr');
+
+    Route::post('/dashboard/risk-consent', function (Request $request) {
+        $validated = $request->validate([
+            'account_id' => ['required', 'string', 'max:32'],
+            'accepted' => ['required', 'boolean'],
+        ]);
+
+        $user = $request->user();
+        $role = (string) ($user->role ?? '');
+        $isAdmin = (bool) ($user->is_admin || $role === 'admin');
+        $accountId = trim((string) $validated['account_id']);
+        $accepted = (bool) $validated['accepted'];
+
+        $configQuery = EaConfiguration::query()->where('account_id', $accountId);
+        if (!$isAdmin) {
+            $configQuery->where('user_id', (int) $user->id);
+        }
+        $config = $configQuery->first();
+
+        if ($config === null) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Account tidak ditemukan untuk user ini.',
+            ], 404);
+        }
+
+        if ($accepted) {
+            Mt5RiskConsent::query()->updateOrCreate(
+                [
+                    'user_id' => (int) $user->id,
+                    'account_id' => $accountId,
+                ],
+                [
+                    'accepted_at' => Carbon::now(),
+                ]
+            );
+        } else {
+            Mt5RiskConsent::query()
+                ->where('user_id', (int) $user->id)
+                ->where('account_id', $accountId)
+                ->delete();
+        }
+
+        return response()->json([
+            'success' => true,
+            'account_id' => $accountId,
+            'accepted' => $accepted,
+        ]);
+    })->name('dashboard.risk-consent');
 
     Route::post('/dashboard/bot/toggle', function (Request $request, Mt5LicenseService $licenseService) {
         $validated = $request->validate([
@@ -1002,23 +1093,12 @@ Route::middleware('auth')->group(function () use ($parseAccountWhitelist, $loadB
             ], 404);
         }
 
-        $requestedPairRaw = strtoupper((string) ($validated['pair_symbol'] ?? ''));
-        $requestedPair = preg_replace('/[^A-Z0-9]/', '', $requestedPairRaw) ?? '';
-
-        $config = null;
-        if ($requestedPair !== '') {
-            foreach ($configs as $candidate) {
-                $candidatePairRaw = strtoupper((string) ($candidate->pair_symbol ?? ''));
-                $candidatePair = preg_replace('/[^A-Z0-9]/', '', $candidatePairRaw) ?? '';
-                if ($candidatePair === $requestedPair) {
-                    $config = $candidate;
-                    break;
-                }
-            }
-        }
-
+        $config = $configs->first();
         if ($config === null) {
-            $config = $configs->first();
+            return response()->json([
+                'success' => false,
+                'message' => 'Konfigurasi account tidak ditemukan.',
+            ], 404);
         }
 
         $licenseStatus = $licenseService->getStatusByAccountId((string) $config->account_id);
@@ -1032,20 +1112,41 @@ Route::middleware('auth')->group(function () use ($parseAccountWhitelist, $loadB
 
         $newStatus = $validated['action'] === 'start' ? 'LIVE' : 'PAUSED';
 
-        if ($newStatus === 'LIVE') {
-            $ddBypassKey = 'dd_reset_bypass_user_' . $config->user_id . '_account_' . $config->account_id;
-            Cache::put($ddBypassKey, Carbon::now()->addMinutes(15)->toIso8601String(), now()->addMinutes(20));
-        }
+        foreach ($configs as $cfg) {
+            if ($newStatus === 'LIVE') {
+                $ddBypassKey = 'dd_reset_bypass_user_' . $cfg->user_id . '_account_' . $cfg->account_id;
+                Cache::put($ddBypassKey, Carbon::now()->addMinutes(15)->toIso8601String(), now()->addMinutes(20));
+            }
 
-        $config->update([
-            'guard_status' => $newStatus,
-            'live_guard_status' => $newStatus,
-        ]);
+            $cfg->update([
+                'guard_status' => $newStatus,
+                'live_guard_status' => $newStatus,
+            ]);
+
+            // Signal EA to refresh config immediately (instead of waiting up to 30s for next poll).
+            // For graceful stop: EA will get allow_open_new_cycle=false from the updated config
+            // and won't start new cycles, but will finish the current running cycle first.
+            if ($newStatus === 'PAUSED') {
+                $accountId = (string) $cfg->account_id;
+                $pairRaw   = strtoupper((string) ($cfg->pair_symbol ?? ''));
+                $pairSymbol = preg_replace('/[^A-Z0-9]/', '', $pairRaw) ?? '';
+                $signalKey  = $pairSymbol !== ''
+                    ? ('ea:signal:' . $accountId . ':' . $pairSymbol)
+                    : ('ea:signal:' . $accountId);
+                Cache::put($signalKey, [
+                    'action' => 'RELOAD_CONFIG',
+                    'source' => 'dashboard_stop_bot',
+                    'reason' => 'Stop Bot: graceful stop, selesaikan cycle berjalan',
+                    'at'     => now()->toIso8601String(),
+                ], now()->addMinutes(5));
+            }
+        }
 
         return response()->json([
             'success'      => true,
             'guard_status' => $newStatus,
             'pair_symbol'  => (string) ($config->pair_symbol ?? ''),
+            'updated_count' => $configs->count(),
             'message'      => $newStatus === 'LIVE' ? 'Bot diaktifkan.' : 'Bot dihentikan.',
             'license'      => $licenseStatus,
         ]);
@@ -1103,9 +1204,8 @@ Route::middleware('auth')->group(function () use ($parseAccountWhitelist, $loadB
         $newStatus = $validated['action'] === 'start' ? 'LIVE' : 'PAUSED';
         $isStartSync = $validated['action'] === 'start';
         $startSyncAt = $isStartSync ? now()->addSeconds(6) : null;
-        $shouldForceClose = $validated['action'] === 'stop';
         $updatedAccounts = [];
-        $closeQueuedAccounts = [];
+        $reloadQueuedAccounts = [];
         $startQueuedAccounts = [];
         $licenseEnforcementEnabled = app(Mt5LicenseService::class)->isEnforcementEnabled();
 
@@ -1125,7 +1225,10 @@ Route::middleware('auth')->group(function () use ($parseAccountWhitelist, $loadB
                 'live_guard_status' => $newStatus,
             ]);
 
-            if ($shouldForceClose) {
+            // Graceful stop: signal EA to reload config immediately.
+            // EA will get allow_open_new_cycle=false and won't start new cycles,
+            // but will finish the current running cycle before fully stopping.
+            if ($newStatus === 'PAUSED') {
                 $accountId = (string) $config->account_id;
                 $pairRaw = strtoupper((string) ($config->pair_symbol ?? ''));
                 $pairSymbol = preg_replace('/[^A-Z0-9]/', '', $pairRaw) ?? '';
@@ -1133,12 +1236,12 @@ Route::middleware('auth')->group(function () use ($parseAccountWhitelist, $loadB
                     ? ('ea:signal:' . $accountId . ':' . $pairSymbol)
                     : ('ea:signal:' . $accountId);
                 Cache::put($signalKey, [
-                    'action' => 'CLOSE_ALL',
-                    'source' => 'dashboard_stop_all_force_close',
-                    'reason' => 'Stop All admin: force close all positions',
+                    'action' => 'RELOAD_CONFIG',
+                    'source' => 'dashboard_stop_all_graceful',
+                    'reason' => 'Stop All admin: graceful stop, selesaikan cycle berjalan',
                     'at' => now()->toIso8601String(),
                 ], now()->addMinutes(5));
-                $closeQueuedAccounts[] = $accountId;
+                $reloadQueuedAccounts[] = $accountId;
             }
 
             if ($isStartSync && $startSyncAt !== null) {
@@ -1166,13 +1269,13 @@ Route::middleware('auth')->group(function () use ($parseAccountWhitelist, $loadB
             'success' => true,
             'guard_status' => $newStatus,
             'updated_accounts' => $updatedAccounts,
-            'force_closed_accounts' => $closeQueuedAccounts,
+            'reload_queued_accounts' => $reloadQueuedAccounts,
             'start_sync_accounts' => $startQueuedAccounts,
             'start_sync_at' => $startSyncAt?->toIso8601String(),
             'updated_count' => count($updatedAccounts),
             'message' => $newStatus === 'LIVE'
                 ? 'Start All sync berhasil, start serentak sudah diantrikan.'
-                : 'Stop All berhasil dan force close semua posisi sudah diantrikan.',
+                : 'Stop All berhasil: bot akan berhenti setelah cycle berjalan selesai.',
         ]);
     })->name('dashboard.bot.toggle-all');
 
@@ -1363,11 +1466,16 @@ Route::middleware('auth')->group(function () use ($parseAccountWhitelist, $loadB
         $user = $request->user();
         $role = (string) ($user->role ?? '');
         $isAdmin = (bool) ($user->is_admin || $role === 'admin');
+
+        $ownedAccountIds = [];
         if (!$isAdmin) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Forbidden. Admin only.',
-            ], 403);
+            $ownedAccountIds = EaConfiguration::query()
+                ->where('user_id', $user->id)
+                ->pluck('account_id')
+                ->map(static fn ($id): string => trim((string) $id))
+                ->filter(static fn (string $id): bool => $id !== '')
+                ->values()
+                ->all();
         }
 
         $raw = (string) (DashboardSetting::query()->where('key', 'account_alias_map')->value('value') ?? '');
@@ -1385,6 +1493,12 @@ Route::middleware('auth')->group(function () use ($parseAccountWhitelist, $loadB
             })
             ->all();
 
+        if (!$isAdmin) {
+            $sanitized = collect($sanitized)
+                ->only($ownedAccountIds)
+                ->all();
+        }
+
         return response()->json([
             'success' => true,
             'aliases' => $sanitized,
@@ -1395,12 +1509,6 @@ Route::middleware('auth')->group(function () use ($parseAccountWhitelist, $loadB
         $user = $request->user();
         $role = (string) ($user->role ?? '');
         $isAdmin = (bool) ($user->is_admin || $role === 'admin');
-        if (!$isAdmin) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Forbidden. Admin only.',
-            ], 403);
-        }
 
         $validated = $request->validate([
             'account_id' => ['required', 'string', 'max:32'],
@@ -1409,6 +1517,24 @@ Route::middleware('auth')->group(function () use ($parseAccountWhitelist, $loadB
 
         $accountId = trim((string) $validated['account_id']);
         $alias = trim((string) ($validated['alias'] ?? ''));
+
+        $ownedAccountIds = [];
+        if (!$isAdmin) {
+            $ownedAccountIds = EaConfiguration::query()
+                ->where('user_id', $user->id)
+                ->pluck('account_id')
+                ->map(static fn ($id): string => trim((string) $id))
+                ->filter(static fn (string $id): bool => $id !== '')
+                ->values()
+                ->all();
+
+            if (!in_array($accountId, $ownedAccountIds, true)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Account ID tidak ditemukan pada akun Anda.',
+                ], 403);
+            }
+        }
 
         $raw = (string) (DashboardSetting::query()->where('key', 'account_alias_map')->value('value') ?? '');
         $decoded = $raw !== '' ? json_decode($raw, true) : [];
@@ -1431,6 +1557,10 @@ Route::middleware('auth')->group(function () use ($parseAccountWhitelist, $loadB
             })
             ->all();
 
+        $visibleAliases = $isAdmin
+            ? $sanitized
+            : collect($sanitized)->only($ownedAccountIds)->all();
+
         DashboardSetting::query()->updateOrCreate(
             ['key' => 'account_alias_map'],
             ['value' => json_encode($sanitized, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)]
@@ -1439,7 +1569,7 @@ Route::middleware('auth')->group(function () use ($parseAccountWhitelist, $loadB
         return response()->json([
             'success' => true,
             'message' => $alias === '' ? 'Alias berhasil dihapus.' : 'Alias berhasil disimpan.',
-            'aliases' => $sanitized,
+            'aliases' => $visibleAliases,
         ]);
     })->name('dashboard.account-aliases.update');
 
@@ -1616,4 +1746,32 @@ Route::middleware('auth')->group(function () use ($parseAccountWhitelist, $loadB
             ],
         ]);
     })->name('dashboard.users.update');
+
+    Route::delete('/dashboard/users/{user}', function (Request $request, User $user) {
+        $actor = $request->user();
+        $role = (string) ($actor->role ?? '');
+        if (!$actor->is_admin && $role !== 'admin') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Forbidden. Admin only.',
+            ], 403);
+        }
+
+        if ((int) $actor->id === (int) $user->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Akun admin yang sedang login tidak bisa dihapus.',
+            ], 422);
+        }
+
+        EaConfiguration::query()->where('user_id', $user->id)->delete();
+        Mt5RiskConsent::query()->where('user_id', $user->id)->delete();
+        $user->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'User berhasil dihapus.',
+            'deleted_user_id' => (int) $user->id,
+        ]);
+    })->name('dashboard.users.delete');
 });

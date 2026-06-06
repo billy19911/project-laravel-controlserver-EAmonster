@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\EaController;
+use App\Http\Controllers\Api\V1\BookkeepingController;
 use App\Http\Controllers\Api\EaController as CentralEaController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -28,6 +29,11 @@ Route::prefix('v1')->group(function (): void {
         Route::get('/my/monitoring-live', [EaController::class, 'myMonitoringLive']);
         Route::get('/my/report-live', [EaController::class, 'myReportLive']);
         Route::post('/my/report-reset-wr', [EaController::class, 'myReportResetWr']);
+        Route::get('/my/bookkeeping/visibility', [BookkeepingController::class, 'visibility']);
+        Route::get('/my/bookkeeping/settings', [BookkeepingController::class, 'settings']);
+        Route::post('/my/bookkeeping/settings', [BookkeepingController::class, 'updateSettings']);
+        Route::get('/my/bookkeeping', [BookkeepingController::class, 'index']);
+        Route::post('/my/bookkeeping/save-batch', [BookkeepingController::class, 'saveBatch']);
         Route::get('/debug/config-sync', [EaController::class, 'debugConfigSync']);
         Route::get('/admin/users', [EaController::class, 'adminUsers']);
         Route::get('/admin/users/{userId}/accounts', [EaController::class, 'adminUserAccounts']);

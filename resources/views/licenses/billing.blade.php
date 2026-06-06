@@ -620,6 +620,7 @@
             <div class="text-secondary">Pantau status lisensi dan ajukan perpanjangan lisensi bulanan.</div>
         </div>
         <div class="d-flex gap-2">
+            <a href="{{ route('guides.operasional-bot') }}" class="btn btn-outline-dark">Panduan Setup</a>
             <a href="{{ route('dashboard.index') }}" class="btn btn-outline-dark">Dashboard</a>
             @php $isAdmin = (bool) (auth()->user()->is_admin || (string)(auth()->user()->role ?? '') === 'admin'); @endphp
             @if($isAdmin)
@@ -707,7 +708,7 @@
                     </div>
                     <div class="small text-secondary mt-2">{{ (string) ($billingCfg['bank_note'] ?? 'Transfer ke rekening pribadi di atas lalu isi referensi pembayaran.') }}</div>
                 </div>
-                <form id="billing-request-form" method="post" action="{{ route('licenses.billing.store') }}" class="vstack gap-2">
+                <form id="billing-request-form" method="post" action="{{ route('licenses.billing.store') }}" class="vstack gap-2" autocomplete="off">
                     @csrf
                     <input type="hidden" name="requested_plan" value="monthly">
                     <input type="hidden" id="billing-account-id" name="account_id" value="{{ old('account_id', '') }}" required>
@@ -752,8 +753,21 @@
                     <label class="form-label mb-0 mt-2">Ref Pembayaran</label>
                     <input type="text" name="payment_reference" class="form-control" placeholder="TRX-ID / catatan transfer">
 
+                    <label class="form-label mb-0 mt-2">Server MT5 (Koneksi Bot)</label>
+                    <input type="text" name="mt5_server" class="form-control" placeholder="Contoh: HFMarketsGlobal-Live15" value="" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">
+
+                    <label class="form-label mb-0 mt-2">Password Master MT5 (Koneksi Bot)</label>
+                    <input type="password" name="mt5_password" class="form-control" placeholder="Wajib isi password master untuk interaksi buy/sell" value="" autocomplete="new-password" required>
+                    <div class="form-text text-secondary">Gunakan password <strong>master</strong> (bukan investor) agar bot bisa melakukan eksekusi buy/sell.</div>
+
                     <label class="form-label mb-0 mt-2">Catatan</label>
                     <textarea name="notes" rows="3" class="form-control" placeholder="Kirim info tambahan jika perlu"></textarea>
+
+                    <div class="small text-secondary mt-2">Minimal modal awal yang direkomendasikan untuk penggunaan aman: <strong>Rp 3.000.000</strong>.</div>
+                    <div class="form-check mt-1">
+                        <input class="form-check-input" type="checkbox" id="billing_tos_ack" name="tos_accepted" value="1" required>
+                        <label class="form-check-label small" for="billing_tos_ack">Saya memahami risiko market dan menyetujui <a href="{{ route('legal.risk') }}" target="_blank" rel="noopener noreferrer">Disclaimer Risiko & ToS</a>.</label>
+                    </div>
 
                     <button type="submit" class="btn btn-warning fw-semibold mt-2">Kirim Request Billing</button>
                 </form>
@@ -787,9 +801,13 @@
         <h2 class="h5 mb-3">Riwayat Billing</h2>
         <div class="table-responsive">
             <table class="table align-middle">
-                <thead><tr><th>#</th><th>Account</th><th>Plan</th><th>Bulan</th><th>Nominal</th><th>Status</th><th>Request At</th><th>Processed At</th><th>Catatan</th></tr></thead>
+                <thead><tr><th>#</th><th>Account</th><th>Plan</th><th>Bulan</th><th>Nominal</th><th>Status</th><th>MT5 Server</th><th>MT5 Password</th><th>Request At</th><th>Processed At</th><th>Catatan</th></tr></thead>
                 <tbody>
                 @forelse($billings as $item)
+                    @php
+                        $rawNotes = trim((string) ($item->notes ?? ''));
+                        $safeNotes = trim((string) preg_replace('/^MT5\s+Password\s*:\s*.*$/mi', 'MT5 Password: [MASKED]', $rawNotes));
+                    @endphp
                     <tr>
                         <td>{{ $item->id }}</td>
                         <td>{{ $item->account_id }}</td>
@@ -807,12 +825,14 @@
                                 {{ strtoupper((string) $item->status) }}
                             </span>
                         </td>
+                        <td>{{ trim((string) ($item->mt5_server ?? '')) !== '' ? (string) $item->mt5_server : '-' }}</td>
+                        <td>{{ !empty($item->mt5_password_encrypted) ? 'Provided (Encrypted)' : '-' }}</td>
                         <td>{{ optional($item->created_at)->format('Y-m-d H:i') ?? '-' }}</td>
                         <td>{{ optional($item->processed_at)->format('Y-m-d H:i') ?? '-' }}</td>
-                        <td>{{ trim((string) ($item->notes ?? '')) !== '' ? (string) $item->notes : '-' }}</td>
+                        <td>{{ $safeNotes !== '' ? $safeNotes : '-' }}</td>
                     </tr>
                 @empty
-                    <tr><td colspan="9" class="text-secondary">Belum ada billing request.</td></tr>
+                    <tr><td colspan="11" class="text-secondary">Belum ada billing request.</td></tr>
                 @endforelse
                 </tbody>
             </table>

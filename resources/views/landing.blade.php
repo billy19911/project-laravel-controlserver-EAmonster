@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>EA Monster Cloud Controller</title>
+    <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
+    <link rel="shortcut icon" href="{{ asset('favicon.svg') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -279,6 +281,7 @@
             <div class="d-flex justify-content-between align-items-center gap-3 mb-4">
                 <div class="badge-soft">EA Monster Cloud Controller</div>
                 <div class="d-flex gap-2 flex-wrap">
+                    <a href="{{ route('guides.operasional-bot') }}" class="btn btn-sm cta-secondary">Panduan Lengkap</a>
                     @auth
                         <a href="{{ url('/dashboard') }}" class="btn btn-sm cta-secondary">Dashboard</a>
                     @else
@@ -300,6 +303,7 @@
                         <button type="button" class="btn btn-lg cta-primary px-4" data-open-register-modal="1">Mulai Sekarang</button>
                         <a class="btn btn-lg btn-outline-light px-4" href="https://www.hfmtrade-ind.com/sv/id/?refid=30516200" target="_blank" rel="noopener noreferrer">Buka Akun HFM</a>
                         <a class="btn btn-lg cta-secondary px-4" href="#tutorial">Cara Mulai</a>
+                        <a class="btn btn-lg cta-secondary px-4" href="{{ route('guides.operasional-bot') }}">Panduan End-to-End</a>
                     </div>
                     <div class="trust-strip d-flex flex-wrap gap-2">
                         <span class="trust-pill">Status akun real-time</span>
