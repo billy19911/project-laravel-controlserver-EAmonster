@@ -20,9 +20,12 @@ class Mt5LicenseBilling extends Model
         'requested_amount',
         'payment_method',
         'payment_reference',
+        'mt5_server',
+        'mt5_password_encrypted',
         'status',
         'processed_by_user_id',
         'processed_at',
+        'tos_accepted_at',
         'notes',
     ];
 
@@ -30,6 +33,7 @@ class Mt5LicenseBilling extends Model
         'requested_months' => 'integer',
         'requested_amount' => 'decimal:2',
         'processed_at' => 'datetime',
+        'tos_accepted_at' => 'datetime',
     ];
 
     public function user(): BelongsTo

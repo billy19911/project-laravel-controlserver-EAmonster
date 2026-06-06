@@ -58,12 +58,13 @@ class EaController extends Controller
 
         $effectiveTradingEnabled = strtoupper($effectiveGuardStatus) === 'LIVE';
         $isDdStop = strtoupper($effectiveGuardStatus) === 'DD_STOP';
-        $allowOpenNewCycle = !$isDdStop && (!$licenseInactive) && $effectiveTradingEnabled;
-        $allowManageExistingCycle = !$isDdStop && ($effectiveTradingEnabled || ($licenseInactive && $hasActiveExposure));
+        $licenseExpiredWithExposure = $licenseInactive && $hasActiveExposure;
+        $allowOpenNewCycle = !$isDdStop && !$licenseInactive && $effectiveTradingEnabled;
+        $allowManageExistingCycle = !$isDdStop && ($effectiveTradingEnabled || $licenseExpiredWithExposure);
         $runtimeTradingMode = $isDdStop
             ? 'FORCE_CLOSE'
-            : (($licenseInactive && $hasActiveExposure)
-                ? 'LICENSE_GRACE_MANAGE_ONLY'
+            : ($licenseExpiredWithExposure
+                ? 'LIVE_FULL'
                 : ($effectiveTradingEnabled ? 'LIVE_FULL' : 'PAUSED'));
 
         return response()->json([
@@ -89,6 +90,27 @@ class EaController extends Controller
             'ema_slope_min' => (float) ($configuration->ema_slope_min ?? 0.03),
             'atr_period' => (int) ($configuration->atr_period ?? 14),
             'use_dxy_filter' => (bool) ($configuration->use_dxy_filter ?? false),
+            'use_us10y_filter' => (bool) ($configuration->use_us10y_filter ?? false),
+            'use_vix_filter' => (bool) ($configuration->use_vix_filter ?? false),
+            'use_oil_filter' => (bool) ($configuration->use_oil_filter ?? false),
+            'trail_start' => (float) ($configuration->trail_start ?? 0),
+            'trail_stop' => (float) ($configuration->trail_stop ?? 0),
+            'trail_step' => (float) ($configuration->trail_step ?? 0),
+            'friday_stop_day' => (string) ($configuration->friday_stop_day ?? 'friday'),
+            'friday_stop_wib' => (string) ($configuration->friday_stop_wib ?? '23:45'),
+            'friday_resume_wib' => (string) ($configuration->friday_resume_wib ?? '06:15'),
+            'runtime_market_group' => [
+                'use_dxy_filter' => (bool) ($configuration->use_dxy_filter ?? false),
+                'use_us10y_filter' => (bool) ($configuration->use_us10y_filter ?? false),
+                'use_vix_filter' => (bool) ($configuration->use_vix_filter ?? false),
+                'use_oil_filter' => (bool) ($configuration->use_oil_filter ?? false),
+            ],
+            'friday_market_close' => [
+                'enabled' => (bool) ($configuration->use_friday_market_close_window ?? false),
+                'stop_day' => (string) ($configuration->friday_stop_day ?? 'friday'),
+                'stop_wib' => (string) ($configuration->friday_stop_wib ?? '23:45'),
+                'resume_wib' => (string) ($configuration->friday_resume_wib ?? '06:15'),
+            ],
             'strategy_params' => $this->strategyParams($configuration),
             'news_block' => [
                 'severity' => (string) $configuration->news_filter_severity,
@@ -265,6 +287,13 @@ class EaController extends Controller
             'ema_slope_min' => ['nullable', 'numeric', 'min:0'],
             'atr_period' => ['nullable', 'integer', 'min:1'],
             'use_dxy_filter' => ['nullable', 'boolean'],
+            'use_us10y_filter' => ['nullable', 'boolean'],
+            'use_vix_filter' => ['nullable', 'boolean'],
+            'use_oil_filter' => ['nullable', 'boolean'],
+            'use_friday_market_close_window' => ['nullable', 'boolean'],
+            'friday_stop_day' => ['nullable', Rule::in(['friday', 'saturday'])],
+            'friday_stop_wib' => ['nullable', 'date_format:H:i'],
+            'friday_resume_wib' => ['nullable', 'date_format:H:i'],
             'use_mirror_trap' => ['nullable', 'boolean'],
             'use_stealth_mode' => ['nullable', 'boolean'],
             'use_sydney_session' => ['nullable', 'boolean'],
@@ -279,11 +308,43 @@ class EaController extends Controller
             'use_us_session' => ['nullable', 'boolean'],
             'us_start_wib' => ['nullable', 'date_format:H:i'],
             'us_end_wib' => ['nullable', 'date_format:H:i'],
+            'trail_start' => ['nullable', 'numeric', 'min:0', 'max:100000'],
+            'trail_stop' => ['nullable', 'numeric', 'min:0', 'max:100000'],
+            'trail_step' => ['nullable', 'numeric', 'min:0', 'max:100000'],
+            'apply_logic_globally' => ['nullable', 'boolean'],
         ]);
 
         $user = $request->user();
         $role = (string) ($user->role ?? '');
         $isAdmin = (bool) ($user->is_admin || $role === 'admin');
+
+        $logicOnlyFields = [
+            'use_pending_guard', 'auto_flip', 'use_trend_filter', 'use_ai_core_sharpening',
+            'use_ema_ribbon', 'use_dmi', 'use_mkt_struct', 'use_early_trend', 'use_sniper_entry',
+            'bb_period', 'bb_deviation', 'rsi_period', 'rsi_buy_level', 'rsi_sell_level',
+            'adx_period', 'adx_level', 'adx_bars', 'adx_sideways',
+            'ema_period', 'ema_fast', 'ema_slow', 'ema_slope_min', 'atr_period', 'use_dxy_filter',
+            'use_us10y_filter', 'use_vix_filter', 'use_oil_filter',
+            'use_friday_market_close_window', 'friday_stop_day', 'friday_stop_wib', 'friday_resume_wib',
+                'use_stealth_mode', 'show_indicator_fallback_logs', 'close_all_on_news',
+                'use_sydney_session', 'sydney_start_wib', 'sydney_end_wib',
+                'use_asia_session', 'asia_start_wib', 'asia_end_wib',
+                'use_europe_session', 'europe_start_wib', 'europe_end_wib',
+                'use_us_session', 'us_start_wib', 'us_end_wib',
+                'trail_start', 'trail_stop', 'trail_step',
+        ];
+
+            $applyLogicGlobally = $isAdmin && (bool) ($validated['apply_logic_globally'] ?? false);
+            unset($validated['apply_logic_globally']);
+
+        if (!$isAdmin) {
+            foreach ($logicOnlyFields as $field) {
+                unset($validated[$field]);
+            }
+
+            // Keep testing strategies admin-only even if payload is tampered client-side.
+            $validated['active_strategy'] = 0;
+        }
 
         $pairSymbol = $this->requestedPairSymbol($request);
 
@@ -303,6 +364,77 @@ class EaController extends Controller
                 'success' => false,
                 'message' => 'Account tidak ditemukan atau tidak punya akses.',
             ], 404);
+        }
+
+        if ($applyLogicGlobally) {
+            $logicPayload = [];
+            foreach ($logicOnlyFields as $field) {
+                if (array_key_exists($field, $validated)) {
+                    $logicPayload[$field] = $validated[$field];
+                }
+            }
+
+            if ($logicPayload === []) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Tidak ada field logic yang dikirim untuk global update.',
+                ], 422);
+            }
+
+            $globalConfigs = EaConfiguration::query()->get();
+            $updatedCount = 0;
+            foreach ($globalConfigs as $cfg) {
+                $beforeValues = [];
+                foreach (array_keys($logicPayload) as $field) {
+                    $beforeValues[$field] = $cfg->getAttribute($field);
+                }
+
+                $cfg->fill($logicPayload);
+                $dirty = $cfg->getDirty();
+                if ($dirty === []) {
+                    continue;
+                }
+
+                $cfg->save();
+                $updatedCount++;
+
+                $changedFields = array_keys($dirty);
+                $afterValues = [];
+                foreach ($changedFields as $field) {
+                    $afterValues[$field] = $cfg->getAttribute($field);
+                }
+
+                EaSettingAudit::query()->create([
+                    'user_id' => $request->user()->id,
+                    'ea_configuration_id' => $cfg->id,
+                    'account_id' => $cfg->account_id,
+                    'changed_fields' => $changedFields,
+                    'before_values' => array_intersect_key($beforeValues, array_flip($changedFields)),
+                    'after_values' => $afterValues,
+                    'ip_address' => $request->ip(),
+                    'user_agent' => (string) $request->userAgent(),
+                ]);
+
+                $signalAccountId = (string) $cfg->account_id;
+                $signalPairRaw = strtoupper((string) ($cfg->pair_symbol ?? ''));
+                $signalPair = preg_replace('/[^A-Z0-9]/', '', $signalPairRaw) ?? '';
+                $signalKey = $signalPair !== ''
+                    ? ('ea:signal:' . $signalAccountId . ':' . $signalPair)
+                    : ('ea:signal:' . $signalAccountId);
+
+                Cache::put($signalKey, [
+                    'action' => 'RELOAD_CONFIG',
+                    'source' => 'dashboard_logic_global_save',
+                    'updated_at' => Carbon::now()->toIso8601String(),
+                ], Carbon::now()->addMinutes(3));
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Global logic update berhasil diterapkan ke semua account.',
+                'updated_count' => $updatedCount,
+                'data' => $configuration->fresh(),
+            ]);
         }
 
         $licenseStatus = $this->licenseService->getStatusByAccountId((string) $configuration->account_id);
@@ -393,6 +525,10 @@ class EaController extends Controller
                 'grid_fix_distance' => (int) $configuration->grid_fix_distance,
                 'grid_atr_multiplier' => (float) $configuration->grid_atr_multiplier,
                 'grid_target_usd' => (float) $configuration->grid_target_usd,
+                'mart_max_steps' => (int) $configuration->mart_max_steps,
+                'mart_type' => (int) $configuration->mart_type,
+                'mart_multiplier' => (float) $configuration->mart_multiplier,
+                'mart_addition' => (float) $configuration->mart_addition,
             ],
             1 => [
                 'mirror_active' => (bool) $configuration->mirror_active,
@@ -411,11 +547,13 @@ class EaController extends Controller
 
     private function isNewsBlockedNow(EaConfiguration $configuration): bool
     {
-        $now = Carbon::now();
+        $now = Carbon::now('UTC');
         $severities = $this->severityFilters((string) $configuration->news_filter_severity);
+        $currencies = $this->resolveCorrelatedCurrencies((string) ($configuration->pair_symbol ?? ''));
 
         $latest = EconomicNews::query()
             ->whereIn('impact', $severities)
+            ->whereIn('currency', $currencies)
             ->whereBetween('event_at', [$now->copy()->subHours(6), $now->copy()->addHours(6)])
             ->orderByRaw('ABS(TIMESTAMPDIFF(SECOND, event_at, ?)) ASC', [$now->toDateTimeString()])
             ->first();
@@ -428,6 +566,30 @@ class EaController extends Controller
         $to = $latest->event_at->copy()->addMinutes((int) $configuration->news_pause_after_minutes);
 
         return $now->between($from, $to);
+    }
+
+    private function resolveCorrelatedCurrencies(string $pairSymbol): array
+    {
+        $normalized = strtoupper(preg_replace('/[^A-Z]/', '', $pairSymbol) ?? '');
+        if ($normalized === '') {
+            return ['USD'];
+        }
+
+        if (str_starts_with($normalized, 'XAU') || str_starts_with($normalized, 'GOLD')) {
+            return ['USD', 'XAU', 'EUR', 'GBP'];
+        }
+
+        if (str_starts_with($normalized, 'BTC') || str_starts_with($normalized, 'ETH')) {
+            return ['USD'];
+        }
+
+        if (strlen($normalized) >= 6) {
+            $base = substr($normalized, 0, 3);
+            $quote = substr($normalized, 3, 3);
+            return array_values(array_unique(['USD', $base, $quote]));
+        }
+
+        return ['USD'];
     }
 
     private function severityFilters(string $severity): array

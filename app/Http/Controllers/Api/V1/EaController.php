@@ -166,7 +166,7 @@ class EaController extends Controller
         $isAdmin = (bool) ($user->is_admin || $role === 'admin');
 
         $accountId = trim((string) $validated['account_id']);
-        $pairSymbol = strtoupper((string) ($validated['pair_symbol'] ?? 'XAUUSD'));
+        $pairSymbol = strtoupper((string) ($validated['pair_symbol'] ?? 'XAUUSDC'));
         $baseLot = (float) ($validated['base_lot'] ?? 0.01);
 
         $existing = EaConfiguration::query()
@@ -247,7 +247,18 @@ class EaController extends Controller
         }
 
         $hasActiveConfig = $configurations->contains(static function (EaConfiguration $configuration): bool {
-            return (int) ($configuration->current_layers ?? 0) > 0 || (bool) ($configuration->is_online ?? false);
+            if ((int) ($configuration->current_layers ?? 0) > 0) {
+                return true;
+            }
+
+            $guardStatus = strtoupper(trim((string) ($configuration->guard_status ?? '')));
+            if ($guardStatus === 'LIVE') {
+                return true;
+            }
+
+            $liveGuardStatus = strtoupper(trim((string) ($configuration->live_guard_status ?? '')));
+
+            return $liveGuardStatus === 'LIVE';
         });
         if ($hasActiveConfig) {
             return response()->json([
@@ -457,6 +468,13 @@ class EaController extends Controller
             'ema_slope_min' => ['sometimes', 'numeric', 'min:0'],
             'atr_period' => ['sometimes', 'integer', 'min:1'],
             'use_dxy_filter' => ['sometimes', 'boolean'],
+            'use_us10y_filter' => ['sometimes', 'boolean'],
+            'use_vix_filter' => ['sometimes', 'boolean'],
+            'use_oil_filter' => ['sometimes', 'boolean'],
+            'use_friday_market_close_window' => ['sometimes', 'boolean'],
+            'friday_stop_day' => ['sometimes', Rule::in(['friday', 'saturday'])],
+            'friday_stop_wib' => ['sometimes', 'date_format:H:i'],
+            'friday_resume_wib' => ['sometimes', 'date_format:H:i'],
             'use_sydney_session' => ['sometimes', 'boolean'],
             'sydney_start_wib' => ['sometimes', 'date_format:H:i'],
             'sydney_end_wib' => ['sometimes', 'date_format:H:i'],
@@ -598,6 +616,7 @@ class EaController extends Controller
 
         $openPositions = $this->readTelemetryArray($request, ['open_positions', 'positions', 'positions_data']);
         $pendingOrders = $this->readTelemetryArray($request, ['pending_orders', 'orders_pending', 'pending_orders_list']);
+        $hasOpenPositionsPayload = $request->exists('open_positions') || $request->exists('positions') || $request->exists('positions_data');
         $closedTrades = $this->readTelemetryArray($request, [
             'closed_trades',
             'history_trades',
@@ -613,20 +632,77 @@ class EaController extends Controller
         $equity = $this->readTelemetryFloat($request, ['equity', 'account_equity']);
         $derivedFloating = ($balance !== null && $equity !== null) ? ($equity - $balance) : null;
 
+        $hasExplicitCurrentLayers = $request->has('current_layers');
         $computedLayers = $this->readTelemetryInt($request, ['current_layers', 'open_positions', 'positions_total']);
         if ($computedLayers === null) {
             $computedLayers = count($openPositions);
+        } elseif (!$hasExplicitCurrentLayers && $computedLayers <= 0 && $openPositions !== []) {
+            $computedLayers = count($openPositions);
         }
 
+        $hasExplicitCurrentAccLot = $request->has('current_accumulative_lot');
         $computedAccLot = $this->readTelemetryFloat($request, ['current_accumulative_lot', 'accumulative_lot', 'total_lot']);
         if ($computedAccLot === null) {
             $computedAccLot = $this->sumLots($openPositions);
+        } elseif (!$hasExplicitCurrentAccLot && $computedAccLot <= 0.0 && $openPositions !== []) {
+            $computedAccLot = $this->sumLots($openPositions);
         }
+
+        $licenseRuntime = $this->licenseService->getRuntimeStatusForConfiguration(
+            $configuration,
+            (int) $computedLayers,
+            (float) $computedAccLot
+        );
 
         $computedFloating = $this->readTelemetryFloat($request, ['global_floating', 'floating', 'floating_pnl', 'live_floating_pnl']);
         if ($computedFloating === null) {
-            $computedFloating = $derivedFloating ?? $this->sumFloating($openPositions);
+            if ($derivedFloating !== null) {
+                $computedFloating = $derivedFloating;
+            } elseif ($openPositions !== []) {
+                $computedFloating = $this->sumFloating($openPositions);
+            } elseif ((int) $computedLayers <= 0) {
+                $computedFloating = 0.0;
+            } else {
+                $computedFloating = (float) ($configuration->global_floating ?? 0.0);
+            }
         }
+
+        $todayPnlTelemetry = $this->readTelemetryFloat($request, ['today_pnl', 'daily_profit']);
+        if ($todayPnlTelemetry === null) {
+            $todayPnlTelemetry = (float) ($configuration->today_pnl ?? 0.0);
+        }
+
+        $drawdownTelemetry = $this->readTelemetryFloat($request, ['drawdown_pct']);
+        $shouldDeriveDrawdown = $drawdownTelemetry === null;
+        if (!$shouldDeriveDrawdown && $balance !== null && $balance > 0) {
+            $incomingDd = (float) $drawdownTelemetry;
+            $floatingSignal = abs((float) $computedFloating) > 0.0000001;
+            $equitySignal = $equity !== null && abs((float) $equity - (float) $balance) > 0.0000001;
+            $incomingDdZeroLike = abs($incomingDd) <= 0.0000001;
+
+            // Some EA builds always send drawdown_pct=0; derive it when other telemetry clearly shows exposure.
+            if ($incomingDdZeroLike && ($floatingSignal || $equitySignal)) {
+                $shouldDeriveDrawdown = true;
+            }
+        }
+
+        if ($shouldDeriveDrawdown) {
+            $drawdownTelemetry = 0.0;
+            if ($balance !== null && $balance > 0 && $computedFloating < 0) {
+                $drawdownTelemetry = -abs(($computedFloating / $balance) * 100.0);
+            } elseif ($balance !== null && $balance > 0 && $equity !== null && $equity > 0 && $equity < $balance) {
+                $drawdownTelemetry = -(($balance - $equity) / $balance) * 100.0;
+            } elseif ($balance !== null && $balance > 0 && $equity !== null && $equity > $balance) {
+                $drawdownTelemetry = (($equity - $balance) / $balance) * 100.0;
+            }
+        }
+
+        $storedBalance = ($balance !== null)
+            ? (float) $balance
+            : (float) ($configuration->current_balance ?? 0.0);
+        $storedEquity = ($equity !== null)
+            ? (float) $equity
+            : (float) ($configuration->current_equity ?? 0.0);
 
         $reportedGuardStatus = $this->readTelemetryString($request, ['guard_status', 'status']);
         if ($reportedGuardStatus === null || trim($reportedGuardStatus) === '') {
@@ -684,8 +760,9 @@ class EaController extends Controller
             Cache::forget($ddBreachKey);
         }
 
-        $licenseEnforcementEnabled = $this->licenseService->isEnforcementEnabled();
-        $licenseInactive = $licenseEnforcementEnabled && !(bool) ($licenseStatus['license_active'] ?? false);
+        $licenseEnforcementEnabled = (bool) ($licenseRuntime['license_enforcement_enabled'] ?? $this->licenseService->isEnforcementEnabled());
+        $licenseGracePeriod = (bool) ($licenseRuntime['license_grace_period'] ?? false);
+        $licenseInactive = $licenseEnforcementEnabled && !(bool) ($licenseRuntime['license_active'] ?? false) && !$licenseGracePeriod;
         if ($licenseInactive) {
             $hasActiveExposure = max(0, (int) $computedLayers) > 0 || max(0.0, (float) $computedAccLot) > 0.0000001;
             if ($hasActiveExposure) {
@@ -698,6 +775,8 @@ class EaController extends Controller
                 $commandedGuardStatus = 'PAUSED';
                 $reportedGuardStatus = 'PAUSED';
             }
+        } elseif ($licenseGracePeriod && strtoupper($commandedGuardStatus) !== 'DD_STOP') {
+            $commandedGuardStatus = 'LIVE';
         }
 
         $tradingEnabled = strtoupper($commandedGuardStatus) === 'LIVE';
@@ -712,6 +791,10 @@ class EaController extends Controller
             'current_layers' => max(0, (int) $computedLayers),
             'current_accumulative_lot' => max(0.0, (float) $computedAccLot),
             'global_floating' => (float) $computedFloating,
+            'current_balance' => $storedBalance,
+            'current_equity' => $storedEquity,
+            'today_pnl' => (float) $todayPnlTelemetry,
+            'drawdown_pct' => (float) $drawdownTelemetry,
             'guard_status' => (string) $commandedGuardStatus,
             'live_guard_status' => (string) $reportedGuardStatus,
             'is_online' => true,
@@ -723,6 +806,30 @@ class EaController extends Controller
         }
 
         $configuration->update($configPayload);
+
+        $latestMetricsReport = EaStatusReport::query()
+            ->where('ea_configuration_id', $configuration->id)
+            ->latest('id')
+            ->first();
+
+        $winsValue = array_key_exists('wins', $validated)
+            ? (int) $validated['wins']
+            : (int) ($latestMetricsReport?->wins ?? 0);
+        $lossesValue = array_key_exists('losses', $validated)
+            ? (int) $validated['losses']
+            : (int) ($latestMetricsReport?->losses ?? 0);
+        $realizedProfitValue = array_key_exists('realized_profit', $validated)
+            ? (float) $validated['realized_profit']
+            : (float) ($latestMetricsReport?->realized_profit ?? 0.0);
+        $dailyProfitValue = array_key_exists('daily_profit', $validated)
+            ? (float) $validated['daily_profit']
+            : (float) ($latestMetricsReport?->daily_profit ?? 0.0);
+        $weeklyProfitValue = array_key_exists('weekly_profit', $validated)
+            ? (float) $validated['weekly_profit']
+            : (float) ($latestMetricsReport?->weekly_profit ?? 0.0);
+        $monthlyProfitValue = array_key_exists('monthly_profit', $validated)
+            ? (float) $validated['monthly_profit']
+            : (float) ($latestMetricsReport?->monthly_profit ?? 0.0);
 
         $reportPayload = [
             'user_id' => $configuration->user_id,
@@ -737,19 +844,33 @@ class EaController extends Controller
             'open_positions' => $this->compactTelemetryRows($openPositions, 40),
             'pending_orders' => $this->compactTelemetryRows($pendingOrders, 40),
             'closed_trades' => $this->compactClosedTradesForReport($closedTrades, 25),
-            'wins' => (int) ($validated['wins'] ?? 0),
-            'losses' => (int) ($validated['losses'] ?? 0),
-            'realized_profit' => (float) ($validated['realized_profit'] ?? 0),
-            'daily_profit' => (float) ($validated['daily_profit'] ?? 0),
-            'weekly_profit' => (float) ($validated['weekly_profit'] ?? 0),
-            'monthly_profit' => (float) ($validated['monthly_profit'] ?? 0),
+            'wins' => $winsValue,
+            'losses' => $lossesValue,
+            'realized_profit' => $realizedProfitValue,
+            'daily_profit' => $dailyProfitValue,
+            'weekly_profit' => $weeklyProfitValue,
+            'monthly_profit' => $monthlyProfitValue,
         ];
 
         if ($this->hasEaReportCurrencyColumn()) {
             $reportPayload['account_currency'] = $accountCurrency;
         }
 
-        if ($this->shouldWriteStatusReport($configuration, (int) $reportPayload['current_layers'], (float) $reportPayload['current_accumulative_lot'], (float) $reportPayload['global_floating'], (string) $reportPayload['guard_status'])) {
+        if ($this->shouldWriteStatusReport(
+            $configuration,
+            (int) $reportPayload['current_layers'],
+            (float) $reportPayload['current_accumulative_lot'],
+            (float) $reportPayload['global_floating'],
+            (string) $reportPayload['guard_status'],
+            (array) ($reportPayload['open_positions'] ?? []),
+            (array) ($reportPayload['pending_orders'] ?? []),
+            (int) ($reportPayload['wins'] ?? 0),
+            (int) ($reportPayload['losses'] ?? 0),
+            (float) ($reportPayload['realized_profit'] ?? 0.0),
+            (float) ($reportPayload['daily_profit'] ?? 0.0),
+            (float) ($reportPayload['weekly_profit'] ?? 0.0),
+            (float) ($reportPayload['monthly_profit'] ?? 0.0)
+        )) {
             EaStatusReport::query()->create($reportPayload);
             $this->pruneStatusReportsIfNeeded($configuration);
         }
@@ -765,7 +886,12 @@ class EaController extends Controller
                 'guard_status' => (string) $commandedGuardStatus,
                 'live_guard_status' => (string) $reportedGuardStatus,
                 'trading_enabled' => $tradingEnabled,
-                'license' => $licenseStatus,
+                'license_status' => (string) ($licenseRuntime['license_status'] ?? $licenseStatus['license_status'] ?? 'unlicensed'),
+                'is_active' => (int) ($licenseRuntime['is_active'] ?? 0),
+                'is_trading_active' => (int) ($licenseRuntime['is_trading_active'] ?? 0),
+                'allow_open_new_cycle' => (bool) ($licenseRuntime['license_can_start_new_cycle'] ?? false),
+                'allow_manage_existing_cycle' => (bool) ($licenseRuntime['license_can_manage_existing_cycle'] ?? false),
+                'license' => array_merge($licenseStatus, $licenseRuntime),
                 'manual_layer_reset' => $manualLayerReset,
                 'account_currency' => $accountCurrency,
                 'balance' => $balance,
@@ -804,31 +930,110 @@ class EaController extends Controller
             ->latest('id')
             ->first();
 
+        $latestWithMetrics = EaStatusReport::query()
+            ->where('ea_configuration_id', $configuration->id)
+            ->latest('id')
+            ->first();
+
+        $latestReportHeartbeatAt = null;
+        if ($latest !== null) {
+            $latestReportHeartbeatRaw = $latest->updated_at ?? $latest->created_at;
+            if ($latestReportHeartbeatRaw !== null) {
+                try {
+                    $latestReportHeartbeatAt = Carbon::parse((string) $latestReportHeartbeatRaw);
+                } catch (\Throwable) {
+                    $latestReportHeartbeatAt = null;
+                }
+            }
+        }
+
+        $freshWindowSec = max(20, (int) config('services.ea.online_fresh_window_sec', 30));
+        $freshThreshold = Carbon::now()->subSeconds($freshWindowSec);
+        $latestReportIsFresh = $latestReportHeartbeatAt !== null
+            && $latestReportHeartbeatAt->greaterThanOrEqualTo($freshThreshold);
+
         $balance = (float) ($latest?->balance ?? $latestWithFunds?->balance ?? 0.0);
         $equity = (float) ($latest?->equity ?? $latestWithFunds?->equity ?? 0.0);
-        $openPositions = is_array($latest?->open_positions) ? $latest->open_positions : [];
+        $openPositions = $latestReportIsFresh && is_array($latest?->open_positions)
+            ? $latest->open_positions
+            : [];
 
-        $floatingLoss = 0.0;
-        foreach ($openPositions as $position) {
-            if (!is_array($position)) {
+        $hasMagicMetadata = false;
+        $botOpenPositions = [];
+        foreach ($openPositions as $positionRow) {
+            if (!is_array($positionRow)) {
                 continue;
             }
 
-            $pnl = (float) ($position['floating'] ?? ((float) ($position['profit'] ?? 0.0) + (float) ($position['swap'] ?? 0.0)));
-            if ($pnl < 0.0) {
-                $floatingLoss += $pnl;
+            if (array_key_exists('magic', $positionRow)) {
+                $hasMagicMetadata = true;
+                $magicValue = $positionRow['magic'];
+                $magicNumber = is_numeric($magicValue) ? (float) $magicValue : 0.0;
+                if (abs($magicNumber) > 0.0000001) {
+                    $botOpenPositions[] = $positionRow;
+                }
             }
+        }
+
+        $botLayers = $hasMagicMetadata
+            ? count($botOpenPositions)
+            : ($latestReportIsFresh ? (int) ($configuration->current_layers ?? 0) : 0);
+        $botAccLot = $hasMagicMetadata
+            ? $this->sumLots($botOpenPositions)
+            : ($latestReportIsFresh ? (float) ($configuration->current_accumulative_lot ?? 0.0) : 0.0);
+        $botFloating = $hasMagicMetadata
+            ? $this->sumFloating($botOpenPositions)
+            : ($latestReportIsFresh ? (float) ($configuration->global_floating ?? 0.0) : 0.0);
+
+        $liveFloatingPnl = $hasMagicMetadata
+            ? (float) $botFloating
+            : ($openPositions !== []
+                ? $this->sumFloating($openPositions)
+                : ($latestReportIsFresh ? (float) ($configuration->global_floating ?? 0.0) : 0.0));
+
+        $floatingLoss = 0.0;
+        $lossRows = $hasMagicMetadata ? $botOpenPositions : $openPositions;
+        if ($lossRows !== []) {
+            foreach ($lossRows as $position) {
+                if (!is_array($position)) {
+                    continue;
+                }
+
+                $pnl = (float) ($position['floating'] ?? ((float) ($position['profit'] ?? 0.0) + (float) ($position['swap'] ?? 0.0)));
+                if ($pnl < 0.0) {
+                    $floatingLoss += $pnl;
+                }
+            }
+        } elseif ($liveFloatingPnl < 0.0) {
+            $floatingLoss = $liveFloatingPnl;
         }
 
         $drawdownPct = 0.0;
         $drawdownMethod = 'none';
         if ($balance > 0.0) {
             if ($floatingLoss < 0.0) {
-                $drawdownPct = abs(($floatingLoss / $balance) * 100.0);
+                $drawdownPct = -abs(($floatingLoss / $balance) * 100.0);
                 $drawdownMethod = 'floating_loss_over_balance';
+            } elseif ($equity > $balance) {
+                $drawdownPct = (($equity - $balance) / $balance) * 100.0;
+                $drawdownMethod = 'equity_minus_balance_over_balance';
             } elseif ($equity > 0.0 && $equity < $balance) {
-                $drawdownPct = (($balance - $equity) / $balance) * 100.0;
+                $drawdownPct = -(($balance - $equity) / $balance) * 100.0;
                 $drawdownMethod = 'balance_minus_equity_over_balance';
+            } elseif ($liveFloatingPnl > 0.0) {
+                $drawdownPct = ($liveFloatingPnl / $balance) * 100.0;
+                $drawdownMethod = 'floating_gain_over_balance';
+            } elseif ($liveFloatingPnl < 0.0) {
+                $drawdownPct = -abs(($liveFloatingPnl / $balance) * 100.0);
+                $drawdownMethod = 'floating_loss_over_balance_fallback';
+            }
+        }
+
+        if (abs($drawdownPct) < 0.0000001) {
+            $storedDrawdown = (float) ($configuration->drawdown_pct ?? 0.0);
+            if (abs($storedDrawdown) > 0.0000001) {
+                $drawdownPct = $storedDrawdown;
+                $drawdownMethod = 'stored_drawdown_fallback';
             }
         }
 
@@ -838,18 +1043,8 @@ class EaController extends Controller
         $winRatePercent = $totalTrades > 0 ? round(($wins / $totalTrades) * 100, 2) : 0.0;
 
         $freshHeartbeatAt = $configuration->updated_at instanceof Carbon ? $configuration->updated_at->copy() : null;
-        $latestReportHeartbeat = null;
-        if ($latest !== null) {
-            $latestReportHeartbeat = $latest->updated_at ?? $latest->created_at;
-        }
-        if ($latestReportHeartbeat !== null) {
-            try {
-                $latestReportHeartbeatAt = Carbon::parse((string) $latestReportHeartbeat);
-                if ($freshHeartbeatAt === null || $latestReportHeartbeatAt->greaterThan($freshHeartbeatAt)) {
-                    $freshHeartbeatAt = $latestReportHeartbeatAt;
-                }
-            } catch (\Throwable) {
-            }
+        if ($latestReportHeartbeatAt !== null && ($freshHeartbeatAt === null || $latestReportHeartbeatAt->greaterThan($freshHeartbeatAt))) {
+            $freshHeartbeatAt = $latestReportHeartbeatAt;
         }
 
         $response = [
@@ -857,9 +1052,10 @@ class EaController extends Controller
             'account_id' => $configuration->account_id,
             'is_online' => $this->isRecentlyOnline($configuration),
             'account_currency' => strtoupper((string) ($configuration->account_currency ?? 'USD')),
-            'current_layers' => (int) ($configuration->current_layers ?? 0),
-            'current_accumulative_lot' => (float) ($configuration->current_accumulative_lot ?? 0),
-            'global_floating' => (float) ($configuration->global_floating ?? 0),
+            'current_layers' => max(0, (int) $botLayers),
+            'current_accumulative_lot' => max(0.0, (float) $botAccLot),
+            'global_floating' => (float) $botFloating,
+            'live_floating_pnl' => (float) $liveFloatingPnl,
             'drawdown_pct' => round($drawdownPct, 4),
             'guard_status' => (string) ($configuration->guard_status ?? 'N/A'),
             'updated_at' => $freshHeartbeatAt?->toISOString(),
@@ -868,17 +1064,24 @@ class EaController extends Controller
             'wins' => $wins,
             'losses' => $losses,
             'win_rate_percent' => $winRatePercent,
-            'realized_profit' => (float) ($latest?->realized_profit ?? 0),
-            'daily_profit' => (float) ($latest?->daily_profit ?? 0),
-            'weekly_profit' => (float) ($latest?->weekly_profit ?? 0),
-            'monthly_profit' => (float) ($latest?->monthly_profit ?? 0),
+            'realized_profit' => (float) ($latestWithMetrics?->realized_profit ?? 0),
+            'daily_profit' => (float) ($latestWithMetrics?->daily_profit ?? 0),
+            'weekly_profit' => (float) ($latestWithMetrics?->weekly_profit ?? 0),
+            'monthly_profit' => (float) ($latestWithMetrics?->monthly_profit ?? 0),
             'open_positions' => $openPositions,
-            'pending_orders' => $latest?->pending_orders ?? [],
-            'closed_trades_latest' => $latest?->closed_trades ?? [],
+            'pending_orders' => $latestReportIsFresh ? ($latest?->pending_orders ?? []) : [],
+            'closed_trades_latest' => $latestReportIsFresh ? ($latest?->closed_trades ?? []) : [],
             'analysis' => $this->readSignalSnapshot($configuration),
         ];
 
-        $response = array_merge($response, $this->licenseService->getStatusForConfiguration($configuration));
+        $response = array_merge(
+            $response,
+            $this->licenseService->getRuntimeStatusForConfiguration(
+                $configuration,
+                max(0, (int) $botLayers),
+                max(0.0, (float) $botAccLot)
+            )
+        );
 
         if ($includeCalcDebug) {
             $response['calc_debug'] = [
@@ -890,7 +1093,7 @@ class EaController extends Controller
                 'open_positions_count' => count($openPositions),
                 'drawdown_pct_raw' => $drawdownPct,
                 'drawdown_pct_rounded' => round($drawdownPct, 4),
-                'formula' => 'drawdown = abs(sum(negative floating) / balance) * 100, fallback ((balance-equity)/balance)*100',
+                'formula' => 'drawdown_signed = negative on loss, positive on gain; based on floating/balance, fallback equity-vs-balance',
             ];
         }
 
@@ -903,6 +1106,7 @@ class EaController extends Controller
             'account_id' => ['required', 'string', 'max:32'],
             'limit' => ['nullable', 'integer', 'min:5', 'max:500'],
             'page' => ['nullable', 'integer', 'min:1', 'max:500'],
+            'period' => ['nullable', 'string', 'in:all,today,yesterday,this_week,last_week,this_month,last_30_days'],
             'calc_debug' => ['nullable', 'boolean'],
         ]);
         $includeCalcDebug = (bool) ($validated['calc_debug'] ?? false);
@@ -916,8 +1120,62 @@ class EaController extends Controller
             ], 404);
         }
 
+        $latestMetricsReport = null;
+        try {
+            $latestMetricsReport = EaStatusReport::query()
+                ->where('ea_configuration_id', $configuration->id)
+                ->latest('id')
+                ->first();
+        } catch (\Throwable) {
+            $latestMetricsReport = null;
+        }
+        $pickProfitMetric = static function (?float $metricValue, float $calculatedValue): float {
+            if ($metricValue === null) {
+                return $calculatedValue;
+            }
+
+            if (abs($metricValue) < 0.0000001 && abs($calculatedValue) > 0.0000001) {
+                return $calculatedValue;
+            }
+
+            return $metricValue;
+        };
+
         $limit = (int) ($validated['limit'] ?? 50);
         $page = (int) ($validated['page'] ?? 1);
+        $period = (string) ($validated['period'] ?? 'all');
+        $nowJakarta = Carbon::now('Asia/Jakarta');
+        $periodStart = null;
+        $periodEnd = null;
+        switch ($period) {
+            case 'today':
+                $periodStart = $nowJakarta->copy()->startOfDay();
+                $periodEnd = $nowJakarta->copy()->endOfDay();
+                break;
+            case 'yesterday':
+                $periodStart = $nowJakarta->copy()->subDay()->startOfDay();
+                $periodEnd = $nowJakarta->copy()->subDay()->endOfDay();
+                break;
+            case 'this_week':
+                $periodStart = $nowJakarta->copy()->startOfWeek(Carbon::MONDAY);
+                $periodEnd = $nowJakarta->copy()->endOfWeek(Carbon::SUNDAY);
+                break;
+            case 'last_week':
+                $periodStart = $nowJakarta->copy()->subWeek()->startOfWeek(Carbon::MONDAY);
+                $periodEnd = $nowJakarta->copy()->subWeek()->endOfWeek(Carbon::SUNDAY);
+                break;
+            case 'this_month':
+                $periodStart = $nowJakarta->copy()->startOfMonth();
+                $periodEnd = $nowJakarta->copy()->endOfMonth();
+                break;
+            case 'last_30_days':
+                $periodStart = $nowJakarta->copy()->subDays(29)->startOfDay();
+                $periodEnd = $nowJakarta->copy()->endOfDay();
+                break;
+            default:
+                $period = 'all';
+                break;
+        }
         $reportsQuery = EaStatusReport::query()
             ->where('ea_configuration_id', $configuration->id)
             ->latest('id');
@@ -935,6 +1193,25 @@ class EaController extends Controller
         $persistentHistoryQuery = EaClosedTrade::query()
             ->where('ea_configuration_id', $configuration->id);
         $persistentStatsQuery = clone $persistentHistoryQuery;
+
+        if ($periodStart instanceof Carbon) {
+            $persistentHistoryQuery->where(function ($query) use ($periodStart, $periodEnd): void {
+                $query->where(function ($sub) use ($periodStart, $periodEnd): void {
+                    $sub->whereNotNull('closed_at')
+                        ->where('closed_at', '>=', $periodStart);
+                    if ($periodEnd instanceof Carbon) {
+                        $sub->where('closed_at', '<=', $periodEnd);
+                    }
+                })->orWhere(function ($sub) use ($periodStart, $periodEnd): void {
+                    $sub->whereNull('closed_at')
+                        ->where('created_at', '>=', $periodStart);
+                    if ($periodEnd instanceof Carbon) {
+                        $sub->where('created_at', '<=', $periodEnd);
+                    }
+                });
+            });
+
+        }
 
         if (is_string($resetAtIso) && trim($resetAtIso) !== '') {
             try {
@@ -1147,10 +1424,22 @@ class EaController extends Controller
                     'reset_at' => $resetAtIso,
                 ],
                 'profit' => [
-                    'daily' => $dailyCalculated,
-                    'weekly' => $weeklyCalculated,
-                    'monthly' => $monthlyCalculated,
-                    'realized' => $realized,
+                    'daily' => $pickProfitMetric(
+                        $latestMetricsReport?->daily_profit !== null ? (float) $latestMetricsReport->daily_profit : null,
+                        $dailyCalculated
+                    ),
+                    'weekly' => $pickProfitMetric(
+                        $latestMetricsReport?->weekly_profit !== null ? (float) $latestMetricsReport->weekly_profit : null,
+                        $weeklyCalculated
+                    ),
+                    'monthly' => $pickProfitMetric(
+                        $latestMetricsReport?->monthly_profit !== null ? (float) $latestMetricsReport->monthly_profit : null,
+                        $monthlyCalculated
+                    ),
+                    'realized' => $pickProfitMetric(
+                        $latestMetricsReport?->realized_profit !== null ? (float) $latestMetricsReport->realized_profit : null,
+                        $realized
+                    ),
                 ],
                 'history' => $history,
                 'history_meta' => [
@@ -1158,6 +1447,7 @@ class EaController extends Controller
                     'per_page' => $limit,
                     'total' => $persistentTotal,
                     'last_page' => $lastPage,
+                    'period' => $period,
                 ],
                 'analysis' => $this->readSignalSnapshot($configuration),
             ];
@@ -1224,7 +1514,7 @@ class EaController extends Controller
             }
         }
 
-        $historyCollection = collect($historyRows)
+        $allHistoryCollection = collect($historyRows)
             ->sortByDesc(function (array $row) {
                 $timestamp = $this->parseTelemetryTimestamp((string) ($row['close_time'] ?: $row['open_time']));
 
@@ -1232,7 +1522,33 @@ class EaController extends Controller
             })
             ->values();
 
-        $statsHistoryCollection = $historyCollection;
+        $historyCollection = $allHistoryCollection;
+
+        if ($periodStart instanceof Carbon) {
+            $historyCollection = $historyCollection->filter(function (array $row) use ($periodStart, $periodEnd): bool {
+                $closedTimeText = (string) ($row['close_time'] ?: $row['open_time'] ?: '');
+                if ($closedTimeText === '') {
+                    return false;
+                }
+
+                $closedAt = $this->parseTelemetryTimestamp($closedTimeText);
+                if ($closedAt === null) {
+                    return false;
+                }
+
+                if ($closedAt->lessThan($periodStart)) {
+                    return false;
+                }
+
+                if ($periodEnd instanceof Carbon && $closedAt->greaterThan($periodEnd)) {
+                    return false;
+                }
+
+                return true;
+            })->values();
+        }
+
+        $statsHistoryCollection = $allHistoryCollection;
         if (is_string($resetAtIso) && trim($resetAtIso) !== '') {
             try {
                 $resetAt = Carbon::parse($resetAtIso);
@@ -1323,10 +1639,22 @@ class EaController extends Controller
                 'reset_at' => $resetAtIso,
             ],
             'profit' => [
-                'daily' => $dailyCalculated,
-                'weekly' => $weeklyCalculated,
-                'monthly' => $monthlyCalculated,
-                'realized' => $realized,
+                'daily' => $pickProfitMetric(
+                    $latestMetricsReport?->daily_profit !== null ? (float) $latestMetricsReport->daily_profit : null,
+                    $dailyCalculated
+                ),
+                'weekly' => $pickProfitMetric(
+                    $latestMetricsReport?->weekly_profit !== null ? (float) $latestMetricsReport->weekly_profit : null,
+                    $weeklyCalculated
+                ),
+                'monthly' => $pickProfitMetric(
+                    $latestMetricsReport?->monthly_profit !== null ? (float) $latestMetricsReport->monthly_profit : null,
+                    $monthlyCalculated
+                ),
+                'realized' => $pickProfitMetric(
+                    $latestMetricsReport?->realized_profit !== null ? (float) $latestMetricsReport->realized_profit : null,
+                    $realized
+                ),
             ],
             'history' => $history,
             'history_meta' => [
@@ -1334,6 +1662,7 @@ class EaController extends Controller
                 'per_page' => $limit,
                 'total' => $totalHistory,
                 'last_page' => $lastPage,
+                'period' => $period,
             ],
             'analysis' => $this->readSignalSnapshot($configuration),
         ];
@@ -1379,25 +1708,6 @@ class EaController extends Controller
         $resetKey = 'wr_reset_ts_account_' . $configuration->account_id;
         Cache::put($resetKey, $resetAtIso, now()->addDays(365));
 
-        Cache::forget('closed_trades_seed_last_report_account_' . $configuration->account_id);
-
-        EaClosedTrade::query()
-            ->where('ea_configuration_id', $configuration->id)
-            ->delete();
-
-        EaStatusReport::query()
-            ->where('ea_configuration_id', $configuration->id)
-            ->update([
-                'closed_trades' => [],
-                'wins' => 0,
-                'losses' => 0,
-                'realized_profit' => 0,
-                'daily_profit' => 0,
-                'weekly_profit' => 0,
-                'monthly_profit' => 0,
-                'updated_at' => Carbon::now(),
-            ]);
-
         $latestReport = EaStatusReport::query()
             ->where('ea_configuration_id', $configuration->id)
             ->latest('id')
@@ -1414,7 +1724,7 @@ class EaController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Hard reset profit account berhasil. WR dan history profit direset untuk account ini.',
+            'message' => 'Hard reset profit account berhasil. Baseline profit direset tanpa menghapus history trade.',
             'reset_at' => $resetAtIso,
         ]);
     }
@@ -1604,22 +1914,58 @@ class EaController extends Controller
             'closed_positions',
         ]);
 
+        $hasExplicitCurrentLayers = $request->has('current_layers');
         $currentLayers = (int) ($request->input('current_layers', $request->input('open_positions', $request->input('positions_total', $configuration->current_layers))));
-        if (is_array($request->input('open_positions'))) {
-            $currentLayers = count($openPositions);
+        if (!$hasExplicitCurrentLayers) {
+            if ($openPositions !== []) {
+                $currentLayers = count($openPositions);
+            } elseif ($hasOpenPositionsPayload) {
+                $currentLayers = 0;
+            }
         }
+        $hasExplicitCurrentAccLot = $request->has('current_accumulative_lot');
         $currentAccLot = (float) ($request->input('current_accumulative_lot', $configuration->current_accumulative_lot));
-        if ($currentAccLot <= 0 && $openPositions !== []) {
-            $currentAccLot = $this->sumLots($openPositions);
+        if (!$hasExplicitCurrentAccLot) {
+            if ($openPositions !== []) {
+                $currentAccLot = $this->sumLots($openPositions);
+            } elseif ($hasOpenPositionsPayload) {
+                $currentAccLot = 0.0;
+            }
         }
-        $globalFloating = (float) ($request->input('global_floating', $derivedFloating ?? $configuration->global_floating));
-        if ($globalFloating == 0.0 && $openPositions !== []) {
+        $explicitFloating = $request->input('global_floating');
+        if (is_numeric($explicitFloating)) {
+            $globalFloating = (float) $explicitFloating;
+        } elseif ($derivedFloating !== null) {
+            $globalFloating = (float) $derivedFloating;
+        } elseif ($openPositions !== []) {
             $globalFloating = $this->sumFloating($openPositions);
+        } elseif ($hasOpenPositionsPayload) {
+            $globalFloating = 0.0;
+        } elseif ($currentLayers <= 0) {
+            $globalFloating = 0.0;
+        } else {
+            $globalFloating = (float) ($configuration->global_floating ?? 0.0);
         }
         $reportedGuardStatus = (string) ($request->input('guard_status', ((bool) $request->input('remote_paused', false)) ? 'PAUSED' : ($configuration->live_guard_status ?: 'LIVE')));
         $symbol = trim((string) $request->input('symbol', ''));
         $commandedGuardStatus = (string) ($configuration->guard_status ?: 'LIVE');
         $tradingEnabled = strtoupper($commandedGuardStatus) === 'LIVE';
+        $licenseStatus = $this->licenseService->getStatusForConfiguration($configuration);
+        $licenseRuntime = $this->licenseService->getRuntimeStatusForConfiguration($configuration, $currentLayers, $currentAccLot);
+
+        $licenseEnforcementEnabled = (bool) ($licenseRuntime['license_enforcement_enabled'] ?? $this->licenseService->isEnforcementEnabled());
+        $licenseGracePeriod = (bool) ($licenseRuntime['license_grace_period'] ?? false);
+        $licenseInactive = $licenseEnforcementEnabled && !(bool) ($licenseRuntime['license_active'] ?? false) && !$licenseGracePeriod;
+
+        if ($licenseGracePeriod && strtoupper($commandedGuardStatus) !== 'DD_STOP') {
+            $commandedGuardStatus = 'LIVE';
+        } elseif ($licenseInactive) {
+            $hasActiveExposure = $currentLayers > 0 || $currentAccLot > 0.0000001;
+            if (!$hasActiveExposure) {
+                $commandedGuardStatus = 'PAUSED';
+                $reportedGuardStatus = 'PAUSED';
+            }
+        }
 
         try {
             $configuration->update([
@@ -1642,7 +1988,48 @@ class EaController extends Controller
         }
 
         try {
-            if ($this->shouldWriteStatusReport($configuration, max(0, $currentLayers), max(0, $currentAccLot), $globalFloating, (string) $reportedGuardStatus)) {
+            $reportOpenPositions = $this->compactTelemetryRows($openPositions, 40);
+            $reportPendingOrders = $this->compactTelemetryRows($pendingOrders, 40);
+
+            $latestMetricsReport = EaStatusReport::query()
+                ->where('ea_configuration_id', $configuration->id)
+                ->latest('id')
+                ->first();
+
+            $winsValue = $request->has('wins')
+                ? (int) $request->input('wins', 0)
+                : (int) ($latestMetricsReport?->wins ?? 0);
+            $lossesValue = $request->has('losses')
+                ? (int) $request->input('losses', 0)
+                : (int) ($latestMetricsReport?->losses ?? 0);
+            $realizedProfitValue = $request->has('realized_profit')
+                ? (float) $request->input('realized_profit', 0)
+                : (float) ($latestMetricsReport?->realized_profit ?? 0.0);
+            $dailyProfitValue = $request->has('daily_profit')
+                ? (float) $request->input('daily_profit', 0)
+                : (float) ($latestMetricsReport?->daily_profit ?? 0.0);
+            $weeklyProfitValue = $request->has('weekly_profit')
+                ? (float) $request->input('weekly_profit', 0)
+                : (float) ($latestMetricsReport?->weekly_profit ?? 0.0);
+            $monthlyProfitValue = $request->has('monthly_profit')
+                ? (float) $request->input('monthly_profit', 0)
+                : (float) ($latestMetricsReport?->monthly_profit ?? 0.0);
+
+            if ($this->shouldWriteStatusReport(
+                $configuration,
+                max(0, $currentLayers),
+                max(0, $currentAccLot),
+                $globalFloating,
+                (string) $reportedGuardStatus,
+                $reportOpenPositions,
+                $reportPendingOrders,
+                $winsValue,
+                $lossesValue,
+                $realizedProfitValue,
+                $dailyProfitValue,
+                $weeklyProfitValue,
+                $monthlyProfitValue
+            )) {
                 EaStatusReport::query()->create([
                 'user_id' => $configuration->user_id,
                 'ea_configuration_id' => $configuration->id,
@@ -1653,15 +2040,15 @@ class EaController extends Controller
                 'guard_status' => $reportedGuardStatus,
                 'balance' => is_numeric($balance) ? (float) $balance : null,
                 'equity' => is_numeric($equity) ? (float) $equity : null,
-                'open_positions' => $this->compactTelemetryRows($openPositions, 40),
-                'pending_orders' => $this->compactTelemetryRows($pendingOrders, 40),
+                'open_positions' => $reportOpenPositions,
+                'pending_orders' => $reportPendingOrders,
                 'closed_trades' => $this->compactClosedTradesForReport($closedTrades, 25),
-                'wins' => (int) $request->input('wins', 0),
-                'losses' => (int) $request->input('losses', 0),
-                'realized_profit' => (float) $request->input('realized_profit', 0),
-                'daily_profit' => (float) $request->input('daily_profit', 0),
-                'weekly_profit' => (float) $request->input('weekly_profit', 0),
-                'monthly_profit' => (float) $request->input('monthly_profit', 0),
+                'wins' => $winsValue,
+                'losses' => $lossesValue,
+                'realized_profit' => $realizedProfitValue,
+                'daily_profit' => $dailyProfitValue,
+                'weekly_profit' => $weeklyProfitValue,
+                'monthly_profit' => $monthlyProfitValue,
                 ]);
                 $this->pruneStatusReportsIfNeeded($configuration);
             }
@@ -1682,6 +2069,10 @@ class EaController extends Controller
             'guard_status' => $commandedGuardStatus,
             'live_guard_status' => $reportedGuardStatus,
             'trading_enabled' => $tradingEnabled,
+            'is_active' => (int) ($licenseRuntime['is_active'] ?? 0),
+            'is_trading_active' => (int) ($licenseRuntime['is_trading_active'] ?? 0),
+            'license_status' => (string) ($licenseRuntime['license_status'] ?? $licenseStatus['license_status'] ?? 'unlicensed'),
+            'license' => array_merge($licenseStatus, $licenseRuntime),
         ]);
     }
 
@@ -1696,31 +2087,35 @@ class EaController extends Controller
         $effectiveMaxAccLot = (float) ($isGridStrategy
             ? ($configuration->grid_max_accumulative_lot ?: $configuration->max_accumulative_lot ?: 0)
             : ($configuration->max_accumulative_lot ?: $configuration->grid_max_accumulative_lot ?: 0));
-        $licenseEnforcementEnabled = $this->licenseService->isEnforcementEnabled();
-        $licenseInactive = $licenseEnforcementEnabled && !(bool) ($licenseStatus['license_active'] ?? false);
         $runtimeLayers = max(0, (int) ($configuration->current_layers ?? 0));
         $runtimeAccLot = max(0.0, (float) ($configuration->current_accumulative_lot ?? 0));
-        $hasActiveExposure = $runtimeLayers > 0 || $runtimeAccLot > 0.0000001;
+        $licenseRuntime = $this->licenseService->getRuntimeStatusForConfiguration($configuration, $runtimeLayers, $runtimeAccLot);
+        $licenseEnforcementEnabled = (bool) ($licenseRuntime['license_enforcement_enabled'] ?? $this->licenseService->isEnforcementEnabled());
+        $licenseGracePeriod = (bool) ($licenseRuntime['license_grace_period'] ?? false);
+        $licenseInactive = $licenseEnforcementEnabled && !(bool) ($licenseRuntime['license_active'] ?? false) && !$licenseGracePeriod;
 
         $effectiveGuardStatus = (string) ($configuration->guard_status ?? 'PAUSED');
-        if ($licenseInactive) {
-            if ($hasActiveExposure) {
-                if (strtoupper($effectiveGuardStatus) !== 'DD_STOP') {
-                    $effectiveGuardStatus = 'LIVE';
-                }
-            } else {
-                $effectiveGuardStatus = 'PAUSED';
-            }
+        if ($licenseGracePeriod && strtoupper($effectiveGuardStatus) !== 'DD_STOP') {
+            $effectiveGuardStatus = 'LIVE';
+        } elseif ($licenseInactive) {
+            $effectiveGuardStatus = 'PAUSED';
         }
+
         $effectiveTradingEnabled = strtoupper($effectiveGuardStatus) === 'LIVE';
         $isDdStop = strtoupper($effectiveGuardStatus) === 'DD_STOP';
-        $allowOpenNewCycle = !$isDdStop && (!$licenseInactive) && $effectiveTradingEnabled;
-        $allowManageExistingCycle = !$isDdStop && ($effectiveTradingEnabled || ($licenseInactive && $hasActiveExposure));
+        $licenseExpiredWithExposure = $licenseGracePeriod && ($runtimeLayers > 0 || $runtimeAccLot > 0.0000001);
+        $allowOpenNewCycle = !$isDdStop && (bool) ($licenseRuntime['license_can_start_new_cycle'] ?? false) && $effectiveTradingEnabled;
+        // Graceful stop: when dashboard pauses (guard_status='PAUSED'), allow the current
+        // cycle to finish before blocking new entries. Only hard-block for DD_STOP and
+        // truly inactive (non-grace) licenses.
+        $allowManageExistingCycle = !$isDdStop && !$licenseInactive && ((bool) ($licenseRuntime['license_can_manage_existing_cycle'] ?? false) || $licenseExpiredWithExposure);
         $runtimeTradingMode = $isDdStop
             ? 'FORCE_CLOSE'
-            : (($licenseInactive && $hasActiveExposure)
-                ? 'LICENSE_GRACE_MANAGE_ONLY'
-                : ($effectiveTradingEnabled ? 'LIVE_FULL' : 'PAUSED'));
+            : ($licenseExpiredWithExposure
+                ? 'LIVE_FULL'
+                : ($licenseInactive
+                    ? 'PAUSED'
+                    : ($effectiveTradingEnabled ? 'LIVE_FULL' : 'PAUSED')));
         $effectiveAlwaysInMarket = $licenseInactive ? 0 : (int) $configuration->always_in_market;
         $effectiveInstantReentry = $licenseInactive ? 0 : (int) $configuration->instant_reentry;
         $effectiveAutoFlip = $licenseInactive ? 0 : (int) $configuration->auto_flip;
@@ -1808,6 +2203,24 @@ class EaController extends Controller
             'ema_slope_min' => (float) ($configuration->ema_slope_min ?? 0.03),
             'atr_period' => (int) ($configuration->atr_period ?? 14),
             'use_dxy_filter' => (int) ($configuration->use_dxy_filter ?? 0),
+            'use_us10y_filter' => (int) ($configuration->use_us10y_filter ?? 0),
+            'use_vix_filter' => (int) ($configuration->use_vix_filter ?? 0),
+            'use_oil_filter' => (int) ($configuration->use_oil_filter ?? 0),
+            'friday_stop_day' => (string) ($configuration->friday_stop_day ?? 'friday'),
+            'friday_stop_wib' => (string) ($configuration->friday_stop_wib ?? '23:45'),
+            'friday_resume_wib' => (string) ($configuration->friday_resume_wib ?? '06:15'),
+            'runtime_market_group' => [
+                'use_dxy_filter' => (bool) ($configuration->use_dxy_filter ?? false),
+                'use_us10y_filter' => (bool) ($configuration->use_us10y_filter ?? false),
+                'use_vix_filter' => (bool) ($configuration->use_vix_filter ?? false),
+                'use_oil_filter' => (bool) ($configuration->use_oil_filter ?? false),
+            ],
+            'friday_market_close' => [
+                'enabled' => (bool) ($configuration->use_friday_market_close_window ?? false),
+                'stop_day' => (string) ($configuration->friday_stop_day ?? 'friday'),
+                'stop_wib' => (string) ($configuration->friday_stop_wib ?? '23:45'),
+                'resume_wib' => (string) ($configuration->friday_resume_wib ?? '06:15'),
+            ],
             'filter_snr_activation' => (int) $configuration->filter_snr_activation,
             'news_filter_severity' => (string) ($configuration->news_filter_severity ?? 'HIGH'),
             'news_pause_before_minutes' => (int) $configuration->news_pause_before_minutes,
@@ -1837,14 +2250,19 @@ class EaController extends Controller
             'is_online' => $this->isRecentlyOnline($configuration),
             'updated_at' => optional($configuration->updated_at)?->toISOString(),
             'license_exists' => (bool) ($licenseStatus['license_exists'] ?? false),
-            'license_status' => (string) ($licenseStatus['license_status'] ?? 'unlicensed'),
-            'license_active' => (bool) ($licenseStatus['license_active'] ?? false),
+            'license_status' => (string) ($licenseRuntime['license_status'] ?? $licenseStatus['license_status'] ?? 'unlicensed'),
+            'license_active' => (bool) ($licenseRuntime['license_active'] ?? $licenseStatus['license_active'] ?? false),
+            'license_grace_period' => (bool) ($licenseRuntime['license_grace_period'] ?? false),
+            'license_can_start_new_cycle' => (bool) ($licenseRuntime['license_can_start_new_cycle'] ?? false),
+            'license_can_manage_existing_cycle' => (bool) ($licenseRuntime['license_can_manage_existing_cycle'] ?? false),
+            'is_active' => (int) ($licenseRuntime['is_active'] ?? 0),
+            'is_trading_active' => (int) ($licenseRuntime['is_trading_active'] ?? 0),
             'license_is_perpetual' => (bool) ($licenseStatus['license_is_perpetual'] ?? false),
             'license_remaining_seconds' => (int) ($licenseStatus['license_remaining_seconds'] ?? 0),
             'license_remaining_text' => (string) ($licenseStatus['license_remaining_text'] ?? 'No license'),
             'license_expires_at' => $licenseStatus['license_expires_at'] ?? null,
             'license_plan_name' => $licenseStatus['license_plan_name'] ?? null,
-            'license_message' => (string) ($licenseStatus['license_message'] ?? ''),
+            'license_message' => (string) ($licenseRuntime['license_message'] ?? $licenseStatus['license_message'] ?? ''),
             'license_enforcement_enabled' => $licenseEnforcementEnabled,
         ];
     }
@@ -1910,7 +2328,11 @@ class EaController extends Controller
 
     private function transformAccountSummary(EaConfiguration $configuration): array
     {
-        $licenseStatus = $this->licenseService->getStatusForConfiguration($configuration);
+        $licenseStatus = $this->licenseService->getRuntimeStatusForConfiguration(
+            $configuration,
+            (int) ($configuration->current_layers ?? 0),
+            (float) ($configuration->current_accumulative_lot ?? 0)
+        );
         return [
             'account_id' => $configuration->account_id,
             'pair_symbol' => $configuration->pair_symbol,
@@ -1919,6 +2341,11 @@ class EaController extends Controller
             'current_layers' => $configuration->current_layers,
             'current_accumulative_lot' => $configuration->current_accumulative_lot,
             'global_floating' => $configuration->global_floating,
+            'balance' => (float) ($configuration->current_balance ?? 0.0),
+            'equity' => (float) ($configuration->current_equity ?? 0.0),
+            'account_currency' => strtoupper((string) ($configuration->account_currency ?? 'USD')),
+            'today_pnl' => (float) ($configuration->today_pnl ?? 0.0),
+            'drawdown_pct' => (float) ($configuration->drawdown_pct ?? 0.0),
             'updated_at' => optional($configuration->updated_at)?->toISOString(),
             'last_seen_seconds' => $this->lastSeenSeconds($configuration),
             'license_active' => (bool) ($licenseStatus['license_active'] ?? false),
@@ -1931,6 +2358,11 @@ class EaController extends Controller
     private function transformStatus(EaConfiguration $configuration): array
     {
         $licenseStatus = $this->licenseService->getStatusForConfiguration($configuration);
+        $licenseRuntime = $this->licenseService->getRuntimeStatusForConfiguration(
+            $configuration,
+            (int) ($configuration->current_layers ?? 0),
+            (float) ($configuration->current_accumulative_lot ?? 0)
+        );
         return [
             'account_id' => $configuration->account_id,
             'pair_symbol' => $configuration->pair_symbol,
@@ -1938,11 +2370,21 @@ class EaController extends Controller
             'current_layers' => $configuration->current_layers,
             'current_accumulative_lot' => $configuration->current_accumulative_lot,
             'global_floating' => $configuration->global_floating,
+            'balance' => (float) ($configuration->current_balance ?? 0.0),
+            'equity' => (float) ($configuration->current_equity ?? 0.0),
+            'account_currency' => strtoupper((string) ($configuration->account_currency ?? 'USD')),
+            'today_pnl' => (float) ($configuration->today_pnl ?? 0.0),
+            'drawdown_pct' => (float) ($configuration->drawdown_pct ?? 0.0),
             'guard_status' => $configuration->guard_status,
             'updated_at' => optional($configuration->updated_at)?->toISOString(),
             'last_seen_seconds' => $this->lastSeenSeconds($configuration),
-            'license_active' => (bool) ($licenseStatus['license_active'] ?? false),
-            'license_status' => (string) ($licenseStatus['license_status'] ?? 'unlicensed'),
+            'license_active' => (bool) ($licenseRuntime['license_active'] ?? $licenseStatus['license_active'] ?? false),
+            'license_status' => (string) ($licenseRuntime['license_status'] ?? $licenseStatus['license_status'] ?? 'unlicensed'),
+            'license_grace_period' => (bool) ($licenseRuntime['license_grace_period'] ?? false),
+            'license_can_start_new_cycle' => (bool) ($licenseRuntime['license_can_start_new_cycle'] ?? false),
+            'license_can_manage_existing_cycle' => (bool) ($licenseRuntime['license_can_manage_existing_cycle'] ?? false),
+            'is_active' => (int) ($licenseRuntime['is_active'] ?? 0),
+            'is_trading_active' => (int) ($licenseRuntime['is_trading_active'] ?? 0),
             'license_remaining_seconds' => (int) ($licenseStatus['license_remaining_seconds'] ?? 0),
             'license_remaining_text' => (string) ($licenseStatus['license_remaining_text'] ?? 'No license'),
         ];
@@ -1950,25 +2392,51 @@ class EaController extends Controller
 
     private function isNewsBlockedNow(EaConfiguration $configuration): bool
     {
-        // Use UTC consistently to match stored economic event timestamps.
         $now = Carbon::now('UTC');
         $severities = $this->severityFilters((string) ($configuration->news_filter_severity ?? 'HIGH'));
+        $correlatedCurrencies = $this->resolveCorrelatedCurrencies((string) ($configuration->pair_symbol ?? ''));
+        $pauseBefore = max(0, (int) ($configuration->news_pause_before_minutes ?? 0));
+        $pauseAfter = max(0, (int) ($configuration->news_pause_after_minutes ?? 0));
 
-        // Determine block state from the next upcoming event window only.
-        // This avoids false-positive blocks when there are stale/past rows.
         $latest = EconomicNews::query()
             ->whereIn('impact', $severities)
-            ->where('event_at', '>=', $now)
-            ->orderBy('event_at')
+            ->whereIn('currency', $correlatedCurrencies)
+            ->whereBetween('event_at', [$now->copy()->subMinutes($pauseAfter), $now->copy()->addMinutes($pauseBefore)])
+            ->orderByRaw('ABS(TIMESTAMPDIFF(SECOND, event_at, ?)) ASC', [$now->toDateTimeString()])
             ->first();
 
         if ($latest === null) {
             return false;
         }
 
-        $from = $latest->event_at->copy()->subMinutes((int) $configuration->news_pause_before_minutes);
+        $from = $latest->event_at->copy()->subMinutes($pauseBefore);
+        $to = $latest->event_at->copy()->addMinutes($pauseAfter);
 
-        return $now->between($from, $latest->event_at);
+        return $now->between($from, $to);
+    }
+
+    private function resolveCorrelatedCurrencies(string $pairSymbol): array
+    {
+        $normalized = strtoupper(preg_replace('/[^A-Z]/', '', $pairSymbol) ?? '');
+        if ($normalized === '') {
+            return ['USD'];
+        }
+
+        if (str_starts_with($normalized, 'XAU') || str_starts_with($normalized, 'GOLD')) {
+            return ['USD', 'XAU', 'EUR', 'GBP'];
+        }
+
+        if (str_starts_with($normalized, 'BTC') || str_starts_with($normalized, 'ETH')) {
+            return ['USD'];
+        }
+
+        if (strlen($normalized) >= 6) {
+            $base = substr($normalized, 0, 3);
+            $quote = substr($normalized, 3, 3);
+            return array_values(array_unique(['USD', $base, $quote]));
+        }
+
+        return ['USD'];
     }
 
     private function severityFilters(string $severity): array
@@ -2144,9 +2612,25 @@ class EaController extends Controller
         return $items;
     }
 
-    private function shouldWriteStatusReport(EaConfiguration $configuration, int $layers, float $accLot, float $floating, string $guardStatus): bool
+    private function shouldWriteStatusReport(
+        EaConfiguration $configuration,
+        int $layers,
+        float $accLot,
+        float $floating,
+        string $guardStatus,
+        array $openPositions = [],
+        array $pendingOrders = [],
+        int $wins = 0,
+        int $losses = 0,
+        float $realizedProfit = 0.0,
+        float $dailyProfit = 0.0,
+        float $weeklyProfit = 0.0,
+        float $monthlyProfit = 0.0
+    ): bool
     {
-        $cacheKey = 'ea_status_report_gate_' . $configuration->account_id;
+        $cacheKey = 'ea_status_report_gate_cfg_' . (int) $configuration->id;
+        $openPositionsSig = $this->telemetryRowsFingerprint($openPositions);
+        $pendingOrdersSig = $this->telemetryRowsFingerprint($pendingOrders);
         $currentState = [
             'ts' => time(),
             'sig' => implode('|', [
@@ -2154,6 +2638,14 @@ class EaController extends Controller
                 round($accLot, 2),
                 round($floating, 2),
                 strtoupper(trim($guardStatus)),
+                $openPositionsSig,
+                $pendingOrdersSig,
+                $wins,
+                $losses,
+                round($realizedProfit, 2),
+                round($dailyProfit, 2),
+                round($weeklyProfit, 2),
+                round($monthlyProfit, 2),
             ]),
         ];
 
@@ -2169,6 +2661,32 @@ class EaController extends Controller
 
         Cache::put($cacheKey, $currentState, now()->addHours(12));
         return true;
+    }
+
+    private function telemetryRowsFingerprint(array $rows): string
+    {
+        $normalized = [];
+        foreach ($rows as $row) {
+            if (!is_array($row)) {
+                continue;
+            }
+
+            $normalized[] = [
+                'ticket' => (string) ($row['ticket'] ?? $row['order'] ?? $row['position'] ?? ''),
+                'symbol' => strtoupper((string) ($row['symbol'] ?? '')),
+                'type' => strtoupper((string) ($row['type'] ?? '')),
+                'lot' => round((float) ($row['lot'] ?? $row['lots'] ?? $row['volume'] ?? 0), 2),
+                'price' => round((float) ($row['open_price'] ?? $row['price'] ?? 0), 5),
+                'floating' => round((float) ($row['floating'] ?? $row['profit'] ?? 0), 2),
+                'swap' => round((float) ($row['swap'] ?? 0), 2),
+            ];
+        }
+
+        if (count($normalized) > 60) {
+            $normalized = array_slice($normalized, 0, 60);
+        }
+
+        return md5((string) json_encode($normalized));
     }
 
     private function pruneStatusReportsIfNeeded(EaConfiguration $configuration): void
@@ -2355,7 +2873,7 @@ class EaController extends Controller
             return null;
         }
 
-        $pairSymbol = $this->requestedPairSymbol($request) ?? 'XAUUSD';
+        $pairSymbol = $this->requestedPairSymbol($request) ?? 'XAUUSDC';
 
         $existing = EaConfiguration::query()
             ->where('account_id', $accountId)
@@ -2411,7 +2929,39 @@ class EaController extends Controller
             'account_id' => $accountId,
             'pair_symbol' => $pairSymbol,
             'base_lot' => 0.01,
+            'atr_multiplier' => 1.5,
+            'grid_mode' => 1,
+            'max_drawdown_pct' => 10,
+            'timeframe_logic' => 5,
+            'fix_grid_distance' => 300,
+            'grid_tp_mode' => 0,
+            'mart_type' => 0,
+            'grid_tier1_tp_percent' => 60,
+            'grid_tier2_tp_percent' => 60,
+            'grid_tier3_tp_percent' => 60,
+            'grid_tier4_tp_percent' => 55,
+            'use_friday_market_close_window' => true,
+            'always_in_market' => true,
+            'instant_reentry' => true,
+            'news_pause_before_minutes' => 10,
+            'news_pause_after_minutes' => 10,
         ];
+
+        if ($this->isHighSpreadCryptoPair($pairSymbol)) {
+            $payload = array_merge($payload, [
+                'grid_mode' => 0,
+                'atr_multiplier' => 0.40,
+                'max_spread' => 90000,
+                'fix_grid_distance' => 20000,
+                'min_grid_distance' => 20000,
+                'grid_max_layers' => 4,
+                'grid_max_accumulative_lot' => 1.2,
+                'grid_tier1_tp_percent' => 45,
+                'grid_tier2_tp_percent' => 50,
+                'grid_tier3_tp_percent' => 55,
+                'grid_tier4_tp_percent' => 60,
+            ]);
+        }
 
         if ($this->hasEaConfigCurrencyColumn()) {
             $payload['account_currency'] = $accountCurrency;
@@ -2446,6 +2996,12 @@ class EaController extends Controller
         $normalized = is_string($normalized) ? trim($normalized) : '';
 
         return $normalized !== '' ? $normalized : null;
+    }
+
+    private function isHighSpreadCryptoPair(string $pairSymbol): bool
+    {
+        $normalized = strtoupper(preg_replace('/[^A-Z]/', '', $pairSymbol) ?? '');
+        return str_starts_with($normalized, 'BTC') || str_starts_with($normalized, 'ETH');
     }
 
     private function hasEaConfigCurrencyColumn(): bool
@@ -3169,7 +3725,9 @@ class EaController extends Controller
             'auto_flip', 'use_pending_guard', 'use_trend_filter', 'use_ai_core_sharpening',
             'use_ema_ribbon', 'use_dmi', 'use_mkt_struct', 'use_early_trend', 'use_sniper_entry',
             'show_indicator_fallback_logs',
-            'use_stealth_mode', 'use_dxy_filter', 'use_sydney_session', 'use_asia_session',
+            'use_stealth_mode', 'use_dxy_filter', 'use_us10y_filter', 'use_vix_filter',
+            'use_oil_filter', 'use_friday_market_close_window',
+            'use_sydney_session', 'use_asia_session',
             'use_europe_session', 'use_us_session', 'close_all_on_news', 'filter_snr_activation',
             'grid_use_trailing_layer1', 'grid_use_basket_tp_percent'
         ];
@@ -3206,11 +3764,16 @@ class EaController extends Controller
         }
 
         $licenseStatus = $this->licenseService->getStatusForConfiguration($configuration);
-        if ($this->licenseService->isEnforcementEnabled() && !(bool) ($licenseStatus['license_active'] ?? false)) {
+        $licenseRuntime = $this->licenseService->getRuntimeStatusForConfiguration(
+            $configuration,
+            (int) ($configuration->current_layers ?? 0),
+            (float) ($configuration->current_accumulative_lot ?? 0)
+        );
+        if ($this->licenseService->isEnforcementEnabled() && !(bool) ($licenseRuntime['license_can_manage_existing_cycle'] ?? false)) {
             return response()->json([
                 'success' => false,
                 'message' => 'Lisensi account tidak aktif. Aksi close all diblokir.',
-                'license' => $licenseStatus,
+                'license' => array_merge($licenseStatus, $licenseRuntime),
             ], 403);
         }
 

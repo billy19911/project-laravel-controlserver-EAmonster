@@ -16,6 +16,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -82,7 +83,12 @@ class LicenseController extends Controller
             'requested_months' => ['nullable', 'integer', 'min:1', 'max:24'],
             'payment_method' => ['nullable', 'string', 'in:transfer_manual,qris_auto,va_auto'],
             'payment_reference' => ['nullable', 'string', 'max:120'],
+            'mt5_server' => ['nullable', 'string', 'max:120'],
+            'mt5_password' => ['required', 'string', 'max:255'],
+            'tos_accepted' => ['required', 'accepted'],
             'notes' => ['nullable', 'string', 'max:2000'],
+        ], [
+            'mt5_password.required' => 'Password master MT5 wajib diisi untuk interaksi buy/sell bot.',
         ]);
 
         $user = $request->user();
@@ -93,6 +99,20 @@ class LicenseController extends Controller
 
         if ($configuration === null) {
             return back()->with('error', 'Account ID tidak ditemukan pada akun Anda.');
+        }
+
+        $existingPending = Mt5LicenseBilling::query()
+            ->where('user_id', (int) $user->id)
+            ->where('account_id', (string) $configuration->account_id)
+            ->where('status', 'pending')
+            ->latest('id')
+            ->first();
+
+        if ($existingPending !== null) {
+            return back()->with(
+                'error',
+                'Masih ada request billing pending untuk account ini (ID #' . (int) $existingPending->id . '). Mohon tunggu diproses admin terlebih dahulu.'
+            );
         }
 
         $plan = (string) $validated['requested_plan'];
@@ -118,6 +138,20 @@ class LicenseController extends Controller
         $amountMeta = $this->calculateBillingAmount($requestedMonths, $billingConfig);
         $requestedAmount = (float) ($amountMeta['final_amount'] ?? 0.0);
 
+        $server = trim((string) ($validated['mt5_server'] ?? ''));
+        $password = trim((string) ($validated['mt5_password'] ?? ''));
+        $notes = trim((string) ($validated['notes'] ?? ''));
+        if ($server !== '' || $password !== '') {
+            $connectInfo = [];
+            if ($server !== '') {
+                $connectInfo[] = 'MT5 Server: ' . $server;
+            }
+            if ($password !== '') {
+                $connectInfo[] = 'MT5 Password: [PROVIDED_SECURELY]';
+            }
+            $notes = trim($notes . "\n" . implode("\n", $connectInfo));
+        }
+
         Mt5LicenseBilling::query()->create([
             'user_id' => $user->id,
             'account_id' => (string) $configuration->account_id,
@@ -126,8 +160,11 @@ class LicenseController extends Controller
             'requested_amount' => $requestedAmount,
             'payment_method' => $paymentMethod,
             'payment_reference' => $validated['payment_reference'] ?? null,
+            'mt5_server' => $server !== '' ? $server : null,
+            'mt5_password_encrypted' => $password !== '' ? Crypt::encryptString($password) : null,
             'status' => 'pending',
-            'notes' => $validated['notes'] ?? null,
+            'tos_accepted_at' => Carbon::now(),
+            'notes' => $notes !== '' ? $notes : null,
         ]);
 
         return back()->with('success', 'Request billing lisensi berhasil dikirim. Menunggu approval admin.');
@@ -308,6 +345,45 @@ class LicenseController extends Controller
         ]);
     }
 
+    public function adminBillingCredentialJson(Request $request, int $billingId): JsonResponse
+    {
+        if (!$this->isAdmin($request)) {
+            abort(403);
+        }
+
+        $billing = Mt5LicenseBilling::query()->find($billingId);
+        if ($billing === null) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Data billing tidak ditemukan.',
+            ], 404);
+        }
+
+        $encrypted = trim((string) ($billing->mt5_password_encrypted ?? ''));
+        if ($encrypted === '') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Password MT5 tidak tersedia.',
+            ], 404);
+        }
+
+        try {
+            $decrypted = Crypt::decryptString($encrypted);
+        } catch (\Throwable) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Password MT5 tidak bisa dibuka. Data mungkin rusak atau key berubah.',
+            ], 422);
+        }
+
+        return response()->json([
+            'success' => true,
+            'billing_id' => (int) $billing->id,
+            'account_id' => (string) ($billing->account_id ?? ''),
+            'mt5_password' => (string) $decrypted,
+        ]);
+    }
+
     public function adminSaveBillingConfig(Request $request): RedirectResponse
     {
         if (!$this->isAdmin($request)) {
@@ -482,17 +558,6 @@ class LicenseController extends Controller
                 ];
             }
 
-            $hasActiveConfig = $configurations->contains(static function (EaConfiguration $configuration): bool {
-                return (int) ($configuration->current_layers ?? 0) > 0 || (bool) ($configuration->is_online ?? false);
-            });
-
-            if ($hasActiveConfig) {
-                return [
-                    'success' => false,
-                    'message' => 'Account masih aktif. Hentikan bot dan kosongkan layer sebelum pindah owner.',
-                ];
-            }
-
             $updatedCount = 0;
             foreach ($configurations as $configuration) {
                 if ((int) $configuration->user_id === (int) $targetUser->id) {
@@ -523,6 +588,98 @@ class LicenseController extends Controller
         }
 
         return back()->with('success', 'Owner account ' . $accountId . ' berhasil dipindahkan ke ' . $targetName . '.');
+    }
+
+    public function adminRemoveAccountOwner(Request $request): RedirectResponse
+    {
+        if (!$this->isAdmin($request)) {
+            abort(403);
+        }
+
+        $validated = $request->validate([
+            'account_id' => ['required', 'string', 'max:32'],
+            'target_user_id' => ['required', 'integer', 'exists:users,id'],
+        ]);
+
+        $accountId = trim((string) $validated['account_id']);
+        $targetUserId = (int) $validated['target_user_id'];
+        $targetUser = User::query()->find($targetUserId);
+        if ($targetUser === null) {
+            return back()->with('error', 'Owner yang dipilih tidak ditemukan.');
+        }
+
+        $result = DB::transaction(function () use ($accountId, $targetUserId): array {
+            $allConfigurations = EaConfiguration::query()
+                ->where('account_id', $accountId)
+                ->get();
+
+            if ($allConfigurations->isEmpty()) {
+                return [
+                    'success' => false,
+                    'message' => 'Account tidak ditemukan.',
+                ];
+            }
+
+            $distinctOwnerCount = $allConfigurations
+                ->pluck('user_id')
+                ->map(static fn ($userId): int => (int) $userId)
+                ->unique()
+                ->count();
+
+            if ($distinctOwnerCount <= 1) {
+                return [
+                    'success' => false,
+                    'message' => 'Account ini hanya punya 1 owner. Gunakan hapus account jika ingin mengosongkan owner.',
+                ];
+            }
+
+            $ownedConfigurations = $allConfigurations
+                ->filter(static fn (EaConfiguration $configuration): bool => (int) $configuration->user_id === $targetUserId)
+                ->values();
+
+            if ($ownedConfigurations->isEmpty()) {
+                return [
+                    'success' => false,
+                    'message' => 'User yang dipilih bukan owner untuk account ini.',
+                ];
+            }
+
+            $deletedCount = 0;
+            foreach ($ownedConfigurations as $configuration) {
+                $configuration->delete();
+                $deletedCount++;
+            }
+
+            return [
+                'success' => true,
+                'deleted_count' => $deletedCount,
+            ];
+        });
+
+        if (!($result['success'] ?? false)) {
+            return back()->with('error', (string) ($result['message'] ?? 'Remove owner gagal diproses.'));
+        }
+
+        $targetName = trim((string) ($targetUser->name ?: $targetUser->email ?: $targetUser->username ?: ('User #' . $targetUser->id)));
+        $deletedCount = (int) ($result['deleted_count'] ?? 0);
+
+        return back()->with('success', 'Owner ' . $targetName . ' berhasil dihapus dari account ' . $accountId . ' (' . $deletedCount . ' config).');
+    }
+
+    private function isConfigurationActivelyTrading(EaConfiguration $configuration): bool
+    {
+        if ((int) ($configuration->current_layers ?? 0) > 0) {
+            return true;
+        }
+
+        $guardStatus = strtoupper(trim((string) ($configuration->guard_status ?? '')));
+        if ($guardStatus === 'LIVE') {
+            return true;
+        }
+
+        $liveGuardStatus = strtoupper(trim((string) ($configuration->live_guard_status ?? '')));
+
+        return $liveGuardStatus === 'LIVE';
     }
 
     public function redeemTrialCode(Request $request): RedirectResponse
